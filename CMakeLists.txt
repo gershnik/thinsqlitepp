@@ -13,7 +13,11 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
-set(CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION 10.0.19041.0)
+#set(CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION 10.0.19041.0)
+
+if (WIN32)
+set(CMAKE_SYSTEM_VERSION "10.0.19041.0" CACHE STRING "Windows SDK Version" FORCE)
+endif()
 
 
 project(ThinSQLite++)
@@ -74,40 +78,6 @@ add_link_options(
     "$<$<CXX_COMPILER_ID:MSVC>:${MSVC_LINK_OPTIONS}>"
 )
 
-
-set (SQLITE_VERSIONS
-    3.7.15.2
-    3.34.0
-)
-
-foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
-
-    add_library(sqlite3-${SQLITE_VERSION} STATIC)
-
-    target_include_directories(sqlite3-${SQLITE_VERSION} SYSTEM BEFORE
-        PUBLIC
-        sqlite/${SQLITE_VERSION}
-    )
-
-    target_compile_definitions(sqlite3-${SQLITE_VERSION} PRIVATE
-        "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
-        SQLITE_THREADSAFE=0
-        SQLITE_OMIT_DEPRECATED=1
-        SQLITE_ENABLE_API_ARMOR=1
-        SQLITE_ENABLE_MEMORY_MANAGEMENT=1
-        SQLITE_MEMDEBUG=1
-        SQLITE_ENABLE_COLUMN_METADATA=1
-    )
-
-    target_compile_options(sqlite3-${SQLITE_VERSION} PRIVATE
-        "$<$<CXX_COMPILER_ID:AppleClang>:-Wno-unused-function;-Wno-format-pedantic>"
-        "$<$<CXX_COMPILER_ID:MSVC>:/Wv:18;/W3;/wd4244;/wd4146;/wd4267;/wd4996>"
-    )
-
-    target_sources(sqlite3-${SQLITE_VERSION} PRIVATE
-        sqlite/${SQLITE_VERSION}/sqlite3.c
-    )
-endforeach()
 
 add_subdirectory(lib)
 add_subdirectory(test)
