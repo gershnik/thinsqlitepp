@@ -99,7 +99,7 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
 
     target_compile_options(sqlite3-${SQLITE_VERSION} PRIVATE
         "$<$<CXX_COMPILER_ID:AppleClang>:-Wno-unused-function;-Wno-format-pedantic>"
-        "$<$<CXX_COMPILER_ID:MSVC>:/W3;/wd4244;/wd4146;/wd4267;/wd4996>"
+        "$<$<CXX_COMPILER_ID:MSVC>:/Wv:18;/W3;/wd4244;/wd4146;/wd4267;/wd4996>"
     )
 
     target_sources(sqlite3-${SQLITE_VERSION} PRIVATE
