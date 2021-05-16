@@ -21,7 +21,7 @@
     {
 
         template<class T>
-        using span<T> = std::span<T>;
+        using span = std::span<T>;
     
     }
 
