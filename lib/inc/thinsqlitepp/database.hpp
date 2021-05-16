@@ -14,6 +14,7 @@
 
 #include <thinsqlitepp/impl/statement_impl.hpp>
 #include <thinsqlitepp/impl/database_impl.hpp>
+#include <thinsqlitepp/impl/exception_impl.hpp>
 
 #endif
 
