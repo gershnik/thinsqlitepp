@@ -172,6 +172,67 @@ namespace thinsqlitepp
         std::string_view _sql;
     };
 
+    enum class auto_reset_flags: unsigned
+    {
+        none = 0,
+        reset = 1,
+        clear_bindings = 2,
+        all = 3
+    };
+    constexpr auto_reset_flags operator|(auto_reset_flags lhs, auto_reset_flags rhs)
+        { return auto_reset_flags(unsigned(lhs) | unsigned(rhs)); }
+    constexpr auto_reset_flags operator&(auto_reset_flags lhs, auto_reset_flags rhs)
+        { return auto_reset_flags(unsigned(lhs) & unsigned(rhs)); }
+
+    template<auto_reset_flags Flags>
+    class auto_reset
+    {
+    public:
+        auto_reset():
+            _st(nullptr)
+        {}
+        auto_reset(const std::unique_ptr<statement> & st) noexcept:
+            _st(st.get())
+        {}
+        auto_reset(statement * st) noexcept:
+            _st(st)
+        {}
+        auto_reset(const auto_reset &) = delete;
+        auto_reset & operator=(const auto_reset &) = delete;
+        auto_reset(auto_reset && src) noexcept:
+            _st(src._st)
+        {
+            src._st = nullptr;
+        }
+        auto_reset & operator=(auto_reset && src)
+        {
+            destroy();
+            _st = src._st;
+            src._st = nullptr;
+            return *this;
+        }
+
+        ~auto_reset() noexcept
+            { destroy(); }
+
+        statement * operator->() const noexcept
+            { return _st; }
+
+    private:
+        void destroy() noexcept
+        {
+            if (_st)
+            {
+                if constexpr ((Flags & auto_reset_flags::reset) != auto_reset_flags::none)
+                    _st->reset();
+                if constexpr ((Flags & auto_reset_flags::clear_bindings) != auto_reset_flags::none)
+                    _st->clear_bindings();
+            }
+        }
+    private:
+        statement * _st;
+    };
+
 }
 
 #endif
