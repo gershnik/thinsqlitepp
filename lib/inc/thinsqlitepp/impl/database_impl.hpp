@@ -168,7 +168,7 @@ namespace thinsqlitepp
                                     void (*last)(context*) noexcept,
                                     void (*deleter)(type_identity_t<T> obj) noexcept)
     {
-        check_error(sqlite3_create_function_v2(this->c_ptr(), name, arg_count, flags, data,
+        check_error(sqlite3_create_function_v2(this->c_ptr(), name, arg_count, flags, (void *)data,
                                                (void (*)(sqlite3_context *, int, sqlite3_value **))func,
                                                (void (*)(sqlite3_context *, int, sqlite3_value **))step,
                                                (void (*)(sqlite3_context *))last,
