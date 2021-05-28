@@ -73,8 +73,10 @@ namespace thinsqlitepp
             { check_error(sqlite3_bind_int64(c_ptr(), idx, value)); }
         void bind(int idx, double value)
             { check_error(sqlite3_bind_double(c_ptr(), idx, value)); }
-        void bind(int idx, const std::string_view & value, bool copy = false);
-        void bind(int idx, const blob_view & value, bool copy = false);
+        void bind(int idx, const std::string_view & value);
+        void bind_reference(int idx, const std::string_view & value);
+        void bind(int idx, const blob_view & value);
+        void bind_reference(int idx, const blob_view & value);
         void bind(int idx, const zero_blob & value)
             { check_error(sqlite3_bind_zeroblob(c_ptr(), idx, int(value.size()))); }
         template<class T>

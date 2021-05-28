@@ -53,21 +53,35 @@ namespace thinsqlitepp
             { sqlite3_result_int(c_ptr(), value); }
         void result(int64_t value) noexcept
             { sqlite3_result_int64(c_ptr(), value); }
-        void result(const std::string_view & value, bool copy = false) noexcept
+        void result(const std::string_view & value) noexcept
         {
             sqlite3_result_text(c_ptr(),
                                 value.size() ? &value[0] : nullptr,
                                 int(value.size()),
-                                copy ? SQLITE_TRANSIENT : SQLITE_STATIC);
+                                SQLITE_TRANSIENT);
+        }
+        void result_reference(const std::string_view & value) noexcept
+        {
+            sqlite3_result_text(c_ptr(),
+                                value.size() ? &value[0] : nullptr,
+                                int(value.size()),
+                                SQLITE_STATIC);
         }
         void result(double value) noexcept
             { sqlite3_result_double(c_ptr(), value); }
-        void result(const blob_view & value, bool copy = false) noexcept
+        void result(const blob_view & value) noexcept
         {
             sqlite3_result_blob(c_ptr(),
                                 value.size() ? &value[0] : nullptr,
                                 int(value.size()),
-                                copy ? SQLITE_TRANSIENT : SQLITE_STATIC);
+                                SQLITE_TRANSIENT);
+        }
+        void result_reference(const blob_view & value) noexcept
+        {
+            sqlite3_result_blob(c_ptr(),
+                                value.size() ? &value[0] : nullptr,
+                                int(value.size()),
+                                SQLITE_STATIC);
         }
         void result(const zero_blob & value) noexcept
             { sqlite3_result_zeroblob(c_ptr(), int(value.size())); }
