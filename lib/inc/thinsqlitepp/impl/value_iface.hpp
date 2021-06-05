@@ -40,6 +40,9 @@ namespace thinsqlitepp
             std::is_same_v<T, int64_t> ||
             std::is_same_v<T, double> ||
             std::is_same_v<T, std::string_view> ||
+        #if __cpp_char8_t >= 201811
+            std::is_same_v<T, std::u8string_view> ||
+        #endif
             std::is_same_v<T, blob_view>,
         T> get() const noexcept;
         
@@ -81,6 +84,16 @@ namespace thinsqlitepp
         auto size = (size_t)sqlite3_value_bytes(c_ptr());
         return std::string_view(first, size);
     }
+
+#if __cpp_char8_t >= 201811
+    template<>
+    inline std::u8string_view value::get<std::u8string_view>() const noexcept
+    {
+        auto first = (const char8_t *)sqlite3_value_text(c_ptr());
+        auto size = (size_t)sqlite3_value_bytes(c_ptr());
+        return std::u8string_view(first, size);
+    }
+#endif
 
     template<>
     inline double value::get<double>() const noexcept

@@ -202,6 +202,12 @@ namespace thinsqlitepp
         
         template<class T>
         T exec(std::string_view sql, T callback);
+
+    #if __cpp_char8_t >= 201811
+        template<class T>
+        T exec(std::u8string_view sql, T callback)
+            {  return exec(std::string_view((const char *)sql.data(), sql.size()), callback); }
+    #endif
         
         //MARK:-
         
@@ -312,12 +318,12 @@ namespace thinsqlitepp
 
     #if SQLITEPP_HAS_VARARG_POUND_POUND_TRICK
 
-        SQLITEPP_SUPPRESS_POUND_POUND_WARNING_BEGIN
+        SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN
 
         #define SQLITEPP_DEFINE_DB_OPTION(code, ...) \
             template<> struct database::config_mapping<code> { using type = database::config_option<code, ##__VA_ARGS__>; };
 
-        SQLITEPP_SUPPRESS_POUND_POUND_WARNING_END
+        SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 
     #elif SQLITEPP_HAS_VA_OPT
 

@@ -25,18 +25,18 @@
     
     #define SQLITEPP_HAS_VARARG_POUND_POUND_TRICK 1
 
-    #ifdef __clang__
-        #define SQLITEPP_SUPPRESS_POUND_POUND_WARNING_BEGIN _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wgnu-zero-variadic-macro-arguments\"")
-        #define SQLITEPP_SUPPRESS_POUND_POUND_WARNING_END _Pragma("GCC diagnostic pop")
-    #else
-        #define SQLITEPP_SUPPRESS_POUND_POUND_WARNING_BEGIN
-        #define SQLITEPP_SUPPRESS_POUND_POUND_WARNING_END
-    #endif
-
 #else
 
     #define SQLITEPP_HAS_VA_OPT 1
     
+#endif
+
+#ifdef __clang__
+    #define SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wgnu-zero-variadic-macro-arguments\"")
+    #define SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END _Pragma("GCC diagnostic pop")
+#else
+    #define SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN
+    #define SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 #endif
 
 

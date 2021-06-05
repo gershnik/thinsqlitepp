@@ -289,7 +289,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "create collation", "[database]") {
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
     db->exec("INSERT INTO foo(name) VALUES ('abc')");
     
-    auto collator = [&](const span<const std::byte> & lhs, const span<const std::byte> & rhs) noexcept -> int {
+    auto collator = [&](const thinsqlitepp::span<const std::byte> & lhs, const thinsqlitepp::span<const std::byte> & rhs) noexcept -> int {
       
         return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
     };
@@ -310,7 +310,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "create collation", "[database]") {
     
     struct collator2_t
     {
-        int operator()(const span<const std::byte> & lhs, const span<const std::byte> & rhs) const noexcept
+        int operator()(const thinsqlitepp::span<const std::byte> & lhs, const thinsqlitepp::span<const std::byte> & rhs) const noexcept
         {
             return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
         }

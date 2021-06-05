@@ -27,15 +27,42 @@ namespace thinsqlitepp
     {
     public:
         static std::unique_ptr<statement> create(const database & db, const string_param & sql
-#if SQLITE_VERSION_NUMBER >= 3020000
+                                            #if SQLITE_VERSION_NUMBER >= 3020000
                                                  , unsigned int flags = 0
-#endif
+                                            #endif
                                                  );
         static std::unique_ptr<statement> create(const database & db, std::string_view & sql
-#if SQLITE_VERSION_NUMBER >= 3020000
+                                            #if SQLITE_VERSION_NUMBER >= 3020000
                                                  , unsigned int flags = 0
-#endif
+                                            #endif
                                                  );
+
+#if __cpp_char8_t >= 201811
+        static std::unique_ptr<statement> create(const database & db, const u8string_param & sql
+                                            #if SQLITE_VERSION_NUMBER >= 3020000
+                                                 , unsigned int flags = 0
+                                            #endif
+                                                 )
+        {
+            return create(db, (const char *)sql.c_str()
+                        #if SQLITE_VERSION_NUMBER >= 3020000
+                          , flags
+                        #endif
+                   );
+        }
+        static std::unique_ptr<statement> create(const database & db, std::u8string_view & sql
+                                            #if SQLITE_VERSION_NUMBER >= 3020000
+                                                 , unsigned int flags = 0
+                                            #endif
+                                                 )
+        {
+            return create(db, *reinterpret_cast<std::string_view *>(&sql)
+                        #if SQLITE_VERSION_NUMBER >= 3020000
+                          , flags
+                        #endif
+                   );
+        }
+#endif
         
         ~statement() noexcept
             { sqlite3_finalize(c_ptr()); }
@@ -75,6 +102,10 @@ namespace thinsqlitepp
             { check_error(sqlite3_bind_double(c_ptr(), idx, value)); }
         void bind(int idx, const std::string_view & value);
         void bind_reference(int idx, const std::string_view & value);
+    #if __cpp_char8_t >= 201811
+        void bind(int idx, const std::u8string_view & value);
+        void bind_reference(int idx, const std::u8string_view & value);
+    #endif
         void bind(int idx, const blob_view & value);
         void bind_reference(int idx, const blob_view & value);
         void bind(int idx, const zero_blob & value)
@@ -103,6 +134,9 @@ namespace thinsqlitepp
             std::is_same_v<T, int64_t> ||
             std::is_same_v<T, double> ||
             std::is_same_v<T, std::string_view> ||
+        #if __cpp_char8_t >= 201811
+            std::is_same_v<T, std::u8string_view> ||
+        #endif
             std::is_same_v<T, blob_view>,
         T> column_value(int idx) const noexcept;
         

@@ -30,8 +30,11 @@ namespace thinsqlitepp
             { return *(class database *)sqlite3_context_db_handle(c_ptr()); }
         
         void error(const std::string_view & value) noexcept
-            { sqlite3_result_error(c_ptr(), value.size() ? &value[0] : nullptr, int(value.size())); }
-        
+            { sqlite3_result_error(c_ptr(), value.size() ? &value[0] : "", int(value.size())); }
+    #if __cpp_char8_t >= 201811
+        void error(const std::u8string_view & value) noexcept
+            { sqlite3_result_error(c_ptr(), value.size() ? (const char *)&value[0] : "", int(value.size())); }
+    #endif
         void error(int error_code) noexcept
             { sqlite3_result_error_code(c_ptr(), error_code); }
         
@@ -60,6 +63,15 @@ namespace thinsqlitepp
                                 int(value.size()),
                                 SQLITE_TRANSIENT);
         }
+    #if __cpp_char8_t >= 201811
+        void result(const std::u8string_view & value) noexcept
+        {
+            sqlite3_result_text(c_ptr(),
+                                value.size() ? (const char *)&value[0] : (const char *)"",
+                                int(value.size()),
+                                SQLITE_TRANSIENT);
+        }
+    #endif
         void result_reference(const std::string_view & value) noexcept
         {
             sqlite3_result_text(c_ptr(),
@@ -67,6 +79,15 @@ namespace thinsqlitepp
                                 int(value.size()),
                                 SQLITE_STATIC);
         }
+    #if __cpp_char8_t >= 201811
+        void result_reference(const std::u8string_view & value) noexcept
+        {
+            sqlite3_result_text(c_ptr(),
+                                value.size() ? (const char *)&value[0] : "",
+                                int(value.size()),
+                                SQLITE_STATIC);
+        }
+    #endif
         void result(double value) noexcept
             { sqlite3_result_double(c_ptr(), value); }
         void result(const blob_view & value) noexcept

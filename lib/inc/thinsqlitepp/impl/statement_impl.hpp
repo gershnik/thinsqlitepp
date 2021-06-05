@@ -79,6 +79,24 @@ namespace thinsqlitepp
                                       SQLITE_STATIC));
     }
 
+#if __cpp_char8_t >= 201811
+    inline void statement::bind(int idx, const std::u8string_view & value)
+    {
+        check_error(sqlite3_bind_text(c_ptr(), idx,
+                                      value.size() ? (const char *)&value[0] : "",
+                                      int(value.size()),
+                                      SQLITE_TRANSIENT));
+    }
+
+    inline void statement::bind_reference(int idx, const std::u8string_view & value)
+    {
+        check_error(sqlite3_bind_text(c_ptr(), idx,
+                                      value.size() ? (const char *)&value[0] : "",
+                                      int(value.size()),
+                                      SQLITE_STATIC));
+    }
+#endif
+
     inline void statement::bind(int idx, const blob_view & value)
     {
         check_error(sqlite3_bind_blob(c_ptr(), idx,
@@ -109,6 +127,16 @@ namespace thinsqlitepp
         auto size = (size_t)sqlite3_column_bytes(c_ptr(), idx);
         return std::string_view(first, size);
     }
+
+#if __cpp_char8_t >= 201811
+    template<>
+    inline std::u8string_view statement::column_value<std::u8string_view>(int idx) const noexcept
+    {
+        auto first = (const char8_t *)sqlite3_column_text(c_ptr(), idx);
+        auto size = (size_t)sqlite3_column_bytes(c_ptr(), idx);
+        return std::u8string_view(first, size);
+    }
+#endif
     
     template<>
     inline blob_view statement::column_value<blob_view>(int idx) const noexcept

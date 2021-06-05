@@ -34,6 +34,12 @@ namespace thinsqlitepp
 
     using string_param = basic_string_param<char>;
 
+#if __cpp_char8_t >= 201811
+
+    using u8string_param = basic_string_param<char8_t>;
+    
+#endif
+
 }
 
 #endif
