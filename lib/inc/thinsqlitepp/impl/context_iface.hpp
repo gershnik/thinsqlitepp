@@ -56,14 +56,14 @@ namespace thinsqlitepp
         void result(const std::string_view & value) noexcept
         {
             sqlite3_result_text(c_ptr(),
-                                value.size() ? &value[0] : nullptr,
+                                value.size() ? &value[0] : "",
                                 int(value.size()),
                                 SQLITE_TRANSIENT);
         }
         void result_reference(const std::string_view & value) noexcept
         {
             sqlite3_result_text(c_ptr(),
-                                value.size() ? &value[0] : nullptr,
+                                value.size() ? &value[0] : "",
                                 int(value.size()),
                                 SQLITE_STATIC);
         }
@@ -72,14 +72,14 @@ namespace thinsqlitepp
         void result(const blob_view & value) noexcept
         {
             sqlite3_result_blob(c_ptr(),
-                                value.size() ? &value[0] : nullptr,
+                                value.size() ? &value[0] : (const std::byte *)"",
                                 int(value.size()),
                                 SQLITE_TRANSIENT);
         }
         void result_reference(const blob_view & value) noexcept
         {
             sqlite3_result_blob(c_ptr(),
-                                value.size() ? &value[0] : nullptr,
+                                value.size() ? &value[0] : (const std::byte *)"",
                                 int(value.size()),
                                 SQLITE_STATIC);
         }

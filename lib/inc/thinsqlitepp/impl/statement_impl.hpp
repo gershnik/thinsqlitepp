@@ -66,7 +66,7 @@ namespace thinsqlitepp
     inline void statement::bind(int idx, const std::string_view & value)
     {
         check_error(sqlite3_bind_text(c_ptr(), idx,
-                                      value.size() ? &value[0] : nullptr,
+                                      value.size() ? &value[0] : "",
                                       int(value.size()),
                                       SQLITE_TRANSIENT));
     }
@@ -74,7 +74,7 @@ namespace thinsqlitepp
     inline void statement::bind_reference(int idx, const std::string_view & value)
     {
         check_error(sqlite3_bind_text(c_ptr(), idx,
-                                      value.size() ? &value[0] : nullptr,
+                                      value.size() ? &value[0] : "",
                                       int(value.size()),
                                       SQLITE_STATIC));
     }
@@ -82,7 +82,7 @@ namespace thinsqlitepp
     inline void statement::bind(int idx, const blob_view & value)
     {
         check_error(sqlite3_bind_blob(c_ptr(), idx,
-                                      value.size() ? &value[0] : nullptr,
+                                      value.size() ? &value[0] : (const std::byte *)"",
                                       int(value.size()),
                                       SQLITE_TRANSIENT));
     }
@@ -90,7 +90,7 @@ namespace thinsqlitepp
     inline void statement::bind_reference(int idx, const blob_view & value)
     {
         check_error(sqlite3_bind_blob(c_ptr(), idx,
-                                      value.size() ? &value[0] : nullptr,
+                                      value.size() ? &value[0] : (const std::byte *)"",
                                       int(value.size()),
                                       SQLITE_STATIC));
     }
