@@ -71,8 +71,8 @@ namespace thinsqlitepp
             { return *(class database *)sqlite3_db_handle(c_ptr()); }
         
         bool step();
-        void reset()
-            { check_error(sqlite3_reset(c_ptr())); }
+        void reset() noexcept
+            { sqlite3_reset(c_ptr()); }
         
         bool busy() const noexcept
             { return sqlite3_stmt_busy(c_ptr()); }
@@ -118,8 +118,8 @@ namespace thinsqlitepp
             { this->bind(idx, ptr.release(), typeid(T).name(), [](T * p) { delete p; }); }
         void bind(int idx, const value & val);
         
-        void clear_bindings()
-            { check_error(sqlite3_clear_bindings(c_ptr())); }
+        void clear_bindings() noexcept
+            { sqlite3_clear_bindings(c_ptr()); }
         
         int bind_parameter_count() const noexcept
             { return sqlite3_bind_parameter_count(c_ptr()); }
