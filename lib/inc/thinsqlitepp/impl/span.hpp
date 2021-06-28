@@ -12,6 +12,7 @@
 #include "config.hpp"
 
 #include <iterator>
+#include <cassert>
 
 #if __cplusplus > 201703L
 
