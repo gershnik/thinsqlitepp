@@ -238,7 +238,7 @@ namespace thinsqlitepp
         {
             src._st = nullptr;
         }
-        auto_reset & operator=(auto_reset && src)
+        auto_reset & operator=(auto_reset && src) noexcept
         {
             destroy();
             _st = src._st;
