@@ -1,6 +1,12 @@
 name: Test
 
-on: [push]
+on: 
+  push:
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+      - 'LICENSE'
+
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
