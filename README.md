@@ -5,7 +5,7 @@ A thin, safe and convenient modern C++ wrapper for SQLite API.
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
 [![Standard](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [![License](https://img.shields.io/badge/license-BSD-brightgreen.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Tests](https://github.com/gershnik/thinsqlitepp/actions/workflows/cmake.yml/badge.svg)](https://github.com/gershnik/thinsqlitepp/actions/workflows/cmake.yml)
+[![Tests](https://github.com/gershnik/thinsqlitepp/actions/workflows/test.yml/badge.svg)](https://github.com/gershnik/thinsqlitepp/actions/workflows/test.yml)
 
 
 Using SQLite C API from C++ can be quite tedious and error prone. While the API is generally clean and object-oriented, various aspects of it, notably resource management and error handling can be very tricky to get right. There is also plenty of `void *` and `...` that make it easy to make a mistake as well as other annoyances. The purpose of this library is to provide a C++ wrapper that alleviates all these problems without introducing any overhead.
