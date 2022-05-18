@@ -57,9 +57,6 @@ Using SQLite C API from C++ can be quite tedious and error prone. While the API 
 
 Here is a small example of opening a database that demonstrates many of the features of the library.
 
-<details>
-<summary>Code</summary>
-
 ```cpp
 
 std::filesystem::path dbFolder = ...;
@@ -89,8 +86,6 @@ if (schemaHash != g_dbSchemaHash)
     throw std::runtime_error("Database schema mismatch");
 
 ```
-
-</details>
 
 ## Integration
 
