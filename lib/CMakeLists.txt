@@ -20,3 +20,33 @@ target_include_directories(${LIBNAME}
     ${SRCDIR}/inc
 )
 
+target_sources(${LIBNAME}
+    PRIVATE
+        inc/thinsqlitepp/context.hpp
+        inc/thinsqlitepp/database.hpp
+        inc/thinsqlitepp/exception.hpp
+        inc/thinsqlitepp/global.hpp
+        inc/thinsqlitepp/mutex.hpp
+        inc/thinsqlitepp/statement.hpp
+        inc/thinsqlitepp/value.hpp
+
+        inc/thinsqlitepp/impl/config.hpp
+        inc/thinsqlitepp/impl/context_iface.hpp
+        inc/thinsqlitepp/impl/database_iface.hpp
+        inc/thinsqlitepp/impl/database_impl.hpp
+        inc/thinsqlitepp/impl/exception_iface.hpp
+        inc/thinsqlitepp/impl/exception_impl.hpp
+        inc/thinsqlitepp/impl/global_iface.hpp
+        inc/thinsqlitepp/impl/handle.hpp
+        inc/thinsqlitepp/impl/memory.hpp
+        inc/thinsqlitepp/impl/meta.hpp
+        inc/thinsqlitepp/impl/mutex_iface.hpp
+        inc/thinsqlitepp/impl/row_iterator.hpp
+        inc/thinsqlitepp/impl/span.hpp
+        inc/thinsqlitepp/impl/statement_iface.hpp
+        inc/thinsqlitepp/impl/statement_impl.hpp
+        inc/thinsqlitepp/impl/string_param.hpp
+        inc/thinsqlitepp/impl/value_iface.hpp
+
+)
+
