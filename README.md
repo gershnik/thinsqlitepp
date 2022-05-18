@@ -2,7 +2,30 @@
 
 A thin, safe and convenient modern C++ wrapper for SQLite API.
 
+[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
+[![Standard](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[![License](https://img.shields.io/badge/license-BSD-brightgreen.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Tests](https://github.com/gershnik/thinsqlitepp/actions/workflows/cmake.yml/badge.svg)](https://github.com/gershnik/thinsqlitepp/actions/workflows/cmake.yml)
+
+
 Using SQLite C API from C++ can be quite tedious and error prone. While the API is generally clean and object-oriented, various aspects of it, notably resource management and error handling can be very tricky to get right. There is also plenty of `void *` and `...` that make it easy to make a mistake as well as other annoyances. The purpose of this library is to provide a C++ wrapper that alleviates all these problems without introducing any overhead.
+
+<!-- TOC depthfrom:2 -->
+
+- [Requirements](#requirements)
+- [Goals](#goals)
+- [Non Goals](#non-goals)
+- [Example](#example)
+- [Integration](#integration)
+    - [CMake](#cmake)
+- [Configuration](#configuration)
+- [Implementation choices](#implementation-choices)
+    - [Errors as exceptions](#errors-as-exceptions)
+    - [Fake classes](#fake-classes)
+    - [Header only](#header-only)
+    - [Thread Safety](#thread-safety)
+
+<!-- /TOC -->
 
 ## Requirements
 
@@ -29,6 +52,71 @@ Using SQLite C API from C++ can be quite tedious and error prone. While the API 
 3. Extend **Serialized** threading mode (see https://sqlite.org/threadsafe.html) to the wrapper. Serialized mode is a design mistake (equivalent to Java's original synchronized collections) and trying to extend it to the wrapper library without violating 0 overhead principle is impossible. The library should work with a database in this mode but not provide Serialized guarantees to its own calls.
 4. Support C++ older than C++17
 5. Support UTF16 SQLite interfaces. 
+
+## Example
+
+Here is a small example of opening a database that demonstrates many of the features of the library.
+
+<details>
+<summary>Code</summary>
+
+```cpp
+
+std::filesystem::path dbFolder = ...;
+
+auto db = database::open((dbFolder / "database.db").string(),
+                            SQLITE_OPEN_READWRITE |
+                            SQLITE_OPEN_NOMUTEX |
+                            SQLITE_OPEN_PRIVATECACHE);
+
+
+db->config<SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION>(1, nullptr);
+db->config<SQLITE_DBCONFIG_ENABLE_FKEY>(1, nullptr);
+
+db->exec("PRAGMA journal_mode=WAL");
+
+auto st = statement::create(*db, "PRAGMA user_version");
+if (!st->step())
+    throw std::runtime_error("No user_version in database");
+auto version = st->column_value<int64_t>(0);
+
+st = statement::create(*db, "SELECT value FROM metadata WHERE key = 'schemaHash'");
+if (!st->step())
+    throw std::runtime_error("No schema hash in database");
+std::string schemaHash(st->column_value<std::string_view>(0));
+
+if (schemaHash != g_dbSchemaHash)
+    throw std::runtime_error("Database schema mismatch");
+
+```
+
+</details>
+
+## Integration
+
+### CMake
+
+With modern CMake you can easily integrate ThinSQLite++ as follows:
+```cmake
+include(FetchContent)
+FetchContent_Declare(thinsqlitepp
+        GIT_REPOSITORY git@github.com:gershnik/thinsqlitepp.git
+        GIT_TAG <desired tag like v1.0>
+        GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(thinsqlitepp)
+``` 
+  
+Alternatively you can clone this repository somewhere and do this:
+
+```cmake
+add_subdirectory(PATH_WHERE_YOU_DOWNALODED_IT_TO, thinsqlitepp)
+```
+
+In either case you can then use `thinsqlitepp` as a library in your project. 
+
+Whichever method you use in order to use ThinSQLite++ your compiler needs to be set in C++17 mode. 
+ThinSQLite++ should compile cleanly even on a highest warnings level. 
 
 ## Configuration
 
