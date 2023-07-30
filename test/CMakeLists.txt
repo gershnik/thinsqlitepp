@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.16)
-
 set (SQLITE_VERSIONS
     3.7.15.2
     3.34.0
@@ -11,12 +9,18 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
 
     add_library(sqlite3-${SQLITE_VERSION} STATIC)
 
+    set_target_properties(sqlite3-${SQLITE_VERSION} PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+
     target_include_directories(sqlite3-${SQLITE_VERSION} SYSTEM BEFORE
-        PUBLIC
+    PUBLIC
         sqlite/${SQLITE_VERSION}
     )
 
-    target_compile_definitions(sqlite3-${SQLITE_VERSION} PRIVATE
+    target_compile_definitions(sqlite3-${SQLITE_VERSION} 
+    PRIVATE
         "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
         SQLITE_THREADSAFE=0
         SQLITE_OMIT_DEPRECATED=1
@@ -26,10 +30,14 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
         SQLITE_ENABLE_COLUMN_METADATA=1
     )
 
-    target_compile_options(sqlite3-${SQLITE_VERSION} PRIVATE
-        "$<$<CXX_COMPILER_ID:AppleClang>:-Wno-unused-function;-Wno-format-pedantic>"
-        "$<$<CXX_COMPILER_ID:MSVC>:/Wv:18;/W3;/wd4244;/wd4146;/wd4267;/wd4996>"
-    )
+    # target_compile_options(sqlite3-${SQLITE_VERSION} 
+    # PRIVATE
+    #     "$<$<CXX_COMPILER_ID:Clang>:${APPLE_CLANG_OPTIONS};-Wno-unused-function;-Wno-format-pedantic>"
+    #     "$<$<C_COMPILER_ID:Clang>:${APPLE_CLANG_OPTIONS};-Wno-unused-function;-Wno-format-pedantic>"
+    #     "$<$<CXX_COMPILER_ID:AppleClang>:${APPLE_CLANG_OPTIONS};-Wno-unused-function;-Wno-format-pedantic>"
+    #     "$<$<CXX_COMPILER_ID:MSVC>:{MSVC_OPTIONS};/Wv:18;/W3;/wd4244;/wd4146;/wd4267;/wd4996>"
+    #     "$<$<CXX_COMPILER_ID:GNU>:${GCC_OPTIONS}>"
+    # )
 
     target_sources(sqlite3-${SQLITE_VERSION} PRIVATE
         sqlite/${SQLITE_VERSION}/sqlite3.c
@@ -37,13 +45,27 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
 
     add_executable(test-${SQLITE_VERSION})
 
-
-    target_include_directories(test-${SQLITE_VERSION} PRIVATE
-        ../lib/inc
+    set_target_properties(test-${SQLITE_VERSION} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        C_STANDARD 11
+        C_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
     )
 
-    target_link_libraries(test-${SQLITE_VERSION} PRIVATE
-        thinsqlitepp
+    target_compile_options(test-${SQLITE_VERSION} 
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8;/W4;/WX>
+        $<$<CXX_COMPILER_ID:Clang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
+        $<$<CXX_COMPILER_ID:AppleClang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-pedantic>
+    )
+
+    target_link_libraries(test-${SQLITE_VERSION} 
+    PRIVATE
+        thinsqlitepp::thinsqlitepp
         sqlite3-${SQLITE_VERSION}
         "$<$<PLATFORM_ID:Linux>:dl>"
     )
@@ -51,38 +73,6 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
     #target_compile_definitions(test-${SQLITE_VERSION} PRIVATE
     #    SQLITE_OMIT_LOAD_EXTENSION=1
     #)
-
-    set(LIB_PUBLIC_HEADERS
-        ../lib/inc/thinsqlitepp/context.hpp
-        ../lib/inc/thinsqlitepp/database.hpp
-        ../lib/inc/thinsqlitepp/exception.hpp
-        ../lib/inc/thinsqlitepp/global.hpp
-        ../lib/inc/thinsqlitepp/mutex.hpp
-        ../lib/inc/thinsqlitepp/statement.hpp
-        ../lib/inc/thinsqlitepp/value.hpp
-    )
-    source_group("Library Headers" FILES ${LIB_PUBLIC_HEADERS})
-
-    set(LIB_IMPL_HEADERS
-        ../lib/inc/thinsqlitepp/impl/config.hpp
-        ../lib/inc/thinsqlitepp/impl/context_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/database_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/database_impl.hpp
-        ../lib/inc/thinsqlitepp/impl/exception_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/exception_impl.hpp
-        ../lib/inc/thinsqlitepp/impl/global_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/handle.hpp
-        ../lib/inc/thinsqlitepp/impl/memory.hpp
-        ../lib/inc/thinsqlitepp/impl/meta.hpp
-        ../lib/inc/thinsqlitepp/impl/mutex_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/row_iterator.hpp
-        ../lib/inc/thinsqlitepp/impl/statement_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/statement_impl.hpp
-        ../lib/inc/thinsqlitepp/impl/span.hpp
-        ../lib/inc/thinsqlitepp/impl/string_param.hpp
-        ../lib/inc/thinsqlitepp/impl/value_iface.hpp
-    )
-    source_group("Library Implementation Headers" FILES ${LIB_IMPL_HEADERS})
 
     target_sources(test-${SQLITE_VERSION} PRIVATE
 
@@ -94,9 +84,6 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
         test_general.cpp
         
         catch.hpp
-     
-        ${LIB_PUBLIC_HEADERS}
-        ${LIB_IMPL_HEADERS}
     )
     
 

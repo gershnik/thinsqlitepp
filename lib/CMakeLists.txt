@@ -13,40 +13,59 @@ set(SRCDIR ${CMAKE_CURRENT_LIST_DIR})
 set(LIBNAME thinsqlitepp)
 
 add_library(${LIBNAME} INTERFACE)
+add_library(${LIBNAME}::${LIBNAME} ALIAS ${LIBNAME})
+
+set_target_properties(${LIBNAME} PROPERTIES
+    CXX_EXTENSIONS OFF
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+)
+
+target_compile_features(${LIBNAME} 
+INTERFACE 
+    cxx_std_17
+)
 
 target_include_directories(${LIBNAME}
-    
-    INTERFACE
+INTERFACE
     ${SRCDIR}/inc
 )
 
+set(PUBLIC_HEADERS
+    inc/thinsqlitepp/context.hpp
+    inc/thinsqlitepp/database.hpp
+    inc/thinsqlitepp/exception.hpp
+    inc/thinsqlitepp/global.hpp
+    inc/thinsqlitepp/mutex.hpp
+    inc/thinsqlitepp/statement.hpp
+    inc/thinsqlitepp/value.hpp
+)
+source_group("Public Headers" FILES ${PUBLIC_HEADERS})
+
+set(IMPL_HEADERS
+    inc/thinsqlitepp/impl/config.hpp
+    inc/thinsqlitepp/impl/context_iface.hpp
+    inc/thinsqlitepp/impl/database_iface.hpp
+    inc/thinsqlitepp/impl/database_impl.hpp
+    inc/thinsqlitepp/impl/exception_iface.hpp
+    inc/thinsqlitepp/impl/exception_impl.hpp
+    inc/thinsqlitepp/impl/global_iface.hpp
+    inc/thinsqlitepp/impl/handle.hpp
+    inc/thinsqlitepp/impl/memory.hpp
+    inc/thinsqlitepp/impl/meta.hpp
+    inc/thinsqlitepp/impl/mutex_iface.hpp
+    inc/thinsqlitepp/impl/row_iterator.hpp
+    inc/thinsqlitepp/impl/statement_iface.hpp
+    inc/thinsqlitepp/impl/statement_impl.hpp
+    inc/thinsqlitepp/impl/span.hpp
+    inc/thinsqlitepp/impl/string_param.hpp
+    inc/thinsqlitepp/impl/value_iface.hpp
+)
+source_group("Implementation Headers" FILES ${IMPL_HEADERS})
+
 target_sources(${LIBNAME}
-    PRIVATE
-        inc/thinsqlitepp/context.hpp
-        inc/thinsqlitepp/database.hpp
-        inc/thinsqlitepp/exception.hpp
-        inc/thinsqlitepp/global.hpp
-        inc/thinsqlitepp/mutex.hpp
-        inc/thinsqlitepp/statement.hpp
-        inc/thinsqlitepp/value.hpp
-
-        inc/thinsqlitepp/impl/config.hpp
-        inc/thinsqlitepp/impl/context_iface.hpp
-        inc/thinsqlitepp/impl/database_iface.hpp
-        inc/thinsqlitepp/impl/database_impl.hpp
-        inc/thinsqlitepp/impl/exception_iface.hpp
-        inc/thinsqlitepp/impl/exception_impl.hpp
-        inc/thinsqlitepp/impl/global_iface.hpp
-        inc/thinsqlitepp/impl/handle.hpp
-        inc/thinsqlitepp/impl/memory.hpp
-        inc/thinsqlitepp/impl/meta.hpp
-        inc/thinsqlitepp/impl/mutex_iface.hpp
-        inc/thinsqlitepp/impl/row_iterator.hpp
-        inc/thinsqlitepp/impl/span.hpp
-        inc/thinsqlitepp/impl/statement_iface.hpp
-        inc/thinsqlitepp/impl/statement_impl.hpp
-        inc/thinsqlitepp/impl/string_param.hpp
-        inc/thinsqlitepp/impl/value_iface.hpp
-
+PRIVATE
+    ${PUBLIC_HEADERS}
+    ${IMPL_HEADERS}
 )
 
