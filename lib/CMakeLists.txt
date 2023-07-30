@@ -6,7 +6,7 @@
 # https://github.com/gershnik/thinsqlitepp/blob/main/LICENSE
 #
 
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.24)
 
 
 set(SRCDIR ${CMAKE_CURRENT_LIST_DIR})

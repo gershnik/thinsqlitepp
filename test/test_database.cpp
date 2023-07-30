@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 #include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/database.hpp>
@@ -8,6 +8,7 @@
 using namespace thinsqlitepp;
 using namespace std;
 using namespace Catch;
+using namespace Catch::Matchers;
 
 TEST_CASE( "database type properties", "[database]") {
 

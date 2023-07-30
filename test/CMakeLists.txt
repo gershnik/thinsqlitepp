@@ -63,6 +63,11 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
         $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-pedantic>
     )
 
+    target_compile_definitions(test-${SQLITE_VERSION} 
+    PRIVATE
+        CATCH_AMALGAMATED_CUSTOM_MAIN
+    )
+
     target_link_libraries(test-${SQLITE_VERSION} 
     PRIVATE
         thinsqlitepp::thinsqlitepp
@@ -83,7 +88,8 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
         test_statement.cpp
         test_general.cpp
         
-        catch.hpp
+        catch_amalgamated.hpp
+        catch_amalgamated.cpp
     )
     
 

@@ -47,7 +47,7 @@ namespace thinsqlitepp
         
         template<class T>
         void set_auxdata(int arg, T * data, void (*destroy)(T*)noexcept) noexcept
-            { sqlite3_set_auxdata(this->c_ptr(), arg, data, (void(*)(void*))destroy); };
+            { sqlite3_set_auxdata(this->c_ptr(), arg, data, (void(*)(void*))destroy); }
                 
         
         void result(std::nullptr_t) noexcept

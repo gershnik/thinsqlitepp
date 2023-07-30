@@ -13,6 +13,12 @@
 #include "context_iface.hpp"
 #include "statement_iface.hpp"
 
+#ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+
+
 namespace thinsqlitepp
 {
     inline
@@ -341,6 +347,10 @@ namespace thinsqlitepp
         return ret;
     }
 }
+
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
 
 #endif
 

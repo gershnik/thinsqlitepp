@@ -20,6 +20,11 @@
 #include <functional>
 #include <optional>
 
+#ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+
 namespace thinsqlitepp
 {
     class context;
@@ -378,6 +383,10 @@ namespace thinsqlitepp
 
 
 }
+
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
 
 #endif
 
