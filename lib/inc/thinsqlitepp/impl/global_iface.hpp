@@ -74,8 +74,6 @@ namespace thinsqlitepp
 
         #endif
 
-        SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
-
         SQLITEPP_DEFINE_OPTION_0( SQLITE_CONFIG_SINGLETHREAD          );
         SQLITEPP_DEFINE_OPTION_0( SQLITE_CONFIG_MULTITHREAD           );
         SQLITEPP_DEFINE_OPTION_0( SQLITE_CONFIG_SERIALIZED            );
@@ -122,6 +120,7 @@ namespace thinsqlitepp
         SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_MEMDB_MAXSIZE,        sqlite3_int64);
         #endif
 
+        SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
         #undef SQLITEPP_DEFINE_OPTION
 
     }
