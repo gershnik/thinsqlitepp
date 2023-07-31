@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+- Ability to install library locally
+
+### Changed
+- Modernized and cleaned up CMake configuration
+
+### Fixed
+- Warnings on various versions of gcc and clang
+
 ## [1.0] - 2022-05-18
 
 ### Added

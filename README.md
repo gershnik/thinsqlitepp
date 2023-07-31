@@ -18,6 +18,13 @@ Using SQLite C API from C++ can be quite tedious and error prone. While the API 
 - [Example](#example)
 - [Integration](#integration)
     - [CMake](#cmake)
+        - [CMake via FetchContent](#cmake-via-fetchcontent)
+        - [CMake from downloaded sources](#cmake-from-downloaded-sources)
+    - [Installing on your system](#installing-on-your-system)
+        - [Basic use](#basic-use)
+        - [CMake package](#cmake-package)
+        - [Via pkg-config](#via-pkg-config)
+    - [Use directly](#use-directly)
 - [Configuration](#configuration)
 - [Implementation choices](#implementation-choices)
     - [Errors as exceptions](#errors-as-exceptions)
@@ -91,6 +98,8 @@ if (schemaHash != g_dbSchemaHash)
 
 ### CMake
 
+#### CMake via FetchContent
+
 With modern CMake you can easily integrate ThinSQLite++ as follows:
 ```cmake
 include(FetchContent)
@@ -99,21 +108,85 @@ FetchContent_Declare(thinsqlitepp
     GIT_TAG <desired tag like v1.0>
     GIT_SHALLOW TRUE
 )
+...
 FetchContent_MakeAvailable(thinsqlitepp)
+...
+target_link_libraries(mytarget
+PRIVATE
+  thinsqlitepp::thinsqlitepp
+)
 ``` 
-  
-Alternatively you can clone this repository somewhere and do this:
+
+#### CMake from downloaded sources
+
+Alternatively you can download the library from [Releases](https://github.com/gershnik/thinsqlitepp/releases) 
+page, unpack it somewhere and do this
 
 ```cmake
-add_subdirectory(PATH_WHERE_YOU_DOWNALODED_IT_TO, thinsqlitepp)
+add_subdirectory(PATH_WHERE_YOU_UNPACKED_IT_TO, thinsqlitepp)
+...
+target_link_libraries(mytarget
+PRIVATE
+  thinsqlitepp::thinsqlitepp
+)
 ```
 
-In either case you can then use `thinsqlitepp` as a library in your project. 
+### Installing on your system
 
-Whichever method you use in order to use ThinSQLite++ your compiler needs to be set in C++17 mode. 
-ThinSQLite++ should compile cleanly even on a highest warnings level. 
+You can also build and install this library on your system using CMake.
+
+1. download the library from [Releases](https://github.com/gershnik/thinsqlitepp/releases) 
+page, unpack it into SOME_PATH
+2. On command line:
+```bash
+cd SOME_PATH
+cmake -S . -B build 
+cmake --build build
+
+#install to /usr/local
+sudo cmake --install build
+#or for a different prefix
+#cmake --install build --prefix /usr
+```
+
+Once the library has been installed it can be used int the following ways:
+
+#### Basic use 
+
+Set the include directory to `<prefix>/include` where `<prefix>` is the install prefix from above.
+
+#### CMake package
+
+```cmake
+find_package(thinsqlitepp)
+
+target_link_libraries(mytarget
+PRIVATE
+  thinsqlitepp::thinsqlitepp
+)
+```
+
+#### Via `pkg-config`
+
+Add the output of `pkg-config --cflags thinsqlitepp` to your compiler flags.
+
+Note that the default installation prefix `/usr/local` might not be in the list of places your
+`pkg-config` looks into. If so you might need to do:
+```bash
+export PKG_CONFIG_PATH=/usr/local/share/pkgconfig
+```
+before running `pkg-config`
+
+### Use directly
+
+You can also simply download the headers of this repository from [Releases](https://github.com/gershnik/thinsqlitepp/releases) page 
+(named `thinsqlitepp-X.Y.tar.gz`), unpack it somewhere and add its `inc` to your include path.
+
 
 ## Configuration
+
+Whichever method you use in order to use ThinSQLite++ your compiler needs to be set to C++17 mode or higher. 
+ThinSQLite++ should compile cleanly even on a highest warnings level. 
 
 This library relies on some of the same configuration macros as SQLite itself to enable some optional functionality. Currently the following macros are used:
 
