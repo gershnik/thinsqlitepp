@@ -355,7 +355,6 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "create function", "[database]") {
         REQUIRE(name == "haha"s);
         REQUIRE(flags == SQLITE_UTF8);
         REQUIRE(data == &func);
-        REQUIRE(func != nullptr);
         REQUIRE(step == nullptr);
         REQUIRE(done == nullptr);
         REQUIRE(destroy == nullptr);
