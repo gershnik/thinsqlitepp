@@ -72,7 +72,7 @@ namespace thinsqlitepp
             #define SQLITEPP_DEFINE_OPTION(code, ...) \
                 template<> struct config_mapping<code> { using type = config_option<code __VA_OPT__(,) __VA_ARGS__>; };
 
-            #define SQLITEPP_DEFINE_OPTION_O(code) SQLITEPP_DEFINE_OPTION(code)
+            #define SQLITEPP_DEFINE_OPTION_0(code) SQLITEPP_DEFINE_OPTION(code)
             #define SQLITEPP_DEFINE_OPTION_N(code, ...) SQLITEPP_DEFINE_OPTION(code __VA_OPT__(,) __VA_ARGS__)
 
         #endif
