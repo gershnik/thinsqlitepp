@@ -8,6 +8,13 @@
 
 cmake_minimum_required(VERSION 3.24)
 
+if (NOT THSQPP_VERSION)
+    file(READ VERSION THSQPP_VERSION)
+    if (NOT THSQPP_VERSION)
+        message(FATAL_ERROR "Cannot determine library version (VERSION file not found)")
+    endif()
+endif()
+project(ThinSQLite++ VERSION ${THSQPP_VERSION})
 
 set(SRCDIR ${CMAKE_CURRENT_LIST_DIR})
 set(LIBNAME thinsqlitepp)
@@ -28,7 +35,8 @@ INTERFACE
 
 target_include_directories(${LIBNAME}
 INTERFACE
-    ${SRCDIR}/inc
+    $<BUILD_INTERFACE:${SRCDIR}/inc>
+    $<INSTALL_INTERFACE:include>  # <prefix>/include
 )
 
 set(PUBLIC_HEADERS
@@ -64,8 +72,16 @@ set(IMPL_HEADERS
 source_group("Implementation Headers" FILES ${IMPL_HEADERS})
 
 target_sources(${LIBNAME}
+INTERFACE 
+    FILE_SET HEADERS BASE_DIRS ${SRCDIR}/inc FILES
+        ${PUBLIC_HEADERS}
+        ${IMPL_HEADERS}
 PRIVATE
     ${PUBLIC_HEADERS}
     ${IMPL_HEADERS}
 )
+
+if (PROJECT_IS_TOP_LEVEL)
+    include(cmake/install.cmake)
+endif()
 

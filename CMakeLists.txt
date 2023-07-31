@@ -8,7 +8,7 @@
 
 cmake_minimum_required(VERSION 3.24)
 
-file(READ VERSION THSQPP_VERSION)
+file(READ lib/VERSION THSQPP_VERSION)
 if (NOT THSQPP_VERSION)
     message(FATAL_ERROR "Cannot determine library version (VERSION file not found)")
 endif()
@@ -20,6 +20,7 @@ project(ThinSQLite++ VERSION ${THSQPP_VERSION} LANGUAGES C CXX)
 add_subdirectory(lib)
 
 if (PROJECT_IS_TOP_LEVEL)
+    include(lib/cmake/install.cmake)
     add_subdirectory(test)
 endif()
 
