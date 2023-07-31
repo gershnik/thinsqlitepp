@@ -33,6 +33,7 @@ function(configure_test_target target)
 
     target_link_libraries(${target}
     PRIVATE
+        thinsqlitepp::thinsqlitepp
         "$<$<PLATFORM_ID:Linux>:dl>"
     )
 
@@ -95,19 +96,47 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
 
         target_link_libraries(test-${CXX_STANDARD}-${SQLITE_VERSION} 
         PRIVATE
-            thinsqlitepp::thinsqlitepp
             sqlite3-${SQLITE_VERSION}
         )
-
-        #target_compile_definitions(test-${SQLITE_VERSION} PRIVATE
-        #    SQLITE_OMIT_LOAD_EXTENSION=1
-        #)
 
         list(APPEND TEST_COMMAND COMMAND)
         list(APPEND TEST_COMMAND test-${CXX_STANDARD}-${SQLITE_VERSION})
     
     endforeach()
 endforeach()
+
+find_package(SQLite3)
+if (SQLite3_FOUND)
+    message("Found native sqlite3 ${SQLite3_VERSION}, configuring native tests")
+
+    foreach(CXX_STANDARD ${CXX_STANDARDS})
+
+        add_executable(test-${CXX_STANDARD}-native)
+
+        configure_test_target(test-${CXX_STANDARD}-native)
+
+        set_target_properties(test-${CXX_STANDARD}-native PROPERTIES
+            CXX_STANDARD ${CXX_STANDARD}
+            CXX_STANDARD_REQUIRED ON
+        )
+
+        target_link_libraries(test-${CXX_STANDARD}-native 
+        PRIVATE
+            SQLite::SQLite3
+        )
+
+        target_compile_definitions(test-${CXX_STANDARD}-native  
+        PRIVATE
+            $<$<PLATFORM_ID:Darwin>:SQLITE_OMIT_LOAD_EXTENSION=1>
+        )
+
+        list(APPEND TEST_COMMAND COMMAND)
+        list(APPEND TEST_COMMAND test-${CXX_STANDARD}-native)
+
+    endforeach()
+else()
+    message("Native sqlite3 not found, skipping native tests")
+endif()
 
 add_custom_target(run-test 
     ${TEST_COMMAND}

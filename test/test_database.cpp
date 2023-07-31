@@ -563,6 +563,8 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "drop modules", "[database]") {
 
 #endif
 
+#if ! SQLITE_OMIT_LOAD_EXTENSION
+
 TEST_CASE_METHOD(sqlitepp_test_fixture,  "load extension", "[database]") {
 
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
@@ -590,6 +592,8 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "load extension", "[database]") {
     }
     
 }
+
+#endif
 
 TEST_CASE_METHOD(sqlitepp_test_fixture,  "progress handler", "[database]") {
 
