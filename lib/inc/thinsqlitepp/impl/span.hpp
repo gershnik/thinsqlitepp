@@ -168,7 +168,7 @@
 
             constexpr reference operator[](index_type idx) const noexcept
             {
-                assert(idx >= 0 && idx < size());
+                assert(idx < size());
                 return _data[idx];
             }
 
@@ -309,7 +309,7 @@ namespace thinsqlitepp
 
         constexpr reference operator[](index_type idx) const noexcept
         {
-            assert(idx >= 0 && idx < size());
+            assert(idx < size());
             (void)idx;
             return s_value;
         }

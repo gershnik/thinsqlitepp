@@ -1,84 +1,26 @@
-cmake_minimum_required(VERSION 3.16)
-cmake_policy(SET CMP0092 NEW)
+#
+# Copyright 2019 Eugene Gershnik
+#
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file or at
+# https://github.com/gershnik/thinsqlitepp/blob/main/LICENSE
+#
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+cmake_minimum_required(VERSION 3.24)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_C_EXTENSIONS OFF)
-
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-
-#set(CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION 10.0.19041.0)
-
-if (WIN32)
-set(CMAKE_SYSTEM_VERSION "10.0.19041.0" CACHE STRING "Windows SDK Version" FORCE)
+file(READ lib/VERSION THSQPP_VERSION)
+if (NOT THSQPP_VERSION)
+    message(FATAL_ERROR "Cannot determine library version (VERSION file not found)")
 endif()
+string(STRIP ${THSQPP_VERSION} THSQPP_VERSION)
 
-
-project(ThinSQLite++)
-
-
-
-set(CLANG_OPTIONS
-	-fvisibility=hidden
-	-fvisibility-inlines-hidden
-	-Wall
-    -Wextra
-    -pedantic
-)
-
-set(APPLE_CLANG_OPTIONS
-	${CLANG_OPTIONS}
-	-stdlib=libc++
-	-fno-common
-)
-
-set(MSVC_OPTIONS
-	/sdl
-	/GR
-	/EHsc
-	"$<$<CONFIG:RELEASE>:/O2;/Ob2;/Oi;/Ot;/GT;/Qpar;/GL>"
-	"$<$<CONFIG:DEBUG>:/Od;/Ob0>"
-	/W4
-	/WX
-)
-
-add_compile_options(
-    "$<$<COMPILE_LANG_AND_ID:CXX,Clang>:${CLANG_OPTIONS}>"
-    "$<$<COMPILE_LANG_AND_ID:C,Clang>:${CLANG_OPTIONS}>"
-    "$<$<CXX_COMPILER_ID:AppleClang>:${APPLE_CLANG_OPTIONS}>"
-    "$<$<CXX_COMPILER_ID:MSVC>:${MSVC_OPTIONS}>"
-)
-
-set(MSVC_DEFINITIONS
-    $<$<CONFIG:DEBUG>:_DEBUG>
-)
-
-add_compile_definitions(
-    "$<$<CXX_COMPILER_ID:MSVC>:${MSVC_DEFINITIONS}>"
-    $<$<CONFIG:RELEASE>:NDEBUG>
-)
-
-set(APPLE_CLANG_LINK_OPTONS
-    -stdlib=libc++
-)
-
-set(MSVC_LINK_OPTIONS
-    $<$<CONFIG:DEBUG>:/DEBUG:FASTLINK;/INCREMENTAL>
-    $<$<CONFIG:RELEASE>:/DEBUG;/RELEASE;/INCREMENTAL:NO;/OPT:REF;/OPT:ICF;/LTCG:incremental>
-)
-
-add_link_options(
-    "$<$<CXX_COMPILER_ID:AppleClang>:${APPLE_CLANG_LINK_OPTONS}>"
-    "$<$<CXX_COMPILER_ID:MSVC>:${MSVC_LINK_OPTIONS}>"
-)
+project(ThinSQLite++ VERSION ${THSQPP_VERSION} LANGUAGES C CXX)
 
 
 add_subdirectory(lib)
-add_subdirectory(test)
+
+if (PROJECT_IS_TOP_LEVEL)
+    include(lib/cmake/install.cmake)
+    add_subdirectory(test)
+endif()
 

@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 #include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/statement.hpp>

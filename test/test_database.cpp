@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 #include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/database.hpp>
@@ -8,6 +8,7 @@
 using namespace thinsqlitepp;
 using namespace std;
 using namespace Catch;
+using namespace Catch::Matchers;
 
 TEST_CASE( "database type properties", "[database]") {
 
@@ -354,7 +355,6 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "create function", "[database]") {
         REQUIRE(name == "haha"s);
         REQUIRE(flags == SQLITE_UTF8);
         REQUIRE(data == &func);
-        REQUIRE(func != nullptr);
         REQUIRE(step == nullptr);
         REQUIRE(done == nullptr);
         REQUIRE(destroy == nullptr);
@@ -563,6 +563,8 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "drop modules", "[database]") {
 
 #endif
 
+#if ! SQLITE_OMIT_LOAD_EXTENSION
+
 TEST_CASE_METHOD(sqlitepp_test_fixture,  "load extension", "[database]") {
 
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
@@ -590,6 +592,8 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "load extension", "[database]") {
     }
     
 }
+
+#endif
 
 TEST_CASE_METHOD(sqlitepp_test_fixture,  "progress handler", "[database]") {
 

@@ -23,12 +23,8 @@
 
 #if __cplusplus <= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG <= 201703L)
     
-    #define SQLITEPP_HAS_VARARG_POUND_POUND_TRICK 1
+    #define SQLITEPP_USE_VARARG_POUND_POUND_TRICK 1
 
-#else
-
-    #define SQLITEPP_HAS_VA_OPT 1
-    
 #endif
 
 #ifdef __clang__
@@ -37,6 +33,10 @@
 #else
     #define SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN
     #define SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
+#endif
+
+#if !defined(__clang__) && defined(__GNUC__)
+    #define SQLITEPP_NO_PEDANTIC __extension__
 #endif
 
 

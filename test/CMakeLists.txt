@@ -1,22 +1,76 @@
-cmake_minimum_required(VERSION 3.16)
-
 set (SQLITE_VERSIONS
     3.7.15.2
     3.34.0
+    3.42.0
 )
+
+set (CXX_STANDARDS
+    17
+    20
+)
+
+function(configure_test_target target)
+
+    set_target_properties(${target} PROPERTIES
+        C_STANDARD 11
+        C_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+
+    target_compile_options(${target}
+    PRIVATE
+        $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8;/W4;/WX>
+        $<$<CXX_COMPILER_ID:Clang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
+        $<$<CXX_COMPILER_ID:AppleClang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
+        $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-pedantic>
+    )
+
+    target_compile_definitions(${target}
+    PRIVATE
+        CATCH_AMALGAMATED_CUSTOM_MAIN
+    )
+
+    target_link_libraries(${target}
+    PRIVATE
+        thinsqlitepp::thinsqlitepp
+        "$<$<PLATFORM_ID:Linux>:dl>"
+    )
+
+    target_sources(${target} 
+    PRIVATE
+        mock_sqlite.hpp
+        mock_sqlite.cpp
+        test_database.cpp
+        test_main.cpp
+        test_statement.cpp
+        test_general.cpp
+        
+        catch_amalgamated.hpp
+        catch_amalgamated.cpp
+    )
+    
+
+endfunction()
 
 set(TEST_COMMAND "")
 
 foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
-
     add_library(sqlite3-${SQLITE_VERSION} STATIC)
 
+    set_target_properties(sqlite3-${SQLITE_VERSION} PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+    )
+
     target_include_directories(sqlite3-${SQLITE_VERSION} SYSTEM BEFORE
-        PUBLIC
+    PUBLIC
         sqlite/${SQLITE_VERSION}
     )
 
-    target_compile_definitions(sqlite3-${SQLITE_VERSION} PRIVATE
+    target_compile_definitions(sqlite3-${SQLITE_VERSION} 
+    PRIVATE
         "$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>"
         SQLITE_THREADSAFE=0
         SQLITE_OMIT_DEPRECATED=1
@@ -26,85 +80,64 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
         SQLITE_ENABLE_COLUMN_METADATA=1
     )
 
-    target_compile_options(sqlite3-${SQLITE_VERSION} PRIVATE
-        "$<$<CXX_COMPILER_ID:AppleClang>:-Wno-unused-function;-Wno-format-pedantic>"
-        "$<$<CXX_COMPILER_ID:MSVC>:/Wv:18;/W3;/wd4244;/wd4146;/wd4267;/wd4996>"
-    )
-
     target_sources(sqlite3-${SQLITE_VERSION} PRIVATE
         sqlite/${SQLITE_VERSION}/sqlite3.c
     )
 
-    add_executable(test-${SQLITE_VERSION})
+    foreach(CXX_STANDARD ${CXX_STANDARDS})
 
+        add_executable(test-${CXX_STANDARD}-${SQLITE_VERSION})
 
-    target_include_directories(test-${SQLITE_VERSION} PRIVATE
-        ../lib/inc
-    )
+        configure_test_target(test-${CXX_STANDARD}-${SQLITE_VERSION})
 
-    target_link_libraries(test-${SQLITE_VERSION} PRIVATE
-        thinsqlitepp
-        sqlite3-${SQLITE_VERSION}
-        "$<$<PLATFORM_ID:Linux>:dl>"
-    )
+        set_target_properties(test-${CXX_STANDARD}-${SQLITE_VERSION} PROPERTIES
+            CXX_STANDARD ${CXX_STANDARD}
+            CXX_STANDARD_REQUIRED ON
+        )
 
-    #target_compile_definitions(test-${SQLITE_VERSION} PRIVATE
-    #    SQLITE_OMIT_LOAD_EXTENSION=1
-    #)
+        target_link_libraries(test-${CXX_STANDARD}-${SQLITE_VERSION} 
+        PRIVATE
+            sqlite3-${SQLITE_VERSION}
+        )
 
-    set(LIB_PUBLIC_HEADERS
-        ../lib/inc/thinsqlitepp/context.hpp
-        ../lib/inc/thinsqlitepp/database.hpp
-        ../lib/inc/thinsqlitepp/exception.hpp
-        ../lib/inc/thinsqlitepp/global.hpp
-        ../lib/inc/thinsqlitepp/mutex.hpp
-        ../lib/inc/thinsqlitepp/statement.hpp
-        ../lib/inc/thinsqlitepp/value.hpp
-    )
-    source_group("Library Headers" FILES ${LIB_PUBLIC_HEADERS})
-
-    set(LIB_IMPL_HEADERS
-        ../lib/inc/thinsqlitepp/impl/config.hpp
-        ../lib/inc/thinsqlitepp/impl/context_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/database_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/database_impl.hpp
-        ../lib/inc/thinsqlitepp/impl/exception_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/exception_impl.hpp
-        ../lib/inc/thinsqlitepp/impl/global_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/handle.hpp
-        ../lib/inc/thinsqlitepp/impl/memory.hpp
-        ../lib/inc/thinsqlitepp/impl/meta.hpp
-        ../lib/inc/thinsqlitepp/impl/mutex_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/row_iterator.hpp
-        ../lib/inc/thinsqlitepp/impl/statement_iface.hpp
-        ../lib/inc/thinsqlitepp/impl/statement_impl.hpp
-        ../lib/inc/thinsqlitepp/impl/span.hpp
-        ../lib/inc/thinsqlitepp/impl/string_param.hpp
-        ../lib/inc/thinsqlitepp/impl/value_iface.hpp
-    )
-    source_group("Library Implementation Headers" FILES ${LIB_IMPL_HEADERS})
-
-    target_sources(test-${SQLITE_VERSION} PRIVATE
-
-        mock_sqlite.hpp
-        mock_sqlite.cpp
-        test_database.cpp
-        test_main.cpp
-        test_statement.cpp
-        test_general.cpp
-        
-        catch.hpp
-     
-        ${LIB_PUBLIC_HEADERS}
-        ${LIB_IMPL_HEADERS}
-    )
+        list(APPEND TEST_COMMAND COMMAND)
+        list(APPEND TEST_COMMAND test-${CXX_STANDARD}-${SQLITE_VERSION})
     
-
-    list(APPEND TEST_COMMAND COMMAND)
-    list(APPEND TEST_COMMAND test-${SQLITE_VERSION})
-    
+    endforeach()
 endforeach()
 
+find_package(SQLite3)
+if (SQLite3_FOUND)
+    message("Found native sqlite3 ${SQLite3_VERSION}, configuring native tests")
+
+    foreach(CXX_STANDARD ${CXX_STANDARDS})
+
+        add_executable(test-${CXX_STANDARD}-native)
+
+        configure_test_target(test-${CXX_STANDARD}-native)
+
+        set_target_properties(test-${CXX_STANDARD}-native PROPERTIES
+            CXX_STANDARD ${CXX_STANDARD}
+            CXX_STANDARD_REQUIRED ON
+        )
+
+        target_link_libraries(test-${CXX_STANDARD}-native 
+        PRIVATE
+            SQLite::SQLite3
+        )
+
+        target_compile_definitions(test-${CXX_STANDARD}-native  
+        PRIVATE
+            $<$<PLATFORM_ID:Darwin>:SQLITE_OMIT_LOAD_EXTENSION=1>
+        )
+
+        list(APPEND TEST_COMMAND COMMAND)
+        list(APPEND TEST_COMMAND test-${CXX_STANDARD}-native)
+
+    endforeach()
+else()
+    message("Native sqlite3 not found, skipping native tests")
+endif()
 
 add_custom_target(run-test 
     ${TEST_COMMAND}

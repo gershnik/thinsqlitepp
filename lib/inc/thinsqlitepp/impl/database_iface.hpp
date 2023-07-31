@@ -20,6 +20,11 @@
 #include <functional>
 #include <optional>
 
+#ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+
 namespace thinsqlitepp
 {
     class context;
@@ -316,7 +321,7 @@ namespace thinsqlitepp
 
     
 
-    #if SQLITEPP_HAS_VARARG_POUND_POUND_TRICK
+    #if SQLITEPP_USE_VARARG_POUND_POUND_TRICK
 
         SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN
 
@@ -325,14 +330,10 @@ namespace thinsqlitepp
 
         SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 
-    #elif SQLITEPP_HAS_VA_OPT
+    #else
 
         #define SQLITEPP_DEFINE_DB_OPTION(code, ...) \
             template<> struct database::config_mapping<code> { using type = database::config_option<code __VA_OPT__(,) __VA_ARGS__>; };
-
-    #else
-
-        #error Neither SQLITEPP_HAS_VARARG_POUND_POUND_TRICK nor SQLITEPP_HAS_VA_OPT defined. Cannot make vararg macro
 
     #endif
 
@@ -378,6 +379,10 @@ namespace thinsqlitepp
 
 
 }
+
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
 
 #endif
 

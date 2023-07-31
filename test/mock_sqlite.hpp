@@ -102,8 +102,12 @@ MAKE_MOCK(sqlite3_drop_modules, (sqlite3 *db, const char ** keep), (db, keep));
 
 #endif
 
+#if ! SQLITE_OMIT_LOAD_EXTENSION
+
 MAKE_MOCK(sqlite3_load_extension, (sqlite3 *db, const char * file, const char * proc, char ** err), (db, file, proc, err));
 #define sqlite3_load_extension mock_sqlite3_load_extension
+
+#endif
 
 MAKE_MOCK(sqlite3_progress_handler, (sqlite3 *db, int step_count, int(*handler)(void*), void*data), (db, step_count, handler, data));
 #define sqlite3_progress_handler mock_sqlite3_progress_handler

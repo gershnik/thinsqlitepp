@@ -10,35 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get release Name
+        uses: actions/github-script@v6
         with:
-          fetch-depth: 0
-
+          script: |
+            const tagName = context.ref.substring(context.ref.lastIndexOf('/') + 2)
+            core.exportVariable('RELEASE_NAME', tagName)
+        
       - name: Zip Headers
-        shell: bash
-        working-directory: ${{github.workspace}}
-        run: tar -czf thinsqlitepp.tar.gz --transform s/lib/thinsqlitepp/ lib
+        run: tar -czf thinsqlitepp-${{ env.RELEASE_NAME }}.tar.gz --transform s/lib/thinsqlitepp/ lib
 
-      - name: Release
-        uses: actions/create-release@v1
-        id: create_release
+      - name: Make release
+        uses: softprops/action-gh-release@v1
         with:
           draft: true
           prerelease: false
-          release_name: ${{ github.ref }}
-          tag_name: ${{ github.ref }}
+          name: ${{ env.RELEASE_NAME }}
           body: ...edit me...
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Upload headers
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{github.workspace}}/thinsqlitepp.tar.gz
-          asset_name: thinsqlitepp-${{ github.ref_name }}.tar.gz
-          asset_content_type: application/gzip
-      
+          files: |
+            thinsqlitepp-${{ env.RELEASE_NAME }}.tar.gz
