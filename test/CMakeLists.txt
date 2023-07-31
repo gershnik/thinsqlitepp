@@ -1,6 +1,7 @@
 set (SQLITE_VERSIONS
     3.7.15.2
     3.34.0
+    3.42.0
 )
 
 set (CXX_STANDARDS
