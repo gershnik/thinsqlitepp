@@ -13,6 +13,7 @@ if (NOT THSQPP_VERSION)
     if (NOT THSQPP_VERSION)
         message(FATAL_ERROR "Cannot determine library version (VERSION file not found)")
     endif()
+    string(STRIP ${THSQPP_VERSION} THSQPP_VERSION)
 endif()
 project(ThinSQLite++ VERSION ${THSQPP_VERSION})
 
