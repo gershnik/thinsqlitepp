@@ -1,4 +1,4 @@
-#include "catch_amalgamated.hpp"
+#include <doctest.h>
 #include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/statement.hpp>
@@ -7,9 +7,10 @@
 
 using namespace thinsqlitepp;
 using namespace std;
-using namespace Catch;
 
-TEST_CASE( "statement type properties", "[statement]") {
+TEST_SUITE_BEGIN("statement");
+
+TEST_CASE( "statement type properties" ) {
     
     CHECK(is_class_v<statement>);
     CHECK(is_final_v<statement>);
@@ -24,7 +25,7 @@ TEST_CASE( "statement type properties", "[statement]") {
     CHECK(!is_swappable_v<statement>);
 }
 
-TEST_CASE( "statement looping", "[statement]") {
+TEST_CASE( "statement looping" ) {
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)  ");
@@ -80,3 +81,5 @@ TEST_CASE( "statement looping", "[statement]") {
     }
     
 }
+
+TEST_SUITE_END();

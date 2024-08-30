@@ -1,3 +1,13 @@
+
+include(FetchContent)
+
+FetchContent_Declare(doctest
+    URL  https://raw.githubusercontent.com/doctest/doctest/v2.4.11/doctest/doctest.h
+    DOWNLOAD_NO_EXTRACT TRUE
+)
+
+FetchContent_MakeAvailable(doctest)
+
 set (SQLITE_VERSIONS
     3.7.15.2
     3.34.0
@@ -39,6 +49,11 @@ function(configure_test_target target)
         "$<$<PLATFORM_ID:Linux>:dl>"
     )
 
+    target_include_directories(${target}
+    PRIVATE
+        ${doctest_SOURCE_DIR}
+    )
+
     target_sources(${target} 
     PRIVATE
         mock_sqlite.hpp
@@ -47,9 +62,6 @@ function(configure_test_target target)
         test_main.cpp
         test_statement.cpp
         test_general.cpp
-        
-        catch_amalgamated.hpp
-        catch_amalgamated.cpp
     )
     
 

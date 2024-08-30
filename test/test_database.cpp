@@ -1,4 +1,4 @@
-#include "catch_amalgamated.hpp"
+#include <doctest.h>
 #include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/database.hpp>
@@ -7,10 +7,11 @@
 
 using namespace thinsqlitepp;
 using namespace std;
-using namespace Catch;
-using namespace Catch::Matchers;
+using namespace std::literals;
 
-TEST_CASE( "database type properties", "[database]") {
+TEST_SUITE_BEGIN("database");
+
+TEST_CASE( "database type properties") {
 
     CHECK(is_class_v<database>);
     CHECK(is_final_v<database>);
@@ -29,28 +30,6 @@ TEST_CASE( "database type properties", "[database]") {
 #include <thinsqlitepp/value.hpp>
 
 
-class ErrorCodeMatcher : public MatcherBase<::thinsqlitepp::exception>
-{
-public:
-    ErrorCodeMatcher(int error_code) : _error_code(error_code) {}
-
-    bool match(::thinsqlitepp::exception const & in) const override
-    {
-        return in.primary_error_code() == _error_code;
-    }
-
-    std::string describe() const override
-    {
-        return "error code equals: " + std::to_string(_error_code);
-    }
-private:
-    int _error_code;
-};
-
-ErrorCodeMatcher HasErrorCode(int val) {
-    return ErrorCodeMatcher(val);
-}
-
 class sqlitepp_test_fixture
 {
 private:
@@ -58,12 +37,12 @@ private:
 };
 
 
-
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "database creation", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "database creation") {
  
     set_mock_sqlite3_open_v2([] (const char *filename, sqlite3 **ppDb, int flags, const char *zVfs) {
        
-        REQUIRE_THAT(filename, Equals("foo.db"));
+        REQUIRE(filename);
+        REQUIRE(filename == "foo.db"sv);
         REQUIRE(flags == (SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX));
         REQUIRE(zVfs == nullptr);
         return real_sqlite3_open_v2(filename, ppDb, flags, zVfs);
@@ -84,7 +63,9 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "database creation", "[database]") {
     int errcode = 0;
     set_mock_sqlite3_open_v2([&errcode] (const char *filename, sqlite3 **ppDb, int flags, const char *zVfs) {
        
-        REQUIRE_THAT(filename, Equals("foo.db"));
+        
+        REQUIRE(filename);
+        REQUIRE(filename == "foo.db"sv);
         REQUIRE(flags == 0);
         REQUIRE(zVfs == nullptr);
         errcode = real_sqlite3_open_v2(filename, ppDb, flags, zVfs);
@@ -109,7 +90,8 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "database creation", "[database]") {
     int sys_errcode = 0;
     set_mock_sqlite3_open_v2([&errcode, &sys_errcode] (const char *filename, sqlite3 **ppDb, int flags, const char *zVfs) {
        
-        REQUIRE_THAT(filename, Equals("/foo/nosuch.db"));
+        REQUIRE(filename);
+        REQUIRE(filename == "/foo/nosuch.db"sv);
         REQUIRE(flags == (SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX));
         REQUIRE(zVfs == nullptr);
         errcode = real_sqlite3_open_v2(filename, ppDb, flags, zVfs);
@@ -131,12 +113,15 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "database creation", "[database]") {
         CHECK(ex.extended_error_code() == errcode);
         CHECK(ex.primary_error_code() == errcode);
         CHECK(ex.system_error_code() == sys_errcode);
-        CHECK_THAT(ex.what(), Equals("unable to open database file"));
+        if (!ex.what())
+            CHECK(false);
+        else
+            CHECK(ex.what() == "unable to open database file"sv);
     }
     
 }
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "busy handler", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "busy handler") {
     
     auto db1 = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     
@@ -197,7 +182,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "busy handler", "[database]") {
     }, (int*)nullptr);
 }
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "busy timeout", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "busy timeout") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     
@@ -210,7 +195,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "busy timeout", "[database]") {
     db->busy_timeout(5);
 }
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "changes", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "changes") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
@@ -224,7 +209,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "changes", "[database]") {
     CHECK(db->changes() == 1);
 }
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "commit hook", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "commit hook") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
@@ -242,7 +227,12 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "commit hook", "[database]") {
     });
     
     db->commit_hook(&hook);
-    REQUIRE_THROWS_MATCHES(db->exec("INSERT INTO foo(name) VALUES ('abc')"), ::thinsqlitepp::exception, HasErrorCode(SQLITE_CONSTRAINT));
+    try {
+        db->exec("INSERT INTO foo(name) VALUES ('abc')");
+        FAIL("exception not thrown");
+    } catch (::thinsqlitepp::exception & ex) {
+        REQUIRE(ex.primary_error_code() == SQLITE_CONSTRAINT);
+    }
     
     set_mock_sqlite3_commit_hook([&] (sqlite3 *dbx, int(*handler)(void*), void *data) {
         
@@ -255,7 +245,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "commit hook", "[database]") {
     REQUIRE_NOTHROW(db->exec("INSERT INTO foo(name) VALUES ('abc')"));
 }
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "rollback hook", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "rollback hook") {
 
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
@@ -284,7 +274,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "rollback hook", "[database]") {
     db->rollback_hook(nullptr);
 }
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "create collation", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create collation") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
@@ -334,7 +324,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "create collation", "[database]") {
     
 }
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "create function", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create function") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
@@ -517,7 +507,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "create function", "[database]") {
 
 #if SQLITE_VERSION_NUMBER >= 3030000
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "drop modules", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "drop modules") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     
@@ -565,7 +555,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "drop modules", "[database]") {
 
 #if ! SQLITE_OMIT_LOAD_EXTENSION
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "load extension", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "load extension") {
 
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     
@@ -595,7 +585,7 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "load extension", "[database]") {
 
 #endif
 
-TEST_CASE_METHOD(sqlitepp_test_fixture,  "progress handler", "[database]") {
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "progress handler") {
 
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     
@@ -640,3 +630,5 @@ TEST_CASE_METHOD(sqlitepp_test_fixture,  "progress handler", "[database]") {
     db->progress_handler(16, func1, nullptr);
     
 }
+
+TEST_SUITE_END();
