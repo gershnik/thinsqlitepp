@@ -1,3 +1,5 @@
+#include <string_view>
+#include <ostream>
 #include <doctest.h>
 #include "mock_sqlite.hpp"
 
