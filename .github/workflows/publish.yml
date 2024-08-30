@@ -11,20 +11,24 @@ jobs:
     permissions: write-all
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Get release Name
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const tagName = context.ref.substring(context.ref.lastIndexOf('/') + 2)
-            core.exportVariable('RELEASE_NAME', tagName)
+      - name: Get Release Name
+        shell: python
+        run: |
+          import os
+          #ref = os.environ['GITHUB_REF']
+          #name = ref[ref.rfind('/') + 1:]
+          with open('lib/VERSION', 'r') as verFile:
+            name = verFile.read().strip()
+          with open(os.environ['GITHUB_ENV'], 'w') as env:
+            print('RELEASE_NAME=' + name, file=env) 
         
       - name: Zip Headers
         run: tar -czf thinsqlitepp-${{ env.RELEASE_NAME }}.tar.gz --transform s/lib/thinsqlitepp/ lib
 
       - name: Make release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
           prerelease: false
