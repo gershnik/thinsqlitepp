@@ -11,6 +11,9 @@
 
 #include "exception_iface.hpp"
 
+/**
+ * ThinSQLite++ namespace
+ */
 namespace thinsqlitepp
 {
 

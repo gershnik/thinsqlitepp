@@ -18,6 +18,12 @@
 
 namespace thinsqlitepp
 {
+    /**
+     * Dynamically Typed Value Object
+     * 
+     * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
+     * sqlite3_value. 
+     */
     class value final : public handle<sqlite3_value, value>
     {
     public:

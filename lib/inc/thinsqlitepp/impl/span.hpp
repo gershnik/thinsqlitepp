@@ -21,6 +21,12 @@
     namespace thinsqlitepp
     {
 
+        /**
+         * Alias or reimplementation of std::span
+         * 
+         * If std::span is available, thinsqlitepp::span is a typedef to it.
+         * Otherwise it is an equivalent class defined in this library
+         */
         template<class T>
         using span = std::span<T>;
     
@@ -219,12 +225,28 @@
 
 namespace thinsqlitepp
 {
+    /// A blob_view is a span of bytes
     using blob_view = span<const std::byte>;
     
 
+    /**
+     * An efficient blob of zeroes of a given size
+     * 
+     * This class is an STL random-access container that returns 0 
+     * for all its elements. It simply stores blob size and 
+     * doesn't allocate any memory.
+     * 
+     * SQLite contains optimized methods that operate on "blobs of zeroes" of
+     * a given size (e.g. ::sqlite3_bind_zeroblob). This class is used to pass
+     * "blobs of zeroes" to overloaded C++ methods (e.g. statement::bind(int, const zero_blob &))
+     * to achieve the same effect in this library.
+     * 
+     */
     class zero_blob
     {
     public:
+        /// @name Types
+        /// @{
         using element_type           = const std::byte;
         using value_type             = std::byte;
         using index_type             = size_t;
@@ -273,8 +295,12 @@ namespace thinsqlitepp
         using iterator               = const_iterator;
         using reverse_iterator       = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+        /// @}
         
     public:
+        /// @name Methods
+        /// @{
         constexpr zero_blob(size_t size = 0) noexcept : _size{size} {}
         
         constexpr zero_blob           (const zero_blob&) noexcept = default;
@@ -335,6 +361,7 @@ namespace thinsqlitepp
         constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
         constexpr const_reverse_iterator   crend() const noexcept { return const_reverse_iterator(cbegin()); }
 
+        /// @}
     private:
         size_t _size;
         

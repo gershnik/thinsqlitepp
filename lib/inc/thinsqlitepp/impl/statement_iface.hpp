@@ -23,14 +23,46 @@ namespace thinsqlitepp
     class database;
     class value;
 
+    /**
+     * Prepared Statement Object
+     * 
+     * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
+     * sqlite3_stmt.
+     * 
+     * Declared in `<thinsqlitepp/statement.h>`
+     * 
+     */
     class statement final : public handle<sqlite3_stmt, statement>
     {
     public:
+        /**
+         * Compile an SQL statement
+         * 
+         * This is a wrapper over ::sqlite3_prepare_v3 or ::sqlite3_prepare_v2, if the former is
+         * not available.
+         * 
+         * @param db The database to create statement for
+         * @param sql The statement to be compiled. Must be in UTF-8.
+         * @param flags Zero or more SQLITE_PREPARE_ flags. Only available for SQLite 3.2 or greater
+         */
         static std::unique_ptr<statement> create(const database & db, const string_param & sql
                                             #if SQLITE_VERSION_NUMBER >= 3020000
                                                  , unsigned int flags = 0
                                             #endif
                                                  );
+
+        /**
+         * Compile an SQL statement
+         * 
+         * This is a wrapper over ::sqlite3_prepare_v3 or ::sqlite3_prepare_v2, if the former is
+         * not available.
+         * 
+         * @param db The database to create statement for
+         * @param sql The statement to be compiled. Must be in UTF-8. This is an input-output parameter.
+         *            On output the string_view is adjusted to contain any text past the end of the first SQL statement.
+         *            See `pzTail` argument description for ::sqlite3_prepare_v3
+         * @param flags Zero or more SQLITE_PREPARE_ flags. Only available for SQLite 3.2 or greater
+         */
         static std::unique_ptr<statement> create(const database & db, std::string_view & sql
                                             #if SQLITE_VERSION_NUMBER >= 3020000
                                                  , unsigned int flags = 0
@@ -38,6 +70,11 @@ namespace thinsqlitepp
                                                  );
 
 #if __cpp_char8_t >= 201811
+        /**
+         * Compile an SQL statement
+         * 
+         * char8_t overload for create(const database &, const string_param &, unsigned int)
+         */ 
         static std::unique_ptr<statement> create(const database & db, const u8string_param & sql
                                             #if SQLITE_VERSION_NUMBER >= 3020000
                                                  , unsigned int flags = 0
@@ -50,6 +87,12 @@ namespace thinsqlitepp
                         #endif
                    );
         }
+
+        /**
+         * Compile an SQL statement
+         * 
+         * char8_t overload for create(const database &, std::string_view &, unsigned int)
+         */
         static std::unique_ptr<statement> create(const database & db, std::u8string_view & sql
                                             #if SQLITE_VERSION_NUMBER >= 3020000
                                                  , unsigned int flags = 0
@@ -64,72 +107,239 @@ namespace thinsqlitepp
         }
 #endif
         
+        /// Equivalent to ::sqlite3_finalize
         ~statement() noexcept
             { sqlite3_finalize(c_ptr()); }
-        
+
+        /**
+         * Returns the database to which this statement belongs
+         * 
+         * Equivalent to ::sqlite3_db_handle
+         */
         class database & database() const noexcept
             { return *(class database *)sqlite3_db_handle(c_ptr()); }
         
+        /**
+         * Evaluate the statement
+         * 
+         * Equivalent to ::sqlite3_step.
+         * 
+         * Returns true if a row was retrieved (#SQLITE_ROW) or false if the 
+         * statement has finished executing successfully (#SQLITE_DONE).
+         * 
+         * All other ::sqlite3_step return codes result in thinsqlitepp::exception being thrown
+         */
         bool step();
+
+        /**
+         * Reset the statement
+         * 
+         * Equivalent to ::sqlite3_reset
+         */
         void reset() noexcept
             { sqlite3_reset(c_ptr()); }
         
+        /**
+         * Determine if the statement has been reset
+         * 
+         * Equivalent to ::sqlite3_stmt_busy
+         */
         bool busy() const noexcept
             { return sqlite3_stmt_busy(c_ptr()); }
-        
+
+        /** 
+         * Return type for isexplain()
+         */ 
         enum class explain_type : int
         {
-            not_explain = 0,
-            explain = 1,
-            explain_query_plan = 2
+            not_explain = 0,        ///< The statement is an ordinary statement
+            explain = 1,            ///< The statement is an EXPLAIN statement
+            explain_query_plan = 2  ///< The statement is an EXPLAIN QUERY PLAN
         };
         
+        
 #if SQLITE_VERSION_NUMBER >= 3031001
+        /**
+         * Query the EXPLAIN Setting for the statement
+         * 
+         * Equivalent to ::sqlite3_stmt_isexplain. 
+         */
         explain_type isexplain() const noexcept
             { return explain_type(sqlite3_stmt_isexplain(c_ptr())); }
 #endif
         
+        /**
+         * Determine the statement writes to the database
+         * 
+         * Equivalent to ::sqlite3_stmt_readonly
+         */
         bool readonly() const noexcept
             { return sqlite3_stmt_readonly(c_ptr()); }
         
+        /**
+         * Bind a NULL value to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_null
+         */
         void bind(int idx, std::nullptr_t)
             { check_error(sqlite3_bind_null(c_ptr(), idx)); }
+        /**
+         * Bind an int value to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_int
+         */
         void bind(int idx, int value)
             { check_error(sqlite3_bind_int(c_ptr(), idx, value)); }
+        /**
+         * Bind an int64_t value to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_int64
+         */
         void bind(int idx, int64_t value)
             { check_error(sqlite3_bind_int64(c_ptr(), idx, value)); }
+        /**
+         * Bind a double value to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_double
+         */
         void bind(int idx, double value)
             { check_error(sqlite3_bind_double(c_ptr(), idx, value)); }
+
+        
+        /**
+         * Bind a string value to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_text with #SQLITE_TRANSIENT.
+         * 
+         * The string content is used **by value** and copied into the statement.
+         * Thus the lifetime of the string referred to by `value` parameter is 
+         * independent of the statement's
+         */
         void bind(int idx, const std::string_view & value);
+
+        /**
+         * Bind a string reference to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_text with #SQLITE_STATIC.
+         * 
+         * The string content is used **by reference**.
+         * Thus the string referred to by `value` parameter must
+         * remain valid during this statement's lifetime.
+         */
         void bind_reference(int idx, const std::string_view & value);
+
     #if __cpp_char8_t >= 201811
+        /**
+         * Bind a string value to a parameter of the statement
+         * 
+         * char8_t overload for bind(int, const std::string_view &)
+         */
         void bind(int idx, const std::u8string_view & value);
+
+        /**
+         * Bind a string reference to a parameter of the statement
+         * 
+         * char8_t overload for bind_reference(int, const std::string_view &)
+         */
         void bind_reference(int idx, const std::u8string_view & value);
     #endif
+
+        /**
+         * Bind a blob value to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_blob with #SQLITE_TRANSIENT.
+         * 
+         * The blob content is used **by value** and copied into the statement.
+         * Thus the lifetime of the blob referred to by `value` parameter is 
+         * independent of the statement's
+         */
         void bind(int idx, const blob_view & value);
+
+        /**
+         * Bind a blob reference to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_blob with #SQLITE_STATIC.
+         * 
+         * The blob content is used **by reference**.
+         * Thus the string referred to by `value` parameter must
+         * remain valid during this statement's lifetime.
+         */
         void bind_reference(int idx, const blob_view & value);
+
+        /**
+         * Bind a blob of zeroes to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_zeroblob.
+         */
         void bind(int idx, const zero_blob & value)
             { check_error(sqlite3_bind_zeroblob(c_ptr(), idx, int(value.size()))); }
+
+        /**
+         * Bind a custom pointer to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_pointer. 
+         * 
+         * The `type` parameter should be a static string, preferably a string literal.
+         */
         template<class T>
         void bind(int idx, T * ptr, const char * type, void(*destroy)(T*))
             { check_error(sqlite3_bind_pointer(this->c_ptr(), idx, ptr, type, (void(*)(void*))destroy)); }
+
+        /**
+         * Bind a custom pointer to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_pointer. 
+         * 
+         * This is a safer overload of bind(int, T *, const char *, void(*)(T*))
+         * that takes a pointer via std::unique_ptr ownership transfer. The inferred
+         * "type" for ::sqlite3_bind_pointer is `typeid(T).name()`.
+         */
         template<class T>
         void bind(int idx, std::unique_ptr<T> ptr)
             { this->bind(idx, ptr.release(), typeid(T).name(), [](T * p) { delete p; }); }
+
+        /**
+         * Bind a dynamically typed value to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_value. 
+         */
         void bind(int idx, const value & val);
         
+        /**
+         * Reset all bindings on the statement
+         * 
+         * Equivalent to ::sqlite3_clear_bindings. 
+         */
         void clear_bindings() noexcept
             { sqlite3_clear_bindings(c_ptr()); }
         
+        /**
+         * Returns the number of SQL parameters
+         * 
+         * Equivalent to ::sqlite3_bind_parameter_count
+         */
         int bind_parameter_count() const noexcept
             { return sqlite3_bind_parameter_count(c_ptr()); }
+
+        /**
+         * Returns the index of a parameter with a given name
+         * 
+         * Equivalent to ::sqlite3_bind_parameter_index
+         */
         int bind_parameter_index(const string_param & name) const noexcept
             { return sqlite3_bind_parameter_index(c_ptr(), name.c_str()); }
+
+        /**
+         * Returns the name of a parameter with a given index
+         * 
+         * Equivalent to ::sqlite3_bind_parameter_name
+         */
         const char * bind_parameter_name(int idx) const noexcept
             { return sqlite3_bind_parameter_name(c_ptr(), idx); }
-        
-        template<class T>
-        std::enable_if_t<
+
+    private:
+        template<typename T>
+        static constexpr bool supported_column_type = 
             std::is_same_v<T, int> ||
             std::is_same_v<T, int64_t> ||
             std::is_same_v<T, double> ||
@@ -137,8 +347,27 @@ namespace thinsqlitepp
         #if __cpp_char8_t >= 201811
             std::is_same_v<T, std::u8string_view> ||
         #endif
-            std::is_same_v<T, blob_view>,
-        T> column_value(int idx) const noexcept;
+            std::is_same_v<T, blob_view>;
+
+    public:
+        
+        /**
+         * Get result values from a query 
+         * 
+         * Wraps @ref sqlite3_column_ function family. Unlike the C API you specify the
+         * desired type via T template parameter
+         * 
+         * @tparam T Desired output type. Must be one of:
+         * - int
+         * - int64_t
+         * - double
+         * - std::string_view
+         * - std::u8string_view (if `char8_t` is supported by your compiler/library)
+         * - blob_view
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(supported_column_type<T>,
+        T) column_value(int idx) const noexcept;
         
         const value & raw_column_value(int idx) const noexcept
             { return *(const value *)sqlite3_column_value(c_ptr(), idx); }
