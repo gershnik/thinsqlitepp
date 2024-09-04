@@ -18,6 +18,15 @@ namespace thinsqlitepp
 {
     class database;
 
+    /**
+     * SQL Function Context Object
+     * 
+     * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
+     * sqlite3_context.
+     * 
+     * `#include <thinsqlitepp/context.hpp>`
+     * 
+     */
     class context final : public handle<sqlite3_context, context>
     {
     public:

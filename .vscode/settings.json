@@ -1,5 +1,14 @@
 {
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "cmake.buildDirectory": "${workspaceFolder}/build/vscode/${buildKit}"
+    "cmake.buildDirectory": "${workspaceFolder}/build/vscode/${buildKit}",
+    "spellright.language": [
+        "en"
+    ],
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext",
+        "cpp"
+    ]
 }

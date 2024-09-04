@@ -6,9 +6,18 @@
 #include <thinsqlitepp/statement.hpp>
 #include <thinsqlitepp/database.hpp>
 
+#if __cpp_lib_ranges >= 201911L
+    #include <ranges>
+#endif
 
 using namespace thinsqlitepp;
 using namespace std;
+
+#if __cpp_lib_ranges >= 201911L
+static_assert(std::forward_iterator<row_iterator>);
+static_assert(std::ranges::random_access_range<row>);
+static_assert(std::ranges::forward_range<row_range>);
+#endif
 
 TEST_SUITE_BEGIN("statement");
 

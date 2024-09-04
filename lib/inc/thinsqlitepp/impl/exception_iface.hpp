@@ -20,13 +20,18 @@ namespace thinsqlitepp
     class exception;
 
     /**
+     * @addtogroup Utility Utilities
+     * @{
+     */
+
+    /**
      * Carries information about SQLite error
      * 
      * The error class stores SQLite [error code](https://www.sqlite.org/rescode.html), 
      * possibly associated system `errno` error code (see ::sqlite3_system_errno)
      * and an error message, if available.
      * 
-     * Declared in `<thinsqlitepp/exception.h>`
+     * `#include <thinsqlitepp/exception.hpp>`
      */
     class error
     {
@@ -136,7 +141,9 @@ namespace thinsqlitepp
     /**
      * Exception used to report any SQLite errors
      * 
-     * The payload of this exception is a thinsqlitepp::error object.
+     * The payload of this exception is an @ref error object.
+     * 
+     * `#include <thinsqlitepp/exception.hpp>`
      */
     class exception : public std::exception
     {
@@ -198,6 +205,8 @@ namespace thinsqlitepp
     private:
         class error _error;
     };
+
+    /** @} */
 }
 
 #endif

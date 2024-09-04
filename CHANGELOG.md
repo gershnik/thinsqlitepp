@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+- Documentation for public API
+- `row_range` to simplify use of `row_iterator`
+
+### Fixed
+- `row_iterator` and `row` now properly implement range concepts
+- Removed unused and invalid #ifdefs for configuration dependent methods of the statement
+- Made handle::c_ptr(T *) an inline friend as it should have been 
+
 ## [1.1] - 2023-07-30
 
 ### Added

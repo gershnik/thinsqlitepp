@@ -26,7 +26,7 @@ namespace thinsqlitepp
     class handle
     {
     public:
-        /// Deleting fake pointer does nothing
+        /// Operator delete for a fake pointer is no-op
         void operator delete(void *) noexcept
         {}
         

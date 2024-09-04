@@ -13,6 +13,15 @@
 
 namespace thinsqlitepp
 {
+    /**
+     * SQLite Mutex
+     * 
+     * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
+     * sqlite3_mutex.
+     * 
+     * `#include <thinsqlitepp/mutex.hpp>`
+     * 
+     */
     class mutex final : public handle<sqlite3_mutex, mutex>
     {
     public:

@@ -12,6 +12,7 @@
 #include "database_iface.hpp"
 #include "context_iface.hpp"
 #include "statement_iface.hpp"
+#include "row_iterator.hpp"
 
 #ifdef __GNUC__
     #pragma GCC diagnostic push

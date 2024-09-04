@@ -29,7 +29,7 @@ namespace thinsqlitepp
      * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
      * sqlite3_stmt.
      * 
-     * Declared in `<thinsqlitepp/statement.h>`
+     * `#include <thinsqlitepp/statement.hpp>`
      * 
      */
     class statement final : public handle<sqlite3_stmt, statement>
@@ -127,7 +127,7 @@ namespace thinsqlitepp
          * Returns true if a row was retrieved (#SQLITE_ROW) or false if the 
          * statement has finished executing successfully (#SQLITE_DONE).
          * 
-         * All other ::sqlite3_step return codes result in thinsqlitepp::exception being thrown
+         * All other ::sqlite3_step return codes result in @ref exception being thrown
          */
         bool step();
 
@@ -163,6 +163,8 @@ namespace thinsqlitepp
          * Query the EXPLAIN Setting for the statement
          * 
          * Equivalent to ::sqlite3_stmt_isexplain. 
+         * 
+         * @since SQLite 3.31
          */
         explain_type isexplain() const noexcept
             { return explain_type(sqlite3_stmt_isexplain(c_ptr())); }
@@ -352,7 +354,7 @@ namespace thinsqlitepp
     public:
         
         /**
-         * Get result values from a query 
+         * Get result value from a query 
          * 
          * Wraps @ref sqlite3_column_ function family. Unlike the C API you specify the
          * desired type via T template parameter
@@ -364,49 +366,125 @@ namespace thinsqlitepp
          * - std::string_view
          * - std::u8string_view (if `char8_t` is supported by your compiler/library)
          * - blob_view
+         * @param idx Column index
          */
         template<class T>
         SQLITEPP_ENABLE_IF(supported_column_type<T>,
         T) column_value(int idx) const noexcept;
         
+        /**
+         * Get result values from a query as a raw @ref value object
+         * 
+         * Equivalent to ::sqlite3_column_value
+         */
         const value & raw_column_value(int idx) const noexcept
             { return *(const value *)sqlite3_column_value(c_ptr(), idx); }
         
+        /**
+         * Number of columns in a result set
+         * 
+         * Equivalent to ::sqlite3_column_count
+         * 
+         * Note that ::sqlite3_column_count represented by this function and 
+         * ::sqlite3_data_count represented by data_count() are subtly and confusingly 
+         * different. See their respective documentation for details.
+         * 
+         * @see data_count
+         */
         int column_count() const noexcept
             { return sqlite3_column_count(c_ptr()); }
+
+        /**
+         * Number of columns in a result set
+         * 
+         * Equivalent to ::sqlite3_data_count
+         * 
+         * Note that ::sqlite3_data_count represented by this function and 
+         * ::sqlite3_column_count represented by column_count() are subtly and confusingly 
+         * different. See their respective documentation for details.
+         * 
+         * @see column_count
+         */
         int data_count() const noexcept
             { return sqlite3_data_count(c_ptr()); }
         
+        /**
+         * Default datatype of the result column
+         * 
+         * Equivalent to ::sqlite3_column_type
+         */
         int column_type(int idx) const noexcept
             { return sqlite3_column_type(c_ptr(), idx); }
+
+        /**
+         * Name of the result column
+         * 
+         * Equivalent to ::sqlite3_column_name
+         * 
+         * The returned string pointer is valid until either the 
+         * statement is destroyed or until the statement is automatically 
+         * re-prepared by the first call to step() for a particular run or 
+         * until the next call to column_name() on the same column.
+         */
         const char * column_name(int idx) const noexcept
             { return sqlite3_column_name(c_ptr(), idx); }
         
-#ifndef SQLITE_ENABLE_COLUMN_METADATA
+        /**
+         * Database that is the origin of a result column
+         * 
+         * Equivalent to ::sqlite3_column_database_name
+         */
         const char * column_database_name(int idx) const noexcept
             { return sqlite3_column_database_name(c_ptr(), idx); }
+
+        /**
+         * Table that is the origin of a result column
+         * 
+         * Equivalent to ::sqlite3_column_table_name
+         */
         const char * column_table_name(int idx) const noexcept
             { return sqlite3_column_table_name(c_ptr(), idx); }
+
+        /**
+         * Table column that is the origin of a result column
+         * 
+         * Equivalent to ::sqlite3_column_origin_name
+         */
         const char * column_origin_name(int idx) const noexcept
             { return sqlite3_column_origin_name(c_ptr(), idx); }
-#endif
 
-#ifndef SQLITE_OMIT_DECLTYPE
+        /**
+         * Declared datatype of a result column
+         * 
+         * Equivalent to ::sqlite3_column_decltype
+         */
         const char * column_declared_type(int idx) const noexcept
             { return sqlite3_column_decltype(c_ptr(), idx); }
-#endif
         
-        
+        /**
+         * Returns a pointer to a copy of the SQL text used to create the statement
+         * 
+         * Equivalent to ::sqlite3_sql
+         */
         const char * sql() const noexcept
             { return sqlite3_sql(c_ptr()); }
         
 #if SQLITE_VERSION_NUMBER >= 3014000
+        /**
+         * Returns SQL text of the statement with bound parameters expanded
+         * 
+         * Equivalent to ::sqlite3_expanded_sql
+         * 
+         * @since SQLite 3.14
+         */
         allocated_string expanded_sql() const;
 #endif
         
     private:
         void check_error(int res) const;
     };
+
+    /// @cond PRIVATE
 
     template<>
     inline int statement::column_value<int>(int idx) const noexcept
@@ -420,46 +498,88 @@ namespace thinsqlitepp
     inline double statement::column_value<double>(int idx) const noexcept
         { return sqlite3_column_double(c_ptr(), idx); }
 
+    /// @endcond
 
+
+    /**
+     * Parses text containing multiple SQL statements
+     * 
+     * This helper class allows you to iterate over text containing multiple SQL
+     * statements and generate @ref statement instances from them 
+     */
     class statement_parser
     {
     public:
+        /// Create a parser for the given database and SQL text
         statement_parser(const database & db, std::string_view sql):
             _db(&db),
             _sql(sql)
         {}
         
+        /**
+         * Return the next statement if any
+         * 
+         * @returns Next statement or nullptr when done
+         */
         std::unique_ptr<statement> next();
     private:
         const database * _db;
         std::string_view _sql;
     };
 
+    /**
+     * Bitwise mask of resets to perform for thinsqlitepp::auto_reset
+     * 
+     * This enum supports all the normal bitwise operations: `&`, `|`, `^` and `~`
+     */
     enum class auto_reset_flags: unsigned
     {
-        none = 0,
-        reset = 1,
-        clear_bindings = 2,
-        all = 3
+        none = 0,               ///< Reset nothing
+        reset = 1,              ///< Reset the statement (does not affect the bindings)
+        clear_bindings = 2,     ///< Reset the bindings 
+        all = 3                 ///< Reset everything
     };
     constexpr auto_reset_flags operator|(auto_reset_flags lhs, auto_reset_flags rhs)
         { return auto_reset_flags(unsigned(lhs) | unsigned(rhs)); }
     constexpr auto_reset_flags operator&(auto_reset_flags lhs, auto_reset_flags rhs)
         { return auto_reset_flags(unsigned(lhs) & unsigned(rhs)); }
+    constexpr auto_reset_flags operator^(auto_reset_flags lhs, auto_reset_flags rhs)
+        { return auto_reset_flags(unsigned(lhs) ^ unsigned(rhs)); }
+    constexpr auto_reset_flags operator~(auto_reset_flags arg)
+        { return auto_reset_flags(~unsigned(arg)); }
 
+    /**
+     * RAII wrapper that resets @ref statement on destruction
+     * 
+     * This class allows you to restore the state of a @ref statement after using it.
+     * This allows you to reuse the statement cleanly without having to worry about resetting
+     * it properly on different code paths.
+     * 
+     * @tparam Flags @ref auto_reset_flags specifying what kind of reset to perform on destruction
+     */
     template<auto_reset_flags Flags>
     class auto_reset
     {
     public:
+        /// Constructs an empty instance with no statement
         auto_reset():
             _st(nullptr)
         {}
+        /**
+         * Constructs an instance referring to a given statement
+         * 
+         * The statement is being help by reference and must exist as long as
+         * this object is existing.
+         */
         auto_reset(const std::unique_ptr<statement> & st) noexcept:
             _st(st.get())
         {}
+
+        /// @overload
         auto_reset(statement * st) noexcept:
             _st(st)
         {}
+
         auto_reset(const auto_reset &) = delete;
         auto_reset & operator=(const auto_reset &) = delete;
         auto_reset(auto_reset && src) noexcept:
@@ -475,9 +595,11 @@ namespace thinsqlitepp
             return *this;
         }
 
+        /// Resets the statement if present
         ~auto_reset() noexcept
             { destroy(); }
 
+        /// Access the stored @ref statement 
         statement * operator->() const noexcept
             { return _st; }
 

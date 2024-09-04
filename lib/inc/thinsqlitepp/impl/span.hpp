@@ -20,16 +20,21 @@
 
     namespace thinsqlitepp
     {
+        /**
+         * @addtogroup Utility Utilities
+         * @{
+         */
 
         /**
          * Alias or reimplementation of std::span
          * 
-         * If std::span is available, thinsqlitepp::span is a typedef to it.
+         * If std::span is available, %thinsqlitepp::span is a typedef to it.
          * Otherwise it is an equivalent class defined in this library
          */
         template<class T>
         using span = std::span<T>;
     
+        /** @} */
     }
 
 #else
@@ -225,6 +230,11 @@
 
 namespace thinsqlitepp
 {
+    /**
+     * @addtogroup Utility Utilities
+     * @{
+     */
+
     /// A blob_view is a span of bytes
     using blob_view = span<const std::byte>;
     
@@ -245,8 +255,6 @@ namespace thinsqlitepp
     class zero_blob
     {
     public:
-        /// @name Types
-        /// @{
         using element_type           = const std::byte;
         using value_type             = std::byte;
         using index_type             = size_t;
@@ -295,12 +303,8 @@ namespace thinsqlitepp
         using iterator               = const_iterator;
         using reverse_iterator       = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
-        /// @}
         
     public:
-        /// @name Methods
-        /// @{
         constexpr zero_blob(size_t size = 0) noexcept : _size{size} {}
         
         constexpr zero_blob           (const zero_blob&) noexcept = default;
@@ -360,13 +364,13 @@ namespace thinsqlitepp
         constexpr reverse_iterator          rend() const noexcept { return reverse_iterator(begin()); }
         constexpr const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
         constexpr const_reverse_iterator   crend() const noexcept { return const_reverse_iterator(cbegin()); }
-
-        /// @}
     private:
         size_t _size;
         
         static inline const std::byte s_value{0};
     };
+
+    /** @} */
 }
 
 #endif

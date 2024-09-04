@@ -16,6 +16,10 @@
 
 namespace thinsqlitepp
 {
+    /**
+     * @addtogroup Utility Utilities
+     * @{
+     */
 
     /**
      * A reference to a null terminated string
@@ -56,6 +60,7 @@ namespace thinsqlitepp
     
 #endif
 
+    /** @} */
 }
 
 #endif

@@ -1,15 +1,11 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <tagfile>
 
-  <compound kind="struct">
-    <name>sqlite3_stmt</name>
-    <filename>c3ref/stmt.html</filename>
-  </compound>
-
-  <compound kind="struct">
-    <name>sqlite3_value</name>
-    <filename>c3ref/value.html</filename>
-  </compound>
+  <compound kind="struct"><name>sqlite3</name><filename>c3ref/sqlite3.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_context</name><filename>c3ref/context.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_stmt</name><filename>c3ref/stmt.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_value</name><filename>c3ref/value.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_mutex</name><filename>c3ref/mutex.html</filename></compound>
 
   <compound kind="enum">
     <name>SQLITE_PREPARE_</name>
@@ -26,13 +22,20 @@
     <filename>c3ref/bind_blob</filename>
   </compound>
 
+  <compound kind="page">
+    <name>sqlite3_value_</name>
+    <filename>c3ref/value_blob</filename>
+  </compound>
+
   <compound kind="file">
     <name>sqlite3.h</name>
 
     <member kind="define"><name>SQLITE_DONE</name><anchorfile>rescode.html</anchorfile><anchor>done</anchor></member>
+    <member kind="define"><name>SQLITE_ENABLE_COLUMN_METADATA</name><anchorfile>compile.html</anchorfile><anchor>enable_column_metadata</anchor></member>
+    <member kind="define"><name>SQLITE_OMIT_DECLTYPE</name><anchorfile>compile.html</anchorfile><anchor>omit_decltype</anchor></member>
     <member kind="define"><name>SQLITE_ROW</name><anchorfile>rescode.html</anchorfile><anchor>row</anchor></member>
-    <member kind="define"><name>SQLITE_STATIC</name><anchorfile>c_static.html</anchorfile></member>
-    <member kind="define"><name>SQLITE_TRANSIENT</name><anchorfile>c_static.html</anchorfile></member>
+    <member kind="define"><name>SQLITE_STATIC</name><anchorfile>c3ref/c_static.html</anchorfile></member>
+    <member kind="define"><name>SQLITE_TRANSIENT</name><anchorfile>c3ref/c_static.html</anchorfile></member>
 
     <member kind="function"><name>sqlite3_bind_blob</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_bind_double</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
@@ -46,20 +49,39 @@
     <member kind="function"><name>sqlite3_bind_text</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_bind_value</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_bind_zeroblob</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_column_count</name><anchorfile>c3ref/column_count.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_column_database_name</name><anchorfile>c3ref/column_database_name.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_column_decltype</name><anchorfile>c3ref/column_decltype.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_column_origin_name</name><anchorfile>c3ref/column_database_name.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_column_table_name</name><anchorfile>c3ref/column_database_name.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_column_name</name><anchorfile>c3ref/column_name.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_column_type</name><anchorfile>c3ref/column_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_column_value</name><anchorfile>c3ref/column_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_clear_bindings</name><anchorfile>c3ref/clear_bindings.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_data_count</name><anchorfile>c3ref/data_count.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_handle</name><anchorfile>c3ref/db_handle.html</anchorfile></member>
     <member kind="function"><name>sqlite3_errmsg</name><anchorfile>c3ref/errcode.html</anchorfile></member>
     <member kind="function"><name>sqlite3_errstr</name><anchorfile>c3ref/errcode.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_expanded_sql</name><anchorfile>c3ref/expanded_sql.html</anchorfile></member>
     <member kind="function"><name>sqlite3_extended_errcode</name><anchorfile>c3ref/errcode.html</anchorfile></member>
     <member kind="function"><name>sqlite3_finalize</name><anchorfile>c3ref/finalize.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_free</name><anchorfile>c3ref/free.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v2</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v3</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_reset</name><anchorfile>c3ref/reset.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_sql</name><anchorfile>c3ref/expanded_sql.html</anchorfile></member>
     <member kind="function"><name>sqlite3_step</name><anchorfile>c3ref/step.html</anchorfile></member>
     <member kind="function"><name>sqlite3_stmt_busy</name><anchorfile>c3ref/stmt_busy.html</anchorfile></member>
     <member kind="function"><name>sqlite3_stmt_isexplain</name><anchorfile>c3ref/stmt_isexplain.html</anchorfile></member>
     <member kind="function"><name>sqlite3_stmt_readonly</name><anchorfile>c3ref/stmt_readonly.html</anchorfile></member>
     <member kind="function"><name>sqlite3_system_errno</name><anchorfile>c3ref/system_errno.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_value_dup</name><anchorfile>c3ref/value_dup.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_value_free</name><anchorfile>c3ref/value_dup.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_value_frombind</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_value_nochange</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_value_numeric_type</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_value_subtype</name><anchorfile>c3ref/value_subtype.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_value_type</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
     
 
   </compound>

@@ -13,7 +13,7 @@
 #include "exception_iface.hpp"
 #include "mutex_iface.hpp"
 #include "string_param.hpp"
-#include "row_iterator.hpp"
+#include "span.hpp"
 #include "meta.hpp"
 
 #include <memory>
@@ -29,6 +29,15 @@ namespace thinsqlitepp
 {
     class context;
 
+    /**
+     * Database Connection
+     * 
+     * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
+     * sqlite3.
+     * 
+     * `#include <thinsqlitepp/database.hpp>`
+     * 
+     */
     class database final : public handle<sqlite3, database>
     {
     private:
