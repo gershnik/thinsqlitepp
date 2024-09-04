@@ -301,20 +301,16 @@ namespace thinsqlitepp
         check_error(sqlite3_db_status(c_ptr(), op, &ret.current, &ret.high, reset));
         return ret;
     }
-
-#ifndef SQLITE_OMIT_LOAD_EXTENSION
         
     inline void database::load_extension(const string_param & file, const string_param & proc)
     {
         char * errmessage = nullptr;
-        int res = sqlite3_load_extension(c_ptr(), file.c_str(), proc.c_str(), &errmessage);
+        int res = call_sqlite3_load_extension(c_ptr(), file.c_str(), proc.c_str(), &errmessage);
         error::message_ptr errmessage_ptr(errmessage, sqlite3_free);
         if (res != SQLITE_OK)
             throw exception(res, std::move(errmessage_ptr));
     }
-#endif
 
-#ifndef SQLITE_OMIT_PROGRESS_CALLBACK
     template<class T>
     std::enable_if_t<std::is_null_pointer_v<T> ||
         (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>),
@@ -332,7 +328,6 @@ namespace thinsqlitepp
             this->progress_handler(step_count, nullptr, nullptr);
         }
     }
-#endif
 
     inline database::column_metadata database::table_column_metadata(const string_param & db_name,
                                                                      const string_param & table_name,

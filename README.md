@@ -188,16 +188,6 @@ You can also simply download the headers of this repository from [Releases](http
 Whichever method you use in order to use ThinSQLite++ your compiler needs to be set to C++17 mode or higher. 
 ThinSQLite++ should compile cleanly even on a highest warnings level. 
 
-This library relies on some of the same configuration macros as SQLite itself to enable some optional functionality. Currently the following macros are used:
-
-* `SQLITE_OMIT_LOAD_EXTENSION`
-* `SQLITE_OMIT_PROGRESS_CALLBACK`
-* `SQLITE_OMIT_DECLTYPE`
-
-If your SQLite is built using any of these you should define them for any code that uses this library too.
-
-Note that macOS built-in SQLite is built with `SQLITE_OMIT_LOAD_EXTENSION` and the relevant functions aren't even present in its `sqlite3.h` header file. Therefore, you **must** define this macro in order to use this library with it.
-
 
 ## Implementation choices
 

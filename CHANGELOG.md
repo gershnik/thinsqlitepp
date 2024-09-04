@@ -7,11 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - Documentation for public API
-- `row_range` to simplify use of `row_iterator`
+- `row_range` range class to simplify use of `row_iterator`
+
+### Changed
+- Defining SQLite configuration macros `SQLITE_OMIT_LOAD_EXTENSION`, `SQLITE_OMIT_PROGRESS_CALLBACK` and `SQLITE_OMIT_DECLTYPE`
+to compile this library is no longer needed.
 
 ### Fixed
 - `row_iterator` and `row` now properly implement range concepts
-- Removed unused and invalid #ifdefs for configuration dependent methods of the statement
 - Made handle::c_ptr(T *) an inline friend as it should have been 
 
 ## [1.1] - 2023-07-30

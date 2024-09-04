@@ -29,6 +29,32 @@ namespace thinsqlitepp
 {
     class context;
 
+    template<typename T>
+    std::true_type load_extension_detector(decltype(sqlite3_enable_load_extension((T *)nullptr, 0)));
+    template<typename T>
+    std::false_type load_extension_detector(...);
+
+    template<typename T>
+    constexpr bool load_extension_present = decltype(load_extension_detector<T>(0))::value;
+
+    template<class T>
+    int call_sqlite3_enable_load_extension(T * db, int onoff)
+    {
+        if constexpr (load_extension_present<T>)
+            return sqlite3_enable_load_extension(db, onoff);
+        else
+            return SQLITE_ERROR;
+    }
+
+    template<class T>
+    int call_sqlite3_load_extension(T * db, const char * file, const char * proc, char ** err)
+    {
+        if constexpr (load_extension_present<T>)
+            return sqlite3_load_extension(db, file, proc, err);
+        else
+            return SQLITE_ERROR;
+    }
+
     /**
      * Database Connection
      * 
@@ -203,10 +229,8 @@ namespace thinsqlitepp
 #endif
         
         //MARK:-
-#ifndef SQLITE_OMIT_LOAD_EXTENSION
         void enable_load_extension(bool val)
-            { check_error(sqlite3_enable_load_extension(this->c_ptr(), val)); }
-#endif
+            { check_error(call_sqlite3_enable_load_extension(this->c_ptr(), val)); }
         
         void extended_result_codes(bool onoff)
             { check_error(sqlite3_extended_result_codes(c_ptr(), onoff)); }
@@ -252,10 +276,8 @@ namespace thinsqlitepp
         int limit(int id, int newVal) noexcept
             { return sqlite3_limit(c_ptr(), id, newVal); }
         
-#ifndef SQLITE_OMIT_LOAD_EXTENSION
         
         void load_extension(const string_param & file, const string_param & proc);
-#endif
         
         class mutex * mutex() const noexcept
             { return (class mutex *)sqlite3_db_mutex(c_ptr()); }
@@ -270,7 +292,6 @@ namespace thinsqlitepp
             { check_error(sqlite3_overload_function(c_ptr(), name.c_str(), arg_count)); }
         
         //MARK:- progress_handler
-#ifndef SQLITE_OMIT_PROGRESS_CALLBACK
         template<class T>
         std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
         void> progress_handler(int step_count, int(*func)(type_identity_t<T>) noexcept, T data) const noexcept
@@ -280,7 +301,6 @@ namespace thinsqlitepp
         std::enable_if_t<std::is_null_pointer_v<T> ||
             (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>),
         void> progress_handler(int step_count, T func) const noexcept;
-#endif
         
         //MARK: -
         std::optional<bool> readonly(const string_param & db_name) const noexcept;
