@@ -1,0 +1,8 @@
+sqlite3_value_frombind
+sqlite3_value_nochange
+sqlite3_stmt_isexplain
+sqlite3_bind_zeroblob
+isexplain
+pzTail
+
+

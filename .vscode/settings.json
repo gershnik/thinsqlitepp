@@ -10,5 +10,13 @@
         "latex",
         "plaintext",
         "cpp"
+    ],
+    "spellright.ignoreRegExps": [
+        "/#include\\s+<.+>/g", 
+        "/#include\\s+\\\".+\\\"/g",
+        "/@addtogroup/g",
+        "/@cond/g",
+        "/@endcond/g",
+        "/@tparam/g"
     ]
 }

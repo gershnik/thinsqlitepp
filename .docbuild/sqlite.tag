@@ -30,9 +30,8 @@
   <compound kind="file">
     <name>sqlite3.h</name>
 
+    <member kind="define"><name>SQLITE_BUSY</name><anchorfile>rescode.html</anchorfile><anchor>busy</anchor></member>
     <member kind="define"><name>SQLITE_DONE</name><anchorfile>rescode.html</anchorfile><anchor>done</anchor></member>
-    <member kind="define"><name>SQLITE_ENABLE_COLUMN_METADATA</name><anchorfile>compile.html</anchorfile><anchor>enable_column_metadata</anchor></member>
-    <member kind="define"><name>SQLITE_OMIT_DECLTYPE</name><anchorfile>compile.html</anchorfile><anchor>omit_decltype</anchor></member>
     <member kind="define"><name>SQLITE_ROW</name><anchorfile>rescode.html</anchorfile><anchor>row</anchor></member>
     <member kind="define"><name>SQLITE_STATIC</name><anchorfile>c3ref/c_static.html</anchorfile></member>
     <member kind="define"><name>SQLITE_TRANSIENT</name><anchorfile>c3ref/c_static.html</anchorfile></member>
@@ -49,6 +48,10 @@
     <member kind="function"><name>sqlite3_bind_text</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_bind_value</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_bind_zeroblob</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_busy_handler</name><anchorfile>c3ref/busy_handler.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_busy_timeout</name><anchorfile>c3ref/busy_timeout.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_changes</name><anchorfile>c3ref/changes.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_collation_needed</name><anchorfile>c3ref/collation_needed.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_count</name><anchorfile>c3ref/column_count.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_database_name</name><anchorfile>c3ref/column_database_name.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_decltype</name><anchorfile>c3ref/column_decltype.html</anchorfile></member>

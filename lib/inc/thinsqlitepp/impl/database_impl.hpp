@@ -57,8 +57,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<bool, T, int>,
-    void> database::busy_handler(T handler)
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T, int>),
+    void) database::busy_handler(T handler)
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -74,8 +74,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<void, T, database *, int, const char *>,
-    void> database::collation_needed(T handler)
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, database *, int, const char *>),
+    void) database::collation_needed(T handler)
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -92,8 +92,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<bool, T>,
-    void> database::commit_hook(T handler) noexcept
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T>),
+    void) database::commit_hook(T handler) noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -109,8 +109,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<void, T>,
-    void> database::rollback_hook(T handler) noexcept
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T>),
+    void) database::rollback_hook(T handler) noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -126,8 +126,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-    void> database::create_collation(const string_param & name, int encoding,
+    SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+    void) database::create_collation(const string_param & name, int encoding,
                                      T collator,
                                      int (* compare)(type_identity_t<T> collator, int lhs_len, const void * lhs_bytes, int rhs_len, const void * rhs_bytes) noexcept,
                                      void (*deleter)(type_identity_t<T> obj) noexcept)
@@ -145,8 +145,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<void, T, span<const std::byte>, span<const std::byte>>,
-    void> database::create_collation(const string_param & name, int encoding, T collator,
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, span<const std::byte>, span<const std::byte>>),
+    void) database::create_collation(const string_param & name, int encoding, T collator,
                                      void (*deleter)(type_identity_t<T> obj) noexcept)
     {
         if constexpr (!std::is_null_pointer_v<T>)
@@ -168,8 +168,8 @@ namespace thinsqlitepp
 
 
     template<class T>
-    std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-    void> database::create_function(const char * name, int arg_count, int flags, T data,
+    SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+    void) database::create_function(const char * name, int arg_count, int flags, T data,
                                     void (*func)(context *, int, value **) noexcept,
                                     void (*step)(context *, int, value **) noexcept,
                                     void (*last)(context*) noexcept,
@@ -183,14 +183,14 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<std::is_null_pointer_v<T> ||
+    SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
         (std::is_pointer_v<T> &&
             (
                std::is_nothrow_invocable_r_v<void, std::remove_pointer_t<T>, context *, int, value **> ||
                is_aggregate_function<std::remove_pointer_t<T>>
             )
-        ),
-    void> database::create_function(const char * name, int arg_count, int flags, T impl,
+        )),
+    void) database::create_function(const char * name, int arg_count, int flags, T impl,
                                     void (*deleter)(type_identity_t<T> obj) noexcept)
     {
         void (*func)(context *, int, value **) noexcept = nullptr;
@@ -230,8 +230,8 @@ namespace thinsqlitepp
 
 #if SQLITE_VERSION_NUMBER >= 3025000
     template<class T>
-    std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-    void> database::create_window_function(const char * name, int arg_count, int flags, T data,
+    SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+    void) database::create_window_function(const char * name, int arg_count, int flags, T data,
                                            void (*step)(context *, int, value **) noexcept,
                                            void (*last)(context*) noexcept,
                                            void (*current)(context*) noexcept,
@@ -247,9 +247,9 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<std::is_null_pointer_v<T> ||
-        (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>),
-    void> database::create_window_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept)
+    SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
+        (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>)),
+    void) database::create_window_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept)
     {
         void (*step)(context *, int, value **) noexcept = nullptr;
         void (*last)(context*) noexcept = nullptr;
@@ -312,9 +312,9 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<std::is_null_pointer_v<T> ||
-        (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>),
-    void> database::progress_handler(int step_count, T func) const noexcept
+    SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
+        (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>)),
+    void) database::progress_handler(int step_count, T func) const noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {

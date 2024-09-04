@@ -86,74 +86,134 @@ namespace thinsqlitepp
         
         
         //MARK:- busy_handler
+
+        /**
+         * Register a callback to handle #SQLITE_BUSY errors
+         * 
+         * Equivalent to ::sqlite3_busy_handler
+         * 
+         * @param handler A callback function that matches the type of `data` argument. Can be
+         *  nullptr.
+         * @param data A pointer to callback data or nullptr.
+         */
         template<class T>
-        std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void> busy_handler(int (* handler)(type_identity_t<T> data, int count_invoked) noexcept, T data)
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) busy_handler(int (* handler)(type_identity_t<T> data, int count_invoked) noexcept, T data)
             { check_error(sqlite3_busy_handler(this->c_ptr(), (int (*)(void*,int))handler, data)); }
         
+        /**
+         * Register a callback to handle #SQLITE_BUSY errors
+         * 
+         * Equivalent to ::sqlite3_busy_handler
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * int count_invoked = ...;
+         * bool result = (*handler_ptr)(count_invoked);
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         */
         template<class T>
-        std::enable_if_t<is_pointer_to_callback<bool, T, int>,
-        void> busy_handler(T handler);
+        SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T, int>),
+        void) busy_handler(T handler_ptr);
         
         
         //MARK:-
+        /**
+         * Set a busy timeout
+         * 
+         * Equivalent to ::sqlite3_busy_timeout
+         */
         void busy_timeout(int ms)
             { check_error(sqlite3_busy_timeout(c_ptr(), ms)); }
         
         //MARK:-
+        /**
+         * Count of the number of rows modified
+         * 
+         * Equivalent to ::sqlite3_changes
+         */
         int changes() const noexcept
             { return sqlite3_changes(c_ptr()); }
         
         //MARK:- collation_needed
+        /**
+         * Register a callback to be called when undefined collation sequence is required
+         * 
+         * Equivalent to ::sqlite3_collation_needed
+         * 
+         * @param data A pointer to callback data or nullptr.
+         * @param handler A callback function that matches the type of `data` argument. Can be
+         *  nullptr.
+         */
         template<class T>
-        std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void> collation_needed(T data, void (* handler)(type_identity_t<T> data, database *, int encoding, const char * name) noexcept)
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) collation_needed(T data, void (* handler)(type_identity_t<T> data, database *, int encoding, const char * name) noexcept)
             { check_error(sqlite3_collation_needed(this->c_ptr(), data, (void(*)(void*,sqlite3*,int,const char*))handler)); }
         
+        /**
+         * Register a callback to be called when undefined collation sequence is required
+         * 
+         * Equivalent to ::sqlite3_collation_needed
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * database * db = ...;
+         * int encoding = <one of SQLITE_UTF8, SQLITE_UTF16BE, or SQLITE_UTF16LE>
+         * const char * name = ...;
+         * (*handler_ptr)(db, encoding, name);
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         */
         template<class T>
-        std::enable_if_t<is_pointer_to_callback<void, T, database *, int, const char *>,
-        void> collation_needed(T handler);
+        SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, database *, int, const char *>),
+        void) collation_needed(T handler_ptr);
         
         //MARK:- commit_hook
+        
         template<class T>
-        std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void> commit_hook(int (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) commit_hook(int (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
             { sqlite3_commit_hook(this->c_ptr(), (int(*)(void*))handler, data); }
         
         template<class T>
-        std::enable_if_t<is_pointer_to_callback<bool, T>,
-        void> commit_hook(T handler) noexcept;
+        SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T>),
+        void) commit_hook(T handler) noexcept;
         
         
         //MARK:- rollback_hook
         template<class T>
-        std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void> rollback_hook(void (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) rollback_hook(void (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
             { sqlite3_rollback_hook(this->c_ptr(), (void(*)(void*))(handler), data); }
         
         template<class T>
-        std::enable_if_t<is_pointer_to_callback<void, T>,
-        void> rollback_hook(T handler) noexcept;
+        SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T>),
+        void) rollback_hook(T handler) noexcept;
         
         
         //MARK:- create_collation
         
         template<class T>
-        std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void> create_collation(const string_param & name, int encoding,
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) create_collation(const string_param & name, int encoding,
                                T collator,
                                int (* compare)(type_identity_t<T> collator, int lhs_len, const void * lhs_bytes, int rhs_len, const void * rhs_bytes) noexcept,
                                void (*deleter)(type_identity_t<T> obj) noexcept);
         
         template<class T>
-        std::enable_if_t<is_pointer_to_callback<void, T, span<const std::byte>, span<const std::byte>>,
-        void> create_collation(const string_param & name, int encoding, T collator, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
+        SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, span<const std::byte>, span<const std::byte>>),
+        void) create_collation(const string_param & name, int encoding, T collator, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
         
         //MARK:- create_function
         
         template<class T>
-        std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void> create_function(const char * name, int arg_count, int flags, T data,
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) create_function(const char * name, int arg_count, int flags, T data,
                               void (*func)(context *, int, value **) noexcept,
                               void (*step)(context *, int, value **) noexcept,
                               void (*last)(context*) noexcept,
@@ -162,20 +222,20 @@ namespace thinsqlitepp
         
         
         template<class T>
-        std::enable_if_t<std::is_null_pointer_v<T> ||
+        SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
             (std::is_pointer_v<T> &&
                 (
                    std::is_nothrow_invocable_r_v<void, std::remove_pointer_t<T>, context *, int, value **> ||
                    is_aggregate_function<std::remove_pointer_t<T>>
                 )
-            ),
-        void> create_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
+            )),
+        void) create_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
         
         //MARK:- create_window_function
 #if SQLITE_VERSION_NUMBER >= 3025000
         template<class T>
-        std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void> create_window_function(const char * name, int arg_count, int flags, T data,
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) create_window_function(const char * name, int arg_count, int flags, T data,
                                      void (*step)(context *, int, value **) noexcept,
                                      void (*last)(context*) noexcept,
                                      void (*current)(context*) noexcept,
@@ -184,9 +244,9 @@ namespace thinsqlitepp
         
         
         template<class T>
-        std::enable_if_t<std::is_null_pointer_v<T> ||
-                (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>),
-        void> create_window_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
+        SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
+                (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>)),
+        void) create_window_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
 #endif
         
         //MARK:-
@@ -212,16 +272,16 @@ namespace thinsqlitepp
             { check_error(sqlite3_drop_modules(c_ptr(), (const char **)keep)); }
         
         template<size_t N>
-        std::enable_if_t<(N > 0),
-        void> drop_modules_except(const char * const (&keep)[N])
+        SQLITEPP_ENABLE_IF(N > 0,
+        void) drop_modules_except(const char * const (&keep)[N])
         {
             if (keep[N-1] != nullptr) throw exception(SQLITE_MISUSE);
             check_error(sqlite3_drop_modules(this->c_ptr(), (const char **)keep));
         }
         
         template<class ...Args>
-        std::enable_if_t<std::conjunction_v<std::is_convertible<Args, string_param>...>,
-        void> drop_modules_except(Args && ...args)
+        SQLITEPP_ENABLE_IF((std::conjunction_v<std::is_convertible<Args, string_param>...>),
+        void) drop_modules_except(Args && ...args)
         {
             const char * buf[] = {string_param(std::forward<Args>(args)).c_str() ..., nullptr};
             check_error(sqlite3_drop_modules(this->c_ptr(), buf));
@@ -293,14 +353,14 @@ namespace thinsqlitepp
         
         //MARK:- progress_handler
         template<class T>
-        std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void> progress_handler(int step_count, int(*func)(type_identity_t<T>) noexcept, T data) const noexcept
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) progress_handler(int step_count, int(*func)(type_identity_t<T>) noexcept, T data) const noexcept
             { sqlite3_progress_handler(this->c_ptr(), step_count, (int(*)(void*))func, data); }
         
         template<class T>
-        std::enable_if_t<std::is_null_pointer_v<T> ||
-            (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>),
-        void> progress_handler(int step_count, T func) const noexcept;
+        SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
+            (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>)),
+        void) progress_handler(int step_count, T func) const noexcept;
         
         //MARK: -
         std::optional<bool> readonly(const string_param & db_name) const noexcept;
