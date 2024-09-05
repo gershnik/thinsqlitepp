@@ -1,31 +1,28 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
 <tagfile>
 
+  <!-- Objects -->
   <compound kind="struct"><name>sqlite3</name><filename>c3ref/sqlite3.html</filename></compound>
   <compound kind="struct"><name>sqlite3_context</name><filename>c3ref/context.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_int64</name><filename>c3ref/int64.html</filename></compound>
   <compound kind="struct"><name>sqlite3_stmt</name><filename>c3ref/stmt.html</filename></compound>
   <compound kind="struct"><name>sqlite3_value</name><filename>c3ref/value.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_mem_methods</name><filename>c3ref/mem_methods.html</filename></compound>
   <compound kind="struct"><name>sqlite3_mutex</name><filename>c3ref/mutex.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_mutex_methods</name><filename>c3ref/mutex_methods.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_pcache_methods2</name><filename>c3ref/pcache_methods2.html</filename></compound>
 
-  <compound kind="enum">
-    <name>SQLITE_PREPARE_</name>
-    <filename>c3ref/c_prepare_normalize.html</filename>
-  </compound>
+  <!-- Macro Groups -->
+  <compound kind="enum"><name>SQLITE_CONFIG_</name><filename>c3ref/c_config_covering_index_scan.html</filename></compound>
+  <compound kind="enum"><name>SQLITE_DBCONFIG_</name><filename>c3ref/c_dbconfig_defensive.html</filename></compound>
+  <compound kind="enum"><name>SQLITE_PREPARE_</name><filename>c3ref/c_prepare_normalize.html</filename></compound>
 
-  <compound kind="page">
-    <name>sqlite3_column_</name>
-    <filename>c3ref/column_blob</filename>
-  </compound>
+  <!-- Function Groups -->
+  <compound kind="page"><name>sqlite3_column_</name><filename>c3ref/column_blob</filename></compound>
+  <compound kind="page"><name>sqlite3_bind_</name><filename>c3ref/bind_blob</filename></compound>
+  <compound kind="page"><name>sqlite3_value_</name><filename>c3ref/value_blob</filename></compound>
 
-  <compound kind="page">
-    <name>sqlite3_bind_</name>
-    <filename>c3ref/bind_blob</filename>
-  </compound>
-
-  <compound kind="page">
-    <name>sqlite3_value_</name>
-    <filename>c3ref/value_blob</filename>
-  </compound>
+  <!-- Functions and Constants -->
 
   <compound kind="file">
     <name>sqlite3.h</name>
@@ -51,6 +48,7 @@
     <member kind="function"><name>sqlite3_busy_handler</name><anchorfile>c3ref/busy_handler.html</anchorfile></member>
     <member kind="function"><name>sqlite3_busy_timeout</name><anchorfile>c3ref/busy_timeout.html</anchorfile></member>
     <member kind="function"><name>sqlite3_changes</name><anchorfile>c3ref/changes.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_clear_bindings</name><anchorfile>c3ref/clear_bindings.html</anchorfile></member>
     <member kind="function"><name>sqlite3_collation_needed</name><anchorfile>c3ref/collation_needed.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_count</name><anchorfile>c3ref/column_count.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_database_name</name><anchorfile>c3ref/column_database_name.html</anchorfile></member>
@@ -60,8 +58,9 @@
     <member kind="function"><name>sqlite3_column_name</name><anchorfile>c3ref/column_name.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_type</name><anchorfile>c3ref/column_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_value</name><anchorfile>c3ref/column_blob.html</anchorfile></member>
-    <member kind="function"><name>sqlite3_clear_bindings</name><anchorfile>c3ref/clear_bindings.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_config</name><anchorfile>c3ref/config.html</anchorfile></member>
     <member kind="function"><name>sqlite3_data_count</name><anchorfile>c3ref/data_count.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_db_config</name><anchorfile>c3ref/db_config.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_handle</name><anchorfile>c3ref/db_handle.html</anchorfile></member>
     <member kind="function"><name>sqlite3_errmsg</name><anchorfile>c3ref/errcode.html</anchorfile></member>
     <member kind="function"><name>sqlite3_errstr</name><anchorfile>c3ref/errcode.html</anchorfile></member>
@@ -69,9 +68,12 @@
     <member kind="function"><name>sqlite3_extended_errcode</name><anchorfile>c3ref/errcode.html</anchorfile></member>
     <member kind="function"><name>sqlite3_finalize</name><anchorfile>c3ref/finalize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_free</name><anchorfile>c3ref/free.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_initialize</name><anchorfile>c3ref/initialize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v2</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v3</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_reset</name><anchorfile>c3ref/reset.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_set_last_insert_rowid</name><anchorfile>c3ref/set_last_insert_rowid.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_shutdown</name><anchorfile>c3ref/initialize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_sql</name><anchorfile>c3ref/expanded_sql.html</anchorfile></member>
     <member kind="function"><name>sqlite3_step</name><anchorfile>c3ref/step.html</anchorfile></member>
     <member kind="function"><name>sqlite3_stmt_busy</name><anchorfile>c3ref/stmt_busy.html</anchorfile></member>

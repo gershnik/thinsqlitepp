@@ -1100,7 +1100,7 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           =
+EXAMPLE_PATH           = lib/inc .docbuild/generated
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -2530,7 +2530,7 @@ SKIP_FUNCTION_MACROS   = YES
 # run, you must also specify the path to the tagfile here.
 
 TAGFILES               = .docbuild/sqlite.tag=https://www.sqlite.org \
-                         .docbuild/cppreference-doxygen-web.tag.xml=http://en.cppreference.com/w/
+                         .docbuild/generated/cppreference-doxygen-web.tag.xml=http://en.cppreference.com/w/
 
 # When a file name is specified after GENERATE_TAGFILE, Doxygen will create a
 # tag file that is based on the input files it reads. See section "Linking to

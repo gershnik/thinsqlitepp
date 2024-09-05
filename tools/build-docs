@@ -4,13 +4,19 @@ import sys
 import subprocess
 import shutil
 import tarfile
+import re
 
 from pathlib import Path
 from urllib.request import urlopen
+from textwrap import dedent
 
 ROOTDIR = Path(__file__).parent.parent
 
-cppreference_tags = ROOTDIR / '.docbuild/cppreference-doxygen-web.tag.xml'
+GENDIR = ROOTDIR / '.docbuild/generated'
+
+GENDIR.mkdir(parents=True, exist_ok=True)
+
+cppreference_tags = GENDIR / 'cppreference-doxygen-web.tag.xml'
 
 if not cppreference_tags.exists():
     print('Downloading cppreference tag file')
@@ -27,9 +33,43 @@ if not cppreference_tags.exists():
 # if (ROOTDIR / 'build/sphinx').exists():
 #     shutil.rmtree(ROOTDIR / 'build/sphinx')
 
+def gen_options(src_path, dst_path, marker, enum, url):
+    header = dedent('''
+        | Code     | Arguments |
+        | -------- |-----------|
+    ''').lstrip()
+    with open(dst_path, 'wt', encoding='utf-8') as dst:
+        dst.write(header)
+        with open(src_path, 'rt', encoding='utf-8') as src:
+            area = 0
+            for line in src:
+                line = line.strip()
+                if line == marker:
+                    area = area + 1
+                    continue
+                if area == 1:
+                    m = re.match(enum + r'\s*\(([^,]+)(?:,(.*))?\);', line)
+                    if m:
+                        fields = [f.strip() if f is not None else '' for f in m.groups()]
+                        anchor = fields[0].lower().replace('_', '')
+                        fields[0] = f'[{fields[0]}]({url}#{anchor})'
+                        dst.write(f'| {fields[0]} | {fields[1]} |\n')
+
+gen_options(ROOTDIR / 'lib/inc/thinsqlitepp/impl/database_iface.hpp',
+            GENDIR / 'db-options.md',
+            '//@ [DB Options]',
+            r'SQLITEPP_DEFINE_DB_OPTION',
+            'https://www.sqlite.org/c3ref/c_dbconfig_defensive.html')
+
+gen_options(ROOTDIR / 'lib/inc/thinsqlitepp/impl/global_iface.hpp',
+            GENDIR / 'global-options.md',
+            '//@ [Config Options]',
+            r'SQLITEPP_DEFINE_OPTION_[0N]',
+            'https://www.sqlite.org/c3ref/c_config_covering_index_scan.html')
+
 res = subprocess.run(['doxygen', '.docbuild/Doxyfile'], cwd=ROOTDIR, check=False)
-for tmp in (ROOTDIR / 'build/doxygen').glob('*.tmp'):
-    tmp.unlink()
+# for tmp in (ROOTDIR / 'build/doxygen').glob('*.tmp'):
+#     tmp.unlink()
 if res.returncode != 0:
     sys.exit(1)
 # res = subprocess.run(['sphinx-build', '-M', 'html', '.docbuild', 'build/sphinx'], cwd=ROOTDIR)

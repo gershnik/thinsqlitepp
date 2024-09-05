@@ -29,6 +29,8 @@ namespace thinsqlitepp
 {
     class context;
 
+    /** @cond PRIVATE */
+
     template<typename T>
     std::true_type load_extension_detector(decltype(sqlite3_enable_load_extension((T *)nullptr, 0)));
     template<typename T>
@@ -54,6 +56,8 @@ namespace thinsqlitepp
         else
             return SQLITE_ERROR;
     }
+
+    /** @endcond */
 
     /**
      * Database Connection
@@ -174,7 +178,7 @@ namespace thinsqlitepp
         void) collation_needed(T handler_ptr);
         
         //MARK:- commit_hook
-        
+
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
         void) commit_hook(int (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
@@ -257,12 +261,33 @@ namespace thinsqlitepp
                 throw exception(res); //sic! sqlite3_db_cacheflush doesn't set DB error
         }
 #endif
-        
+        /**
+         * Configure database connection
+         * 
+         * Wraps ::sqlite3_db_config
+         * 
+         * @tparam Code One of the SQLITE_DBCONFIG_ options. Needs to be explicitly specified
+         * @tparam Args depend on the `Code` template parameter
+         * 
+         * The following table lists required argument types for each option.
+         * Supplying wrong argument types will result in compile-time error.
+         * 
+         * @include{doc} db-options.md
+         * 
+         */
         template<int Code, class ...Args>
-        auto config(Args && ...args) -> decltype(config_mapping<Code>::type::apply(*this, std::forward<decltype(args)>(args)...))
+        auto config(Args && ...args) -> 
+        #ifndef DOXYGEN
+            //void but prevents instantiation with wrong types
+            decltype(
+              config_mapping<Code>::type::apply(*this, std::forward<decltype(args)>(args)...)
+            )
+        #else
+            void
+        #endif
             { config_mapping<Code>::type::apply(*this, std::forward<Args>(args)...); }
         
-        
+
         //MARK:- drop_modules
 #if SQLITE_VERSION_NUMBER >= 3030000
         void drop_modules()
@@ -328,6 +353,13 @@ namespace thinsqlitepp
             { return sqlite3_last_insert_rowid(c_ptr()); }
         
 #if SQLITE_VERSION_NUMBER >= 3018000
+        /** 
+         * Set the last insert rowid value
+         * 
+         * Equivalent to ::sqlite3_set_last_insert_rowid 
+         * 
+         * @since SQLite 3.18
+         */
         void set_last_insert_rowid(int64_t value) noexcept
             { sqlite3_set_last_insert_rowid(c_ptr(), value); }
 #endif
@@ -408,6 +440,7 @@ namespace thinsqlitepp
         }
     };
 
+    /** @cond PRIVATE */
     
 
     #if SQLITEPP_USE_VARARG_POUND_POUND_TRICK
@@ -427,6 +460,7 @@ namespace thinsqlitepp
     #endif
 
 
+    //@ [DB Options]
     SQLITEPP_DEFINE_DB_OPTION( SQLITE_DBCONFIG_LOOKASIDE,               void *, int, int);
     SQLITEPP_DEFINE_DB_OPTION( SQLITE_DBCONFIG_ENABLE_FKEY,             int, int *);
     SQLITEPP_DEFINE_DB_OPTION( SQLITE_DBCONFIG_ENABLE_TRIGGER,          int, int *);
@@ -463,10 +497,11 @@ namespace thinsqlitepp
 #ifdef SQLITE_DBCONFIG_LEGACY_ALTER_TABLE
     SQLITEPP_DEFINE_DB_OPTION( SQLITE_DBCONFIG_LEGACY_ALTER_TABLE,      int, int *);
 #endif
+    //@ [DB Options]
 
-    #undef SQLITEPP_DEFINE_OPTION
+    #undef SQLITEPP_DEFINE_DB_OPTION
 
-
+    /** @endcond */
 }
 
 #ifdef __GNUC__
