@@ -113,8 +113,22 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
             sqlite3-${SQLITE_VERSION}
         )
 
+        target_compile_options(test-${CXX_STANDARD}-${SQLITE_VERSION}
+        PRIVATE 
+            $<$<BOOL:EMSCRIPTEN>:-fexceptions>
+        )
+
+        target_link_options(test-${CXX_STANDARD}-${SQLITE_VERSION}
+        PRIVATE 
+            $<$<BOOL:EMSCRIPTEN>:-sNO_DISABLE_EXCEPTION_CATCHING -fexceptions>
+        )
+
         list(APPEND TEST_COMMAND COMMAND)
-        list(APPEND TEST_COMMAND test-${CXX_STANDARD}-${SQLITE_VERSION})
+        if (DEFINED EMSCRIPTEN)
+            list(APPEND TEST_COMMAND node --trace-uncaught $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}>)
+        else()
+            list(APPEND TEST_COMMAND $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}>)
+        endif()
     
     endforeach()
 endforeach()
