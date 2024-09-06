@@ -14,6 +14,11 @@
 namespace thinsqlitepp
 {
     /**
+     * @addtogroup SQL SQLite API Wrappers
+     * @{
+     */
+
+    /**
      * SQLite Mutex
      * 
      * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
@@ -32,6 +37,13 @@ namespace thinsqlitepp
         void unlock() noexcept
             { sqlite3_mutex_leave(c_ptr()); }
     };
+
+    /** @} */
+
+    /**
+     * @addtogroup Utility Utilities
+     * @{
+     */
 
     class lock_adapter
     {
@@ -56,6 +68,8 @@ namespace thinsqlitepp
     private:
         mutex * _mutex;
     };
+
+    /** @} */
 }
 
 #endif

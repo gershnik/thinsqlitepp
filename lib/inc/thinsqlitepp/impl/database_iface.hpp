@@ -60,6 +60,11 @@ namespace thinsqlitepp
     /** @endcond */
 
     /**
+     * @addtogroup SQL SQLite API Wrappers
+     * @{
+     */
+
+    /**
      * Database Connection
      * 
      * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
@@ -520,6 +525,8 @@ namespace thinsqlitepp
                 throw exception(res, this);
         }
     };
+
+    /** @} */
 
     /** @cond PRIVATE */
     

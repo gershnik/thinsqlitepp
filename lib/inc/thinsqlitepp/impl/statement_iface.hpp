@@ -24,6 +24,11 @@ namespace thinsqlitepp
     class value;
 
     /**
+     * @addtogroup SQL SQLite API Wrappers
+     * @{
+     */
+
+    /**
      * Prepared Statement Object
      * 
      * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
@@ -500,6 +505,13 @@ namespace thinsqlitepp
 
     /// @endcond
 
+    /** @} */
+
+    /**
+     * @addtogroup Utility Utilities
+     * @{
+     */
+
 
     /**
      * Parses text containing multiple SQL statements
@@ -617,6 +629,8 @@ namespace thinsqlitepp
     private:
         statement * _st;
     };
+
+    /** @} */
 
 }
 

@@ -16,11 +16,17 @@
  */
 namespace thinsqlitepp
 {
+    /**
+     * @addtogroup SQL SQLite API Wrappers
+     * @{
+     */
 
     /**
      * Initialize the SQLite library
      * 
      * Equivalent to ::sqlite3_initialize
+     * 
+     * `#include <thinsqlitepp/global.hpp>`
      */
     inline void initialize()
     {
@@ -33,6 +39,8 @@ namespace thinsqlitepp
      * Deinitialize the SQLite library
      * 
      * Equivalent to ::sqlite3_shutdown
+     * 
+     * `#include <thinsqlitepp/global.hpp>`
      */
     inline void shutdown() noexcept
     {
@@ -68,6 +76,8 @@ namespace thinsqlitepp
      * @tparam Code One of the SQLITE_CONFIG_ options. Needs to be explicitly specified
      * @tparam Args depend on the `Code` template parameter
      * 
+     * `#include <thinsqlitepp/global.hpp>`
+     * 
      * The following table lists required argument types for each option.
      * Supplying wrong argument types will result in compile-time error.
      * 
@@ -85,6 +95,8 @@ namespace thinsqlitepp
         void
     #endif
         { internal::config_mapping<Code>::type::apply(std::forward<Args>(args)...); }
+
+    /** @} */
 
     /** @cond PRIVATE */
 

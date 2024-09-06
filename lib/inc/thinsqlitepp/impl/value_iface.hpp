@@ -19,6 +19,11 @@
 namespace thinsqlitepp
 {
     /**
+     * @addtogroup SQL SQLite API Wrappers
+     * @{
+     */
+
+    /**
      * Dynamically Typed Value Object
      * 
      * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
@@ -151,6 +156,8 @@ namespace thinsqlitepp
 #endif
 
     };
+
+    /** @} */
 
     /// @cond PRIVATE
 
