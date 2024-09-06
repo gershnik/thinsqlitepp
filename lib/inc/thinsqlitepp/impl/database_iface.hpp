@@ -125,6 +125,7 @@ namespace thinsqlitepp
         
         
         //MARK:-
+
         /**
          * Set a busy timeout
          * 
@@ -134,6 +135,7 @@ namespace thinsqlitepp
             { check_error(sqlite3_busy_timeout(c_ptr(), ms)); }
         
         //MARK:-
+
         /**
          * Count of the number of rows modified
          * 
@@ -143,6 +145,7 @@ namespace thinsqlitepp
             { return sqlite3_changes(c_ptr()); }
         
         //MARK:- collation_needed
+
         /**
          * Register a callback to be called when undefined collation sequence is required
          * 
@@ -179,39 +182,117 @@ namespace thinsqlitepp
         
         //MARK:- commit_hook
 
+        /**
+         * Register a callback to be called on commit
+         * 
+         * Equivalent to ::sqlite3_commit_hook
+         * 
+         * @param handler A callback function that matches the type of `data` argument. Can be
+         *  nullptr.
+         * @param data A pointer to callback data or nullptr.
+         */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
         void) commit_hook(int (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
             { sqlite3_commit_hook(this->c_ptr(), (int(*)(void*))handler, data); }
         
+        /**
+         * Register a callback to be called on commit
+         * 
+         * Equivalent to ::sqlite3_commit_hook
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * bool result = (*handler_ptr)();
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         */
         template<class T>
         SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T>),
-        void) commit_hook(T handler) noexcept;
+        void) commit_hook(T handler_ptr) noexcept;
         
         
         //MARK:- rollback_hook
+
+        /**
+         * Register a callback to be called on rollback
+         * 
+         * Equivalent to ::sqlite3_rollback_hook
+         * 
+         * @param handler A callback function that matches the type of `data` argument. Can be
+         *  nullptr.
+         * @param data A pointer to callback data or nullptr.
+         */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
         void) rollback_hook(void (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
             { sqlite3_rollback_hook(this->c_ptr(), (void(*)(void*))(handler), data); }
         
+        /**
+         * Register a callback to be called on rollback
+         * 
+         * Equivalent to ::sqlite3_rollback_hook
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * bool result = (*handler_ptr)();
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         */
         template<class T>
         SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T>),
-        void) rollback_hook(T handler) noexcept;
+        void) rollback_hook(T handler_ptr) noexcept;
         
         
         //MARK:- create_collation
         
+        /**
+         * Define a new collating sequence
+         * 
+         * Equivalent to ::sqlite3_create_collation_v2
+         * 
+         * @param name Collation name
+         * @param encoding One of [SQLite text encodings](https://www.sqlite.org/c3ref/c_any.html)
+         * @param collator_ptr A pointer to a collator or nullptr.
+         * @param compare A collating function that matches the type of `collator` argument. Can be
+         *  nullptr.
+         * @param destructor A "destructor" function for the `collator` argument. Can be
+         *  nullptr.
+         * 
+         */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
         void) create_collation(const string_param & name, int encoding,
-                               T collator,
-                               int (* compare)(type_identity_t<T> collator, int lhs_len, const void * lhs_bytes, int rhs_len, const void * rhs_bytes) noexcept,
-                               void (*deleter)(type_identity_t<T> obj) noexcept);
+                               T collator_ptr,
+                               int (*compare)(type_identity_t<T> collator, int lhs_len, const void * lhs_bytes, int rhs_len, const void * rhs_bytes) noexcept,
+                               void (*destructor)(type_identity_t<T> collator) noexcept);
         
+        /**
+         * Define a new collating sequence
+         * 
+         * Equivalent to ::sqlite3_create_collation_v2
+         * 
+         * @param name Collation name
+         * @param encoding One of [SQLite text encodings](https://www.sqlite.org/c3ref/c_any.html)
+         * @param collator_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * span<const std::byte> lhs = ...;
+         * span<const std::byte> rhs = ...;
+         * int res = (*collator_ptr)(lhs, rhs);
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the collator.
+         * @param destructor A "destructor" function for the `collator` argument. Can be
+         *  nullptr.
+         */
         template<class T>
-        SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, span<const std::byte>, span<const std::byte>>),
-        void) create_collation(const string_param & name, int encoding, T collator, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
+        SQLITEPP_ENABLE_IF((is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),
+        void) create_collation(const string_param & name, int encoding, T collator_ptr, 
+                              void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
         
         //MARK:- create_function
         

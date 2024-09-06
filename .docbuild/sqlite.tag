@@ -58,7 +58,9 @@
     <member kind="function"><name>sqlite3_column_name</name><anchorfile>c3ref/column_name.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_type</name><anchorfile>c3ref/column_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_value</name><anchorfile>c3ref/column_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_commit_hook</name><anchorfile>c3ref/commit_hook.html</anchorfile></member>
     <member kind="function"><name>sqlite3_config</name><anchorfile>c3ref/config.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_create_collation_v2</name><anchorfile>c3ref/create_collation.html</anchorfile></member>
     <member kind="function"><name>sqlite3_data_count</name><anchorfile>c3ref/data_count.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_config</name><anchorfile>c3ref/db_config.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_handle</name><anchorfile>c3ref/db_handle.html</anchorfile></member>
@@ -72,6 +74,7 @@
     <member kind="function"><name>sqlite3_prepare_v2</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v3</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_reset</name><anchorfile>c3ref/reset.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_rollback_hook</name><anchorfile>c3ref/commit_hook.html</anchorfile></member>
     <member kind="function"><name>sqlite3_set_last_insert_rowid</name><anchorfile>c3ref/set_last_insert_rowid.html</anchorfile></member>
     <member kind="function"><name>sqlite3_shutdown</name><anchorfile>c3ref/initialize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_sql</name><anchorfile>c3ref/expanded_sql.html</anchorfile></member>

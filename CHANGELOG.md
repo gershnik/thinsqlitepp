@@ -16,6 +16,7 @@ to compile this library is no longer needed.
 ### Fixed
 - `row_iterator` and `row` now properly implement range concepts
 - Made handle::c_ptr(T *) an inline friend as it should have been 
+- Return type of the collator for `database::create_collation`
 
 ## [1.1] - 2023-07-30
 

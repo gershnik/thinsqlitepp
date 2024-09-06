@@ -145,7 +145,7 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, span<const std::byte>, span<const std::byte>>),
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),
     void) database::create_collation(const string_param & name, int encoding, T collator,
                                      void (*deleter)(type_identity_t<T> obj) noexcept)
     {
