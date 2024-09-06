@@ -115,12 +115,12 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
 
         target_compile_options(test-${CXX_STANDARD}-${SQLITE_VERSION}
         PRIVATE 
-            $<$<BOOL:EMSCRIPTEN>:-fexceptions>
+            $<$<BOOL:${EMSCRIPTEN}>:-fexceptions>
         )
 
         target_link_options(test-${CXX_STANDARD}-${SQLITE_VERSION}
         PRIVATE 
-            $<$<BOOL:EMSCRIPTEN>:-sNO_DISABLE_EXCEPTION_CATCHING -fexceptions>
+            $<$<BOOL:${EMSCRIPTEN}>:-sNO_DISABLE_EXCEPTION_CATCHING -fexceptions>
         )
 
         list(APPEND TEST_COMMAND COMMAND)
