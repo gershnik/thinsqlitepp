@@ -23,11 +23,18 @@
 #ifdef __GNUC__
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-function-type"
+    
+    #if defined(__APPLE__) && defined(__clang__) && defined(SQLITE_AVAILABLE)
+        #pragma GCC diagnostic ignored "-Wunguarded-availability-new"
+    #endif
 #endif
+
+
 
 namespace thinsqlitepp
 {
     class context;
+    class row;
 
     /** @cond PRIVATE */
 
@@ -89,7 +96,7 @@ namespace thinsqlitepp
         template<int Code> struct config_mapping;
         
     public:
-        static std::unique_ptr<database> open(const string_param & filename, int flags, const char * vfs = nullptr);
+        static std::unique_ptr<database> open(const string_param & db_filename, int flags, const char * vfs = nullptr);
         ~database() noexcept
             { sqlite3_close_v2(c_ptr()); }
         
@@ -101,14 +108,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_busy_handler
          * 
-         * @param handler A callback function that matches the type of `data` argument. Can be
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
          *  nullptr.
-         * @param data A pointer to callback data or nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
          */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void) busy_handler(int (* handler)(type_identity_t<T> data, int count_invoked) noexcept, T data)
-            { check_error(sqlite3_busy_handler(this->c_ptr(), (int (*)(void*,int))handler, data)); }
+        void) busy_handler(int (* handler)(type_identity_t<T> data_ptr, int count_invoked) noexcept, T data_ptr)
+            { check_error(sqlite3_busy_handler(this->c_ptr(), (int (*)(void*,int))handler, data_ptr)); }
         
         /**
          * Register a callback to handle #SQLITE_BUSY errors
@@ -156,14 +163,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_collation_needed
          * 
-         * @param data A pointer to callback data or nullptr.
-         * @param handler A callback function that matches the type of `data` argument. Can be
+         * @param data_ptr A pointer to callback data or nullptr.
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
          *  nullptr.
          */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void) collation_needed(T data, void (* handler)(type_identity_t<T> data, database *, int encoding, const char * name) noexcept)
-            { check_error(sqlite3_collation_needed(this->c_ptr(), data, (void(*)(void*,sqlite3*,int,const char*))handler)); }
+        void) collation_needed(T data_ptr, void (* handler)(type_identity_t<T> data_ptr, database *, int encoding, const char * name) noexcept)
+            { check_error(sqlite3_collation_needed(this->c_ptr(), data_ptr, (void(*)(void*,sqlite3*,int,const char*))handler)); }
         
         /**
          * Register a callback to be called when undefined collation sequence is required
@@ -192,14 +199,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_commit_hook
          * 
-         * @param handler A callback function that matches the type of `data` argument. Can be
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
          *  nullptr.
-         * @param data A pointer to callback data or nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
          */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void) commit_hook(int (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
-            { sqlite3_commit_hook(this->c_ptr(), (int(*)(void*))handler, data); }
+        void) commit_hook(int (* handler)(type_identity_t<T> data_ptr) noexcept, T data_ptr) noexcept
+            { sqlite3_commit_hook(this->c_ptr(), (int(*)(void*))handler, data_ptr); }
         
         /**
          * Register a callback to be called on commit
@@ -226,14 +233,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_rollback_hook
          * 
-         * @param handler A callback function that matches the type of `data` argument. Can be
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
          *  nullptr.
-         * @param data A pointer to callback data or nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
          */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void) rollback_hook(void (* handler)(type_identity_t<T> data) noexcept, T data) noexcept
-            { sqlite3_rollback_hook(this->c_ptr(), (void(*)(void*))(handler), data); }
+        void) rollback_hook(void (* handler)(type_identity_t<T> data_ptr) noexcept, T data_ptr) noexcept
+            { sqlite3_rollback_hook(this->c_ptr(), (void(*)(void*))(handler), data_ptr); }
         
         /**
          * Register a callback to be called on rollback
@@ -263,9 +270,9 @@ namespace thinsqlitepp
          * @param name Collation name
          * @param encoding One of [SQLite text encodings](https://www.sqlite.org/c3ref/c_any.html)
          * @param collator_ptr A pointer to a collator or nullptr.
-         * @param compare A collating function that matches the type of `collator` argument. Can be
+         * @param compare A collating function that matches the type of @p collator_ptr argument. Can be
          *  nullptr.
-         * @param destructor A "destructor" function for the `collator` argument. Can be
+         * @param destructor A "destructor" function for the @p collator_ptr argument. Can be
          *  nullptr.
          * 
          */
@@ -291,7 +298,7 @@ namespace thinsqlitepp
          * ```
          * This invocation must be `noexcept`. 
          * This parameter can also be nullptr to reset the collator.
-         * @param destructor A "destructor" function for the `collator` argument. Can be
+         * @param destructor A "destructor" function for the @p collator_ptr argument. Can be
          *  nullptr.
          */
         template<class T>
@@ -301,16 +308,61 @@ namespace thinsqlitepp
         
         //MARK:- create_function
         
+        /**
+         * Create or redefine SQL function
+         * 
+         * Equivalent to ::sqlite3_create_function_v2
+         * 
+         * @param name Name of the SQL function to be created or redefined
+         * @param arg_count The number of arguments that the SQL function takes. 
+         * If this parameter is -1, then the SQL function may take any number of arguments.
+         * @param flags Combination of
+         * - [Text encoding flags](https://www.sqlite.org/c3ref/c_any.html) that specify
+         * what encoding this SQL function prefers for its parameters
+         * - [Function flags](https://www.sqlite.org/c3ref/c_deterministic.html)
+         * @param data_ptr A pointer to callback data or nullptr. The implementation of the function 
+         * can gain access to this pointer using context::user_data().
+         * @param func Function callback. See ::sqlite3_create_function_v2
+         * @param step Step callback. See ::sqlite3_create_function_v2
+         * @param last Last callback. See ::sqlite3_create_function_v2
+         * @param destructor A "destructor" function for @p data_ptr. Can be nullptr.
+         */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void) create_function(const char * name, int arg_count, int flags, T data,
+        void) create_function(const char * name, int arg_count, int flags, T data_ptr,
                               void (*func)(context *, int, value **) noexcept,
                               void (*step)(context *, int, value **) noexcept,
                               void (*last)(context*) noexcept,
-                              void (*deleter)(type_identity_t<T> obj) noexcept);
+                              void (*destructor)(type_identity_t<T> data_ptr) noexcept);
         
         
         
+        /**
+         * Create or redefine SQL function
+         * 
+         * Equivalent to ::sqlite3_create_function_v2
+         * 
+         * @param name Name of the SQL function to be created or redefined
+         * @param arg_count The number of arguments that the SQL function takes. 
+         * If this parameter is -1, then the SQL function may take any number of arguments.
+         * @param flags Combination of
+         * - [Text encoding flags](https://www.sqlite.org/c3ref/c_any.html) that specify
+         * what encoding this SQL function prefers for its parameters
+         * - [Function flags](https://www.sqlite.org/c3ref/c_deterministic.html)
+         * @param impl_ptr A **pointer** to C++ object that implements the function or nullptr. 
+         * The C++ object pointed to it needs to:
+         * - For scalar SQL function **only** be callable as:
+         *   ```
+         *   (*impl_ptr)(context *, int, value **);
+         *   ```
+         * - For aggregate SQL function **only** be callable as:
+         *   ```
+         *   impl_ptr->step(context *, int, value **);
+         *   impl_ptr->last(context *);
+         *   ```
+         * If impl_ptr is nullptr the function is removed.
+         * @param destructor A "destructor" function for @p impl_ptr. Can be nullptr.
+         */
         template<class T>
         SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
             (std::is_pointer_v<T> &&
@@ -319,28 +371,86 @@ namespace thinsqlitepp
                    is_aggregate_function<std::remove_pointer_t<T>>
                 )
             )),
-        void) create_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
+        void) create_function(const char * name, int arg_count, int flags, 
+                              T impl_ptr, void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
         
         //MARK:- create_window_function
+
 #if SQLITE_VERSION_NUMBER >= 3025000
+
+        /**
+         * Create or redefine SQL [aggregate window function](https://www.sqlite.org/windowfunctions.html#aggwinfunc)
+         * 
+         * Equivalent to ::sqlite3_create_window_function
+         * 
+         * @param name Name of the SQL function to be created or redefined
+         * @param arg_count The number of arguments that the SQL aggregate takes. 
+         * If this parameter is -1, then the SQL aggregate may take any number of arguments.
+         * @param flags Combination of
+         * - [Text encoding flags](https://www.sqlite.org/c3ref/c_any.html) that specify
+         * what encoding this SQL function prefers for its parameters
+         * - [Function flags](https://www.sqlite.org/c3ref/c_deterministic.html)
+         * @param data_ptr A pointer to callback data or nullptr. The implementation of the function 
+         * can gain access to this pointer using context::user_data().
+         * @param step Step callback. See ::sqlite3_create_window_function
+         * @param last Last callback. See ::sqlite3_create_window_function
+         * @param current Current callback. See ::sqlite3_create_window_function
+         * @param inverse Inverse callback. See ::sqlite3_create_window_function
+         * @param destructor A "destructor" function for @p data_ptr. Can be nullptr.
+         * 
+         * @since SQLite 3.25
+         */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void) create_window_function(const char * name, int arg_count, int flags, T data,
+        void) create_window_function(const char * name, int arg_count, int flags, T data_ptr,
                                      void (*step)(context *, int, value **) noexcept,
                                      void (*last)(context*) noexcept,
                                      void (*current)(context*) noexcept,
                                      void (*inverse)(context *, int, value **) noexcept,
-                                     void (*deleter)(type_identity_t<T> obj) noexcept);
+                                     void (*destructor)(type_identity_t<T> data_ptr) noexcept);
         
         
+        /**
+         * Create or redefine SQL [aggregate window function](https://www.sqlite.org/windowfunctions.html#aggwinfunc)
+         * 
+         * Equivalent to ::sqlite3_create_window_function
+         * 
+         * @param name Name of the SQL function to be created or redefined
+         * @param arg_count The number of arguments that the SQL function takes. 
+         * If this parameter is -1, then the SQL function may take any number of arguments.
+         * @param flags Combination of
+         * - [Text encoding flags](https://www.sqlite.org/c3ref/c_any.html) that specify
+         * what encoding this SQL function prefers for its parameters
+         * - [Function flags](https://www.sqlite.org/c3ref/c_deterministic.html)
+         * @param impl_ptr A **pointer** to C++ object that implements the function or nullptr. 
+         * The C++ object pointed to it needs to be callable as:
+         *   ```
+         *   impl_ptr->step(context *, int, value **);
+         *   impl_ptr->last(context *);
+         *   impl_ptr->current(context *);
+         *   impl_ptr->inverse(context *, int, value **);
+         *   ```
+         * If impl_ptr is nullptr the function is removed.
+         * @param destructor A "destructor" function for @p impl_ptr. Can be nullptr.
+         * 
+         * @since SQLite 3.25
+         */
         template<class T>
         SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
                 (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>)),
-        void) create_window_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept = nullptr);
+        void) create_window_function(const char * name, int arg_count, int flags, 
+                                     T impl_ptr, void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
 #endif
         
         //MARK:-
 #if SQLITE_VERSION_NUMBER >= 3010000
+        /**
+         * Flush caches to disk mid-transaction
+         * 
+         * Equivalent to ::sqlite3_db_cacheflush
+         * 
+         * @since SQLite 3.1
+         */
         void cacheflush()
         {
             if (int res = sqlite3_db_cacheflush(c_ptr()); res != SQLITE_OK)
@@ -353,7 +463,7 @@ namespace thinsqlitepp
          * Wraps ::sqlite3_db_config
          * 
          * @tparam Code One of the SQLITE_DBCONFIG_ options. Needs to be explicitly specified
-         * @tparam Args depend on the `Code` template parameter
+         * @tparam Args depend on the @p Code template parameter
          * 
          * The following table lists required argument types for each option.
          * Supplying wrong argument types will result in compile-time error.
@@ -376,12 +486,34 @@ namespace thinsqlitepp
 
         //MARK:- drop_modules
 #if SQLITE_VERSION_NUMBER >= 3030000
+        /**
+         * Remove all virtual table modules from database connection
+         * 
+         * Equivalent to ::sqlite3_drop_modules with nullptr second argument
+         * 
+         * @since SQLite 3.30
+         */
         void drop_modules()
             { check_error(sqlite3_drop_modules(c_ptr(), nullptr)); }
-                          
+
+        /**
+         * Remove virtual table modules from database connection
+         * 
+         * Equivalent to ::sqlite3_drop_modules
+         * 
+         * @since SQLite 3.30
+         */                  
         void drop_modules_except(const char * const * keep)
             { check_error(sqlite3_drop_modules(c_ptr(), (const char **)keep)); }
         
+        
+        /**
+         * Remove virtual table modules from database connection
+         * 
+         * Equivalent to ::sqlite3_drop_modules
+         * 
+         * @since SQLite 3.30
+         */      
         template<size_t N>
         SQLITEPP_ENABLE_IF(N > 0,
         void) drop_modules_except(const char * const (&keep)[N])
@@ -390,6 +522,16 @@ namespace thinsqlitepp
             check_error(sqlite3_drop_modules(this->c_ptr(), (const char **)keep));
         }
         
+        /**
+         * Remove virtual table modules from database connection
+         * 
+         * Equivalent to ::sqlite3_drop_modules
+         * 
+         * @param args Any combination of `const char *` and `std::string` arguments
+         * that specify names of the modules to keep 
+         * 
+         * @since SQLite 3.30
+         */  
         template<class ...Args>
         SQLITEPP_ENABLE_IF((std::conjunction_v<std::is_convertible<Args, string_param>...>),
         void) drop_modules_except(Args && ...args)
@@ -400,19 +542,85 @@ namespace thinsqlitepp
 #endif
         
         //MARK:-
+
+        /**
+         * Enable or disable extension loading
+         * 
+         * Equivalent to ::sqlite3_enable_load_extension
+         */
         void enable_load_extension(bool val)
             { check_error(call_sqlite3_enable_load_extension(this->c_ptr(), val)); }
         
+        //MARK:-
+
+        /**
+         * Enable or disable extended result codes
+         * 
+         * Equivalent to ::sqlite3_extended_result_codes
+         */
         void extended_result_codes(bool onoff)
             { check_error(sqlite3_extended_result_codes(c_ptr(), onoff)); }
         
         //MARK:- exec
-        void exec(const string_param & sql);
-        
-        template<class T>
-        T exec(std::string_view sql, T callback);
+
+        /**
+         * Run multiple statements of SQL
+         * 
+         * Unlike other functions in this library this one **DOES NOT** delegate to
+         * ::sqlite3_exec but instead implements equivalent functionality directly.
+         * 
+         * It runs zero or more UTF-8 encoded, semicolon-separate SQL statements passed
+         * as the `sql` argument. If an error occurs while evaluating the SQL statements
+         * then execution of the current statement stops and subsequent statements are skipped.
+         * 
+         * As usual the error will be reported via an @ref exception
+         * 
+         * @param sql Statements to execute
+         */
+        void exec(std::string_view sql);
 
     #if __cpp_char8_t >= 201811
+        /// @overload
+        template<class T>
+        T exec(std::u8string_view sql)
+            {  return exec(std::string_view((const char *)sql.data(), sql.size())); }
+    #endif
+        
+        /**
+         * Run multiple statements of SQL with a callback
+         * 
+         * Unlike other functions in this library this one **DOES NOT** delegate to
+         * ::sqlite3_exec but instead implements equivalent functionality directly.
+         * 
+         * It runs zero or more UTF-8 encoded, semicolon-separate SQL statements passed
+         * as the `sql` argument. The `callback` callable is passed by value and
+         * is invoked for each result row coming out of the evaluated SQL statements. 
+         * The callable must support being invoked as:
+         * ```
+         * bool res = callback(int statement_count, thinsqlitepp::row current_row);
+         * ```
+         * If an invocation of callback returns `false` then execution of the current 
+         * statement stops and subsequent statements are skipped.
+         * 
+         * The `callback` argument is returned back from the function which allows it to 
+         * accumulate state.
+         * 
+         * If an error occurs while evaluating the SQL statements
+         * then execution of the current statement stops and subsequent statements are skipped.
+         * 
+         * As usual the error will be reported via an @ref exception
+         * 
+         * @param sql Statements to execute
+         * @param callback Callback to execute for each row of the results
+         * @returns the `callback` argument
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF((
+            std::is_invocable_r_v<bool, T, int, row>),
+        T) exec(std::string_view sql, T callback);
+
+    #if __cpp_char8_t >= 201811
+        /// @overload
         template<class T>
         T exec(std::u8string_view sql, T callback)
             {  return exec(std::string_view((const char *)sql.data(), sql.size()), callback); }
@@ -420,21 +628,58 @@ namespace thinsqlitepp
         
         //MARK:-
         
+        /**
+         * Low-level control of database file
+         * 
+         * Equivalent to ::sqlite3_file_control
+         */
         void file_control(const string_param & db_name, int op, void * data)
             { check_error(sqlite3_file_control(c_ptr(), db_name.c_str(), op, data)); }
         
+        /**
+         * Return the filename for the database connection
+         * 
+         * Equivalent to ::sqlite3_db_filename
+         */
         const char * filename(const string_param & db_name) const noexcept
         {
             auto ret = sqlite3_db_filename(c_ptr(), db_name.c_str());
             return ret ? ret : "";
         }
         
+        /**
+         * Return the auto-commit mode
+         * 
+         * Equivalent to ::sqlite3_get_autocommit
+         */
         bool get_autocommit() const noexcept
             { return sqlite3_get_autocommit(c_ptr()); }
         
+        /**
+         * Interrupt a long-running query
+         * 
+         * Equivalent to ::sqlite3_interrupt
+         */
         void interrupt() noexcept
             { sqlite3_interrupt(c_ptr()); }
+
+    #if SQLITE_VERSION_NUMBER >= 3041000
+        /**
+         * Returns whether or not an interrupt is currently in effect
+         * 
+         * Equivalent to ::sqlite3_is_interrupted
+         * 
+         * @since SQLite 3.41
+         */
+        bool is_interrupted() noexcept
+            { return sqlite3_is_interrupted(c_ptr()) != 0; }
+    #endif
         
+        /**
+         * Returns last insert rowid
+         * 
+         * Equivalent to ::sqlite3_last_insert_rowid
+         */
         int64_t last_insert_rowid() const noexcept
             { return sqlite3_last_insert_rowid(c_ptr()); }
         
@@ -451,10 +696,24 @@ namespace thinsqlitepp
 #endif
         
         //returns -1 on bad limit or other issues
-        int limit(int id, int newVal) noexcept
-            { return sqlite3_limit(c_ptr(), id, newVal); }
+        /**
+         * Set or retrieve run-time limits
+         * 
+         * Equivalent to ::sqlite3_limit
+         * 
+         * @param id one of the [limit categories](https://www.sqlite.org/c3ref/c_limit_attached.html)
+         * @param new_val new value or -1 to query
+         * @returns prior value of the limit or -1 on bad limit or other issues
+         */
+        int limit(int id, int new_val) noexcept
+            { return sqlite3_limit(c_ptr(), id, new_val); }
         
         
+        /**
+         * Load an extension
+         * 
+         * Equivalent to ::sqlite3_load_extension
+         */
         void load_extension(const string_param & file, const string_param & proc);
         
         class mutex * mutex() const noexcept
@@ -472,8 +731,8 @@ namespace thinsqlitepp
         //MARK:- progress_handler
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void) progress_handler(int step_count, int(*func)(type_identity_t<T>) noexcept, T data) const noexcept
-            { sqlite3_progress_handler(this->c_ptr(), step_count, (int(*)(void*))func, data); }
+        void) progress_handler(int step_count, int(*func)(type_identity_t<T> data_ptr) noexcept, T data_ptr) const noexcept
+            { sqlite3_progress_handler(this->c_ptr(), step_count, (int(*)(void*))func, data_ptr); }
         
         template<class T>
         SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||

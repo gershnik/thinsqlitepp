@@ -34,7 +34,9 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    T database::exec(std::string_view sql, T callback)
+    SQLITEPP_ENABLE_IF((
+        std::is_invocable_r_v<bool, T, int, row>),
+    T) database::exec(std::string_view sql, T callback)
     {
         int statement_count = 0;
         statement_parser parser(*this, sql);
@@ -49,9 +51,9 @@ namespace thinsqlitepp
         return callback;
     }
 
-    inline void database::exec(const string_param & sql)
+    inline void database::exec(std::string_view sql)
     {
-        exec(sql.c_str(), [] (int, row) {
+        exec(sql, [] (int, row) {
             return true;
         });
     }
