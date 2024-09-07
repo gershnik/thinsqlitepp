@@ -96,7 +96,14 @@ namespace thinsqlitepp
         template<int Code> struct config_mapping;
         
     public:
+        /**
+         * Open a new database connection
+         * 
+         * Equivalent to ::sqlite3_open_v2
+         */
         static std::unique_ptr<database> open(const string_param & db_filename, int flags, const char * vfs = nullptr);
+
+        /// Equivalent to ::sqlite3_close_v2
         ~database() noexcept
             { sqlite3_close_v2(c_ptr()); }
         
@@ -716,12 +723,23 @@ namespace thinsqlitepp
          */
         void load_extension(const string_param & file, const string_param & proc);
         
+        /**
+         * Retrieve the mutex for the database connection
+         * 
+         * Equivalent to ::sqlite3_db_mutex
+         */
         class mutex * mutex() const noexcept
             { return (class mutex *)sqlite3_db_mutex(c_ptr()); }
         
+        /**
+         * Find the next prepared statement
+         * 
+         * Equivalent to ::sqlite3_next_stmt
+         */
         const class statement * next_statement(const class statement * prev) const noexcept
             { return (class statement *)sqlite3_next_stmt(c_ptr(), (sqlite3_stmt *)prev); }
         
+        /// @overload
         class statement * next_statement(const class statement * prev) noexcept
             { return (class statement *)sqlite3_next_stmt(c_ptr(), (sqlite3_stmt *)prev); }
         
@@ -729,48 +747,125 @@ namespace thinsqlitepp
             { check_error(sqlite3_overload_function(c_ptr(), name.c_str(), arg_count)); }
         
         //MARK:- progress_handler
+
+        /**
+         * Register a callback to be called on query progress
+         * 
+         * Equivalent to ::sqlite3_progress_handler
+         * 
+         * @param step_count An approximate number of 
+         * [virtual machine instructions](https://www.sqlite.org/opcode.html)
+         * that are evaluated between successive invocations of the callback.
+         * If less than one then the progress handler is disabled.
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
+         *  nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
+         * 
+         */
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-        void) progress_handler(int step_count, int(*func)(type_identity_t<T> data_ptr) noexcept, T data_ptr) const noexcept
-            { sqlite3_progress_handler(this->c_ptr(), step_count, (int(*)(void*))func, data_ptr); }
+        void) progress_handler(int step_count, int(*handler)(type_identity_t<T> data_ptr) noexcept, T data_ptr) const noexcept
+            { sqlite3_progress_handler(this->c_ptr(), step_count, (int(*)(void*))handler, data_ptr); }
         
+        /**
+         * Register a callback to be called on query progress
+         * 
+         * Equivalent to ::sqlite3_progress_handler
+         * 
+         * @param step_count An approximate number of 
+         * [virtual machine instructions](https://www.sqlite.org/opcode.html)
+         * that are evaluated between successive invocations of the callback.
+         * If less than one then the progress handler is disabled.
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * (*handler_ptr)();
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         */
         template<class T>
         SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
             (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>)),
-        void) progress_handler(int step_count, T func) const noexcept;
+        void) progress_handler(int step_count, T handler_ptr) const noexcept;
         
         //MARK: -
+        /**
+         * Determine if a database is read-only
+         * 
+         * Equivalent to ::sqlite3_db_readonly
+         * 
+         * @param db_name database name
+         * @return `true` if the database named @p db_name is readonly, `false` if it is
+         * read/write or `std::nullopt` if @p db_name is not a name of a database on this
+         * connection.
+         */
         std::optional<bool> readonly(const string_param & db_name) const noexcept;
         
+        /**
+         * Free memory used by the database connection
+         * 
+         * Equivalent to ::sqlite3_db_release_memory
+         */
         void release_memory() const
             { check_error(sqlite3_db_release_memory(c_ptr())); }
         
         //MARK:- status
+
+        /// Return type for @ref status()
         struct status
         {
             int current;
             int high;
         };
+
+        /**
+         * Retrieve database connection status
+         * 
+         * Equivalent to ::sqlite3_db_status
+         */
         struct status status(int op, bool reset = false) const;
         
         //MARK:- table_column_metadata
         
+        /// Return type for table_column_metadata()
         struct column_metadata
         {
-            const char * data_type;
-            const char * collation_sequence;
-            bool not_null;
-            bool primary_key;
-            bool auto_increment;
+            const char * data_type;             ///< Declared data type
+            const char * collation_sequence;    ///< Collation sequence name
+            bool not_null;                      ///< Whether NOT NULL constraint exists
+            bool primary_key;                   ///< Whether column part of PK
+            bool auto_increment;                ///< Whether column is auto-increment
         };
-        column_metadata table_column_metadata(const string_param & db_name, const string_param & table_name, const string_param & column_name) const;
+
+        /**
+         * Extract metadata about a column of a table
+         * 
+         * Equivalent to ::sqlite3_table_column_metadata
+         */
+        column_metadata table_column_metadata(const string_param & db_name, 
+                                              const string_param & table_name, 
+                                              const string_param & column_name) const;
         
         //MARK:-
         
+        /**
+         * Returns total number of rows modified
+         * 
+         * Equivalent to ::sqlite3_total_changes
+         */
         int total_changes() const noexcept
             { return sqlite3_total_changes(c_ptr()); }
         
 #if SQLITE_VERSION_NUMBER >= 3034000
+
+        /**
+         * Returns the transaction state of a database
+         * 
+         * Equivalent to ::sqlite3_txn_state
+         * 
+         * @since SQLite 3.34
+         */
         int txn_state(const string_param & schema) const noexcept
             { return sqlite3_txn_state(c_ptr(), schema.c_str()); }
 #endif

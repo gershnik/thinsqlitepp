@@ -5,3 +5,7 @@ sqlite3_bind_zeroblob
 isexplain
 pzTail
 rowid
+autocommit
+DBCONFIG
+cacheflush
+impl_ptr

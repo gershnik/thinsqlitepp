@@ -49,6 +49,7 @@
     <member kind="function"><name>sqlite3_busy_timeout</name><anchorfile>c3ref/busy_timeout.html</anchorfile></member>
     <member kind="function"><name>sqlite3_changes</name><anchorfile>c3ref/changes.html</anchorfile></member>
     <member kind="function"><name>sqlite3_clear_bindings</name><anchorfile>c3ref/clear_bindings.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_close_v2</name><anchorfile>c3ref/close.html</anchorfile></member>
     <member kind="function"><name>sqlite3_collation_needed</name><anchorfile>c3ref/collation_needed.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_count</name><anchorfile>c3ref/column_count.html</anchorfile></member>
     <member kind="function"><name>sqlite3_column_database_name</name><anchorfile>c3ref/column_database_name.html</anchorfile></member>
@@ -68,6 +69,10 @@
     <member kind="function"><name>sqlite3_db_config</name><anchorfile>c3ref/db_config.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_filename</name><anchorfile>c3ref/db_filename.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_handle</name><anchorfile>c3ref/db_handle.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_db_mutex</name><anchorfile>c3ref/db_mutex.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_db_readonly</name><anchorfile>c3ref/db_readonly.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_db_release_memory</name><anchorfile>c3ref/db_release_memory.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_db_status</name><anchorfile>c3ref/db_status.html</anchorfile></member>
     <member kind="function"><name>sqlite3_drop_modules</name><anchorfile>c3ref/drop_modules.html</anchorfile></member>
     <member kind="function"><name>sqlite3_enable_load_extension</name><anchorfile>c3ref/enable_load_extension.html</anchorfile></member>
     <member kind="function"><name>sqlite3_errmsg</name><anchorfile>c3ref/errcode.html</anchorfile></member>
@@ -86,8 +91,11 @@
     <member kind="function"><name>sqlite3_last_insert_rowid</name><anchorfile>c3ref/last_insert_rowid.html</anchorfile></member>
     <member kind="function"><name>sqlite3_limit</name><anchorfile>c3ref/limit.html</anchorfile></member>
     <member kind="function"><name>sqlite3_load_extension</name><anchorfile>c3ref/load_extension.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_next_stmt</name><anchorfile>c3ref/next_stmt.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_open_v2</name><anchorfile>c3ref/open.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v2</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v3</name><anchorfile>c3ref/prepare.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_progress_handler</name><anchorfile>c3ref/progress_handler.html</anchorfile></member>
     <member kind="function"><name>sqlite3_reset</name><anchorfile>c3ref/reset.html</anchorfile></member>
     <member kind="function"><name>sqlite3_rollback_hook</name><anchorfile>c3ref/commit_hook.html</anchorfile></member>
     <member kind="function"><name>sqlite3_set_last_insert_rowid</name><anchorfile>c3ref/set_last_insert_rowid.html</anchorfile></member>
@@ -98,6 +106,9 @@
     <member kind="function"><name>sqlite3_stmt_isexplain</name><anchorfile>c3ref/stmt_isexplain.html</anchorfile></member>
     <member kind="function"><name>sqlite3_stmt_readonly</name><anchorfile>c3ref/stmt_readonly.html</anchorfile></member>
     <member kind="function"><name>sqlite3_system_errno</name><anchorfile>c3ref/system_errno.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_table_column_metadata</name><anchorfile>c3ref/table_column_metadata.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_total_changes</name><anchorfile>c3ref/total_changes.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_txn_state</name><anchorfile>c3ref/txn_state.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_dup</name><anchorfile>c3ref/value_dup.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_free</name><anchorfile>c3ref/value_dup.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_frombind</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
