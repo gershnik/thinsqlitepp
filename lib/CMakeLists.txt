@@ -48,6 +48,7 @@ set(PUBLIC_HEADERS
     inc/thinsqlitepp/mutex.hpp
     inc/thinsqlitepp/statement.hpp
     inc/thinsqlitepp/value.hpp
+    inc/thinsqlitepp/thinsqlitepp.hpp
 )
 source_group("Public Headers" FILES ${PUBLIC_HEADERS})
 
