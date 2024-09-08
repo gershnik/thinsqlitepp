@@ -91,6 +91,10 @@
     <member kind="function"><name>sqlite3_last_insert_rowid</name><anchorfile>c3ref/last_insert_rowid.html</anchorfile></member>
     <member kind="function"><name>sqlite3_limit</name><anchorfile>c3ref/limit.html</anchorfile></member>
     <member kind="function"><name>sqlite3_load_extension</name><anchorfile>c3ref/load_extension.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_mutex_alloc</name><anchorfile>c3ref/mutex_alloc.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_mutex_enter</name><anchorfile>c3ref/mutex_alloc.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_mutex_leave</name><anchorfile>c3ref/mutex_alloc.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_mutex_try</name><anchorfile>c3ref/mutex_alloc.html</anchorfile></member>
     <member kind="function"><name>sqlite3_next_stmt</name><anchorfile>c3ref/next_stmt.html</anchorfile></member>
     <member kind="function"><name>sqlite3_open_v2</name><anchorfile>c3ref/open.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v2</name><anchorfile>c3ref/prepare.html</anchorfile></member>

@@ -139,10 +139,9 @@ namespace thinsqlitepp
                                               (void (*)(void *))deleter);
         if (res != SQLITE_OK)
         {
-            exception ex(res, this); //noexcept, capture it before calling callback
             if (deleter)
                 deleter(collator);
-            throw ex;
+            throw exception(res, this);
         }
     }
 

@@ -306,7 +306,8 @@ namespace thinsqlitepp
          * This invocation must be `noexcept`. 
          * This parameter can also be nullptr to reset the collator.
          * @param destructor A "destructor" function for the @p collator_ptr argument. Can be
-         *  nullptr.
+         * nullptr. Unlike the ::sqlite3_create_collation_v2 the @p destructor is always called
+         * even if this function throws an exception.
          */
         template<class T>
         SQLITEPP_ENABLE_IF((is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),

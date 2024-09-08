@@ -20,7 +20,7 @@ namespace thinsqlitepp
     class exception;
 
     /**
-     * @addtogroup Utility Utilities
+     * @addtogroup SQL SQLite API Wrappers
      * @{
      */
 
