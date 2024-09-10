@@ -13,6 +13,7 @@ Using SQLite C API from C++ can be quite tedious and error prone. While the API 
 <!-- TOC depthfrom:2 -->
 
 - [Requirements](#requirements)
+- [Documentation](#documentation)
 - [Goals](#goals)
 - [Non Goals](#non-goals)
 - [Example](#example)
@@ -38,6 +39,10 @@ Using SQLite C API from C++ can be quite tedious and error prone. While the API 
 
 * C++17 or greater
 * SQLite 3.7.15 or greater
+
+## Documentation
+
+Full reference documentation is available at https://gershnik.github.io/thinsqlitepp/
 
 ## Goals
 
