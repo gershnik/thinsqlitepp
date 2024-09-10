@@ -67,35 +67,49 @@ Full reference documentation is available at https://gershnik.github.io/thinsqli
 
 ## Example
 
-Here is a small example of opening a database that demonstrates many of the features of the library.
+Here is a small example that demonstrates many of the features of the library.
 
 ```cpp
 
-std::filesystem::path dbFolder = ...;
-
-auto db = database::open((dbFolder / "database.db").string(),
+auto db = database::open("database.db",
                             SQLITE_OPEN_READWRITE |
                             SQLITE_OPEN_NOMUTEX |
                             SQLITE_OPEN_PRIVATECACHE);
 
 
-db->config<SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION>(1, nullptr);
 db->config<SQLITE_DBCONFIG_ENABLE_FKEY>(1, nullptr);
 
 db->exec("PRAGMA journal_mode=WAL");
 
-auto st = statement::create(*db, "PRAGMA user_version");
-if (!st->step())
-    throw std::runtime_error("No user_version in database");
-auto version = st->column_value<int64_t>(0);
+auto st = statement::create(*db, "SELECT name, age FROM mytable");
+while (st->step()) {
+    auto name = st->column_value<std::string_view>(0);
+    auto age = st->column_value<int>(1);
+}
 
-st = statement::create(*db, "SELECT value FROM metadata WHERE key = 'schemaHash'");
-if (!st->step())
-    throw std::runtime_error("No schema hash in database");
-std::string schemaHash(st->column_value<std::string_view>(0));
+st->reset();
 
-if (schemaHash != g_dbSchemaHash)
-    throw std::runtime_error("Database schema mismatch");
+for (auto r: row_range(st)) {
+    auto name = r[0].value<std::string_view>();
+    auto age = r[0].value<int>();
+}
+
+db->exec("SELECT name, age FROM mytable", [](int statement_idx, row r) noexcept {
+    auto name = r[0].value<std::string_view>();
+    auto age = r[0].value<int>();
+    return true;
+});
+
+auto func = [] (context * ctxt, int arg_count, value ** args) noexcept {
+    ctxt->result(42);
+};
+
+db->create_function("myfunction", 0, SQLITE_UTF8, &func, nullptr);
+
+db->exec("SELECT myfunction();", [](int statement_idx, row r) noexcept {
+    assert(r[0].value<int>() == 42);
+    return true;
+});
 
 ```
 

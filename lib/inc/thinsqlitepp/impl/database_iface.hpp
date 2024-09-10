@@ -605,7 +605,7 @@ namespace thinsqlitepp
          * is invoked for each result row coming out of the evaluated SQL statements. 
          * The callable must support being invoked as:
          * ```
-         * bool res = callback(int statement_count, thinsqlitepp::row current_row);
+         * bool res = callback(int statement_idx, thinsqlitepp::row current_row);
          * ```
          * If an invocation of callback returns `false` then execution of the current 
          * statement stops and subsequent statements are skipped.
