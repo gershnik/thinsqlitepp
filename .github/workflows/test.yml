@@ -11,6 +11,7 @@ on:
       - '.gitignore'
       - 'LICENSE'
       - '.github/workflows/publish.yml'
+      - '.github/workflows/make-docs.yml'
       - 'tools/**'
       - '.docbuild/**'
 
