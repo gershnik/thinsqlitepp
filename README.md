@@ -71,45 +71,54 @@ Here is a small example that demonstrates many of the features of the library.
 
 ```cpp
 
-auto db = database::open("database.db",
-                            SQLITE_OPEN_READWRITE |
-                            SQLITE_OPEN_NOMUTEX |
-                            SQLITE_OPEN_PRIVATECACHE);
+try {
+
+    auto db = database::open("database.db",
+                                SQLITE_OPEN_READWRITE |
+                                SQLITE_OPEN_NOMUTEX |
+                                SQLITE_OPEN_PRIVATECACHE);
 
 
-db->config<SQLITE_DBCONFIG_ENABLE_FKEY>(1, nullptr);
+    db->config<SQLITE_DBCONFIG_ENABLE_FKEY>(1, nullptr);
 
-db->exec("PRAGMA journal_mode=WAL");
+    db->exec("PRAGMA journal_mode=WAL");
 
-auto st = statement::create(*db, "SELECT name, age FROM mytable");
-while (st->step()) {
-    auto name = st->column_value<std::string_view>(0);
-    auto age = st->column_value<int>(1);
+    auto st = statement::create(*db, "SELECT name, age FROM mytable");
+    while (st->step()) {
+        auto name = st->column_value<std::string_view>(0);
+        auto age = st->column_value<int>(1);
+    }
+
+    st->reset();
+
+    for (auto r: row_range(st)) {
+        auto name = r[0].value<std::string_view>();
+        auto age = r[0].value<int>();
+    }
+
+    db->exec("SELECT name, age FROM mytable", [](int statement_idx, row r) noexcept {
+        auto name = r[0].value<std::string_view>();
+        auto age = r[0].value<int>();
+        return true;
+    });
+
+    auto func = [] (context * ctxt, int arg_count, value ** args) noexcept {
+        ctxt->result(42);
+    };
+
+    db->create_function("myfunction", 0, SQLITE_UTF8, &func, nullptr);
+
+    db->exec("SELECT myfunction();", [](int statement_idx, row r) noexcept {
+        assert(r[0].value<int>() == 42);
+        return true;
+    });
+    
+} catch (thinsqlitepp::exception & ex) {
+    int err = ex.primary_error_code();
+    int ext = ex.extended_error_code();
+    int sys = ex.system_error_code();
+    std::cout << ex.what() << '\n';
 }
-
-st->reset();
-
-for (auto r: row_range(st)) {
-    auto name = r[0].value<std::string_view>();
-    auto age = r[0].value<int>();
-}
-
-db->exec("SELECT name, age FROM mytable", [](int statement_idx, row r) noexcept {
-    auto name = r[0].value<std::string_view>();
-    auto age = r[0].value<int>();
-    return true;
-});
-
-auto func = [] (context * ctxt, int arg_count, value ** args) noexcept {
-    ctxt->result(42);
-};
-
-db->create_function("myfunction", 0, SQLITE_UTF8, &func, nullptr);
-
-db->exec("SELECT myfunction();", [](int statement_idx, row r) noexcept {
-    assert(r[0].value<int>() == 42);
-    return true;
-});
 
 ```
 

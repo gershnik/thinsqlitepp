@@ -20,6 +20,11 @@ namespace thinsqlitepp
     class database;
 
     /**
+     * @addtogroup SQL SQLite API Wrappers
+     * @{
+     */
+
+    /**
      * SQL Function Context Object
      * 
      * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
@@ -349,6 +354,8 @@ namespace thinsqlitepp
         T * user_data() noexcept
             { return (T *)sqlite3_user_data(this->c_ptr()); }
     };
+
+    /** @} */
     
 }
 
