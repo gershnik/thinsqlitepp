@@ -12,6 +12,7 @@
 #include "database_iface.hpp"
 #include "context_iface.hpp"
 #include "statement_iface.hpp"
+#include "row_iterator.hpp"
 
 #ifdef __GNUC__
     #pragma GCC diagnostic push
@@ -33,7 +34,9 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    T database::exec(std::string_view sql, T callback)
+    SQLITEPP_ENABLE_IF((
+        std::is_invocable_r_v<bool, T, int, row>),
+    T) database::exec(std::string_view sql, T callback)
     {
         int statement_count = 0;
         statement_parser parser(*this, sql);
@@ -48,16 +51,16 @@ namespace thinsqlitepp
         return callback;
     }
 
-    inline void database::exec(const string_param & sql)
+    inline void database::exec(std::string_view sql)
     {
-        exec(sql.c_str(), [] (int, row) {
+        exec(sql, [] (int, row) {
             return true;
         });
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<bool, T, int>,
-    void> database::busy_handler(T handler)
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T, int>),
+    void) database::busy_handler(T handler)
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -73,8 +76,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<void, T, database *, int, const char *>,
-    void> database::collation_needed(T handler)
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, database *, int, const char *>),
+    void) database::collation_needed(T handler)
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -91,8 +94,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<bool, T>,
-    void> database::commit_hook(T handler) noexcept
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T>),
+    void) database::commit_hook(T handler) noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -108,8 +111,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<void, T>,
-    void> database::rollback_hook(T handler) noexcept
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T>),
+    void) database::rollback_hook(T handler) noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -125,8 +128,8 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-    void> database::create_collation(const string_param & name, int encoding,
+    SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+    void) database::create_collation(const string_param & name, int encoding,
                                      T collator,
                                      int (* compare)(type_identity_t<T> collator, int lhs_len, const void * lhs_bytes, int rhs_len, const void * rhs_bytes) noexcept,
                                      void (*deleter)(type_identity_t<T> obj) noexcept)
@@ -136,16 +139,15 @@ namespace thinsqlitepp
                                               (void (*)(void *))deleter);
         if (res != SQLITE_OK)
         {
-            exception ex(res, this); //noexcept, capture it before calling callback
             if (deleter)
                 deleter(collator);
-            throw ex;
+            throw exception(res, this);
         }
     }
 
     template<class T>
-    std::enable_if_t<is_pointer_to_callback<void, T, span<const std::byte>, span<const std::byte>>,
-    void> database::create_collation(const string_param & name, int encoding, T collator,
+    SQLITEPP_ENABLE_IF((is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),
+    void) database::create_collation(const string_param & name, int encoding, T collator,
                                      void (*deleter)(type_identity_t<T> obj) noexcept)
     {
         if constexpr (!std::is_null_pointer_v<T>)
@@ -167,8 +169,8 @@ namespace thinsqlitepp
 
 
     template<class T>
-    std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-    void> database::create_function(const char * name, int arg_count, int flags, T data,
+    SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+    void) database::create_function(const char * name, int arg_count, int flags, T data,
                                     void (*func)(context *, int, value **) noexcept,
                                     void (*step)(context *, int, value **) noexcept,
                                     void (*last)(context*) noexcept,
@@ -182,14 +184,14 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<std::is_null_pointer_v<T> ||
+    SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
         (std::is_pointer_v<T> &&
             (
                std::is_nothrow_invocable_r_v<void, std::remove_pointer_t<T>, context *, int, value **> ||
                is_aggregate_function<std::remove_pointer_t<T>>
             )
-        ),
-    void> database::create_function(const char * name, int arg_count, int flags, T impl,
+        )),
+    void) database::create_function(const char * name, int arg_count, int flags, T impl,
                                     void (*deleter)(type_identity_t<T> obj) noexcept)
     {
         void (*func)(context *, int, value **) noexcept = nullptr;
@@ -229,8 +231,8 @@ namespace thinsqlitepp
 
 #if SQLITE_VERSION_NUMBER >= 3025000
     template<class T>
-    std::enable_if_t<std::is_pointer_v<T> || std::is_null_pointer_v<T>,
-    void> database::create_window_function(const char * name, int arg_count, int flags, T data,
+    SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+    void) database::create_window_function(const char * name, int arg_count, int flags, T data,
                                            void (*step)(context *, int, value **) noexcept,
                                            void (*last)(context*) noexcept,
                                            void (*current)(context*) noexcept,
@@ -246,9 +248,9 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    std::enable_if_t<std::is_null_pointer_v<T> ||
-        (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>),
-    void> database::create_window_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept)
+    SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
+        (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>)),
+    void) database::create_window_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept)
     {
         void (*step)(context *, int, value **) noexcept = nullptr;
         void (*last)(context*) noexcept = nullptr;
@@ -300,24 +302,20 @@ namespace thinsqlitepp
         check_error(sqlite3_db_status(c_ptr(), op, &ret.current, &ret.high, reset));
         return ret;
     }
-
-#ifndef SQLITE_OMIT_LOAD_EXTENSION
         
     inline void database::load_extension(const string_param & file, const string_param & proc)
     {
         char * errmessage = nullptr;
-        int res = sqlite3_load_extension(c_ptr(), file.c_str(), proc.c_str(), &errmessage);
+        int res = call_sqlite3_load_extension(c_ptr(), file.c_str(), proc.c_str(), &errmessage);
         error::message_ptr errmessage_ptr(errmessage, sqlite3_free);
         if (res != SQLITE_OK)
             throw exception(res, std::move(errmessage_ptr));
     }
-#endif
 
-#ifndef SQLITE_OMIT_PROGRESS_CALLBACK
     template<class T>
-    std::enable_if_t<std::is_null_pointer_v<T> ||
-        (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>),
-    void> database::progress_handler(int step_count, T func) const noexcept
+    SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
+        (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<bool, std::remove_pointer_t<T>>)),
+    void) database::progress_handler(int step_count, T func) const noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
@@ -331,7 +329,6 @@ namespace thinsqlitepp
             this->progress_handler(step_count, nullptr, nullptr);
         }
     }
-#endif
 
     inline database::column_metadata database::table_column_metadata(const string_param & db_name,
                                                                      const string_param & table_name,

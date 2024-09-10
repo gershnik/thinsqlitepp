@@ -11,6 +11,7 @@
 
 #include <thinsqlitepp/impl/database_iface.hpp>
 #include <thinsqlitepp/impl/exception_iface.hpp>
+#include <thinsqlitepp/impl/statement_iface.hpp>
 
 #include <thinsqlitepp/impl/statement_impl.hpp>
 #include <thinsqlitepp/impl/database_impl.hpp>

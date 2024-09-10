@@ -13,39 +13,51 @@
 
 namespace thinsqlitepp
 {
+    /**
+     * Base functionality for all [fake wrapper classes](https://github.com/gershnik/thinsqlitepp#fake-classes)
+     * 
+     * This is a [CRTP](https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern) base class
+     * that implements functionality common to all fake wrapper classes.
+     * 
+     * @tparam T the underlying SQLite type
+     * @tparam Derived the derived class for CRTP casts
+     */
     template<class T, class Derived>
     class handle
     {
     public:
+        /// Operator delete for a fake pointer is no-op
         void operator delete(void *) noexcept
         {}
         
+        /// You cannot construct it
         handle() = delete;
+        /// You cannot copy (or move) it
         handle(const handle &) = delete;
+        /// You cannot assign it
         handle & operator=(const handle &) = delete;
-        
+
+        /// Create fake pointer from the underlying SQLite one
+        static Derived * from(T * obj) noexcept
+            { return (Derived *)obj; }
+
+        /// Access the real underlying SQLite type
         T * c_ptr() const noexcept
             { return (T *)this; }
         
-        static Derived * from(T * obj) noexcept
-            { return (Derived *)obj; }
-        
-        
-        static T * c_ptr(const handle<T, Derived> * obj) noexcept
-            { return (T *)obj; }
-
+        /// Access the real underlying SQLite type
         friend T * c_ptr(const handle<T, Derived> & obj) noexcept
             { return (T *)&obj; }
+
+        /// Access the real underlying SQLite type
+        friend T * c_ptr(const handle<T, Derived> * obj) noexcept
+            { return (T *)obj; }
         
     protected:
         ~handle() noexcept
         {}
     };
 
-    template<class T, class Derived>
-    T * c_ptr(const handle<T, Derived> * obj) noexcept
-        { return handle<T, Derived>::c_ptr(obj); }
-    
 }
 
 #endif

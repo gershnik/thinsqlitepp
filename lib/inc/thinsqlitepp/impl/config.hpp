@@ -17,7 +17,7 @@
 
 #if SQLITE_VERSION_NUMBER < 3007015
 
-#error This library requires SQLite 3.7.4 or greater
+#error This library requires SQLite 3.7.15 or greater
 
 #endif
 
@@ -39,6 +39,11 @@
     #define SQLITEPP_NO_PEDANTIC __extension__
 #endif
 
+#ifndef DOXYGEN
+    #define SQLITEPP_ENABLE_IF(cond, t) std::enable_if_t<(cond), t>
+#else
+    #define SQLITEPP_ENABLE_IF(cond, t) t
+#endif
 
 #endif
 

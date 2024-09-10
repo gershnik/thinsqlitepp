@@ -11,9 +11,23 @@
 
 #include "exception_iface.hpp"
 
+/**
+ * ThinSQLite++ namespace
+ */
 namespace thinsqlitepp
 {
+    /**
+     * @addtogroup SQL SQLite API Wrappers
+     * @{
+     */
 
+    /**
+     * Initialize the SQLite library
+     * 
+     * Equivalent to ::sqlite3_initialize
+     * 
+     * `#include <thinsqlitepp/global.hpp>`
+     */
     inline void initialize()
     {
         int res = sqlite3_initialize();
@@ -21,10 +35,19 @@ namespace thinsqlitepp
             throw exception(res);
     }
 
+    /**
+     * Deinitialize the SQLite library
+     * 
+     * Equivalent to ::sqlite3_shutdown
+     * 
+     * `#include <thinsqlitepp/global.hpp>`
+     */
     inline void shutdown() noexcept
     {
         sqlite3_shutdown();
     }
+
+    /** @cond PRIVATE */
 
     namespace internal
     {
@@ -42,14 +65,40 @@ namespace thinsqlitepp
         template<int Code> struct config_mapping;
 
     }
+
+    /** @endcond */
     
+    /**
+     * Configures SQLite library.
+     * 
+     * Wraps ::sqlite3_config
+     * 
+     * @tparam Code One of the SQLITE_CONFIG_ options. Needs to be explicitly specified
+     * @tparam Args depend on the `Code` template parameter
+     * 
+     * `#include <thinsqlitepp/global.hpp>`
+     * 
+     * The following table lists required argument types for each option.
+     * Supplying wrong argument types will result in compile-time error.
+     * 
+     * @include{doc} global-options.md
+     */
     template<int Code, class ...Args>
     inline
-    auto config(Args && ...args) -> decltype(internal::config_mapping<Code>::type::apply(std::forward<decltype(args)>(args)...))
-    {
-        internal::config_mapping<Code>::type::apply(std::forward<Args>(args)...);
-    }
+    auto config(Args && ...args) -> 
+    #ifndef DOXYGEN
+        //void but prevents instantiation with wrong types 
+        decltype(
+          internal::config_mapping<Code>::type::apply(std::forward<decltype(args)>(args)...)
+        )
+    #else
+        void
+    #endif
+        { internal::config_mapping<Code>::type::apply(std::forward<Args>(args)...); }
 
+    /** @} */
+
+    /** @cond PRIVATE */
 
     namespace internal 
     {
@@ -73,6 +122,8 @@ namespace thinsqlitepp
             #define SQLITEPP_DEFINE_OPTION_N(code, ...) SQLITEPP_DEFINE_OPTION(code __VA_OPT__(,) __VA_ARGS__)
 
         #endif
+
+        //@ [Config Options]
 
         SQLITEPP_DEFINE_OPTION_0( SQLITE_CONFIG_SINGLETHREAD          );
         SQLITEPP_DEFINE_OPTION_0( SQLITE_CONFIG_MULTITHREAD           );
@@ -120,11 +171,13 @@ namespace thinsqlitepp
         SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_MEMDB_MAXSIZE,        sqlite3_int64);
         #endif
 
+        //@ [Config Options]
+
         SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
         #undef SQLITEPP_DEFINE_OPTION
 
     }
-
+    /** @endcond */
 }
 
 

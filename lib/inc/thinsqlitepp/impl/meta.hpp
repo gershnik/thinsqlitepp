@@ -30,6 +30,8 @@ namespace thinsqlitepp
 
 #endif
 
+    /** @cond PRIVATE */
+
     //MARK:- is_pointer_to_callback
 
     template<class R, class T, class... ArgTypes>
@@ -74,6 +76,8 @@ namespace thinsqlitepp
 
     template<class T>
     constexpr bool is_aggregate_window_function = is_aggregate_function<T> && is_aggregate_window_helper<T>(nullptr, nullptr);
+
+    /** @endcond */
     
 }
 

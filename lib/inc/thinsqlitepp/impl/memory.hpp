@@ -15,7 +15,14 @@
 
 namespace thinsqlitepp
 {
+    /**
+     * @addtogroup Utility Utilities
+     * @{
+     */
 
+    /**
+     * Memory deleter that uses ::sqlite3_free
+     */
     template<class T>
     class deleter
     {
@@ -24,8 +31,10 @@ namespace thinsqlitepp
             { sqlite3_free(const_cast<std::remove_const_t<T> *>(mem)); }
     };
 
+    /// A string allocated by SQLite
     using allocated_string = std::unique_ptr<char, deleter<char>>;
 
+    /** @} */
 }
 
 #endif
