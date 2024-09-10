@@ -417,6 +417,8 @@ namespace thinsqlitepp
          * Default datatype of the result column
          * 
          * Equivalent to ::sqlite3_column_type
+         * 
+         * @returns One of the [SQLite fundamental datatypes](https://www.sqlite.org/c3ref/c_blob.html)
          */
         int column_type(int idx) const noexcept
             { return sqlite3_column_type(c_ptr(), idx); }

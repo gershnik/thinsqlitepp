@@ -67,7 +67,7 @@ namespace thinsqlitepp
          * @returns Newly allocated mutex of `nullptr` if the SQLite implementation
          * is unable to allocate a mutex (e.g. if it does not support mutexes).
          */
-        static std::unique_ptr<mutex> alloc(type t) 
+        static std::unique_ptr<mutex> alloc(type t) noexcept
             { return std::unique_ptr<mutex>(from(sqlite3_mutex_alloc(int(t)))); }
 
         /**
@@ -115,10 +115,10 @@ namespace thinsqlitepp
     {
     public:
         /// Adapt a @ref mutex pointer
-        lock_adapter(mutex * mutex = nullptr): _mutex(mutex)
+        lock_adapter(mutex * mutex = nullptr) noexcept: _mutex(mutex)
         {}
         /// Adapt a std::unique_ptr<mutex>
-        lock_adapter(const std::unique_ptr<mutex> & mutex): _mutex(mutex.get())
+        lock_adapter(const std::unique_ptr<mutex> & mutex) noexcept: _mutex(mutex.get())
         {}
         
 
@@ -137,7 +137,7 @@ namespace thinsqlitepp
          */
         bool try_lock() noexcept
             { return sqlite3_mutex_try(c_ptr(_mutex)) == SQLITE_OK; }
-        
+
         /**
          * Unlock the mutex
          * 

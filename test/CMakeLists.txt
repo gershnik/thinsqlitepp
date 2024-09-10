@@ -62,6 +62,7 @@ function(configure_test_target target)
         test_main.cpp
         test_statement.cpp
         test_general.cpp
+        test_context.cpp
     )
     
 

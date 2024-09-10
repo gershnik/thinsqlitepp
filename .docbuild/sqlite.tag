@@ -29,10 +29,12 @@
 
     <member kind="define"><name>SQLITE_BUSY</name><anchorfile>rescode.html</anchorfile><anchor>busy</anchor></member>
     <member kind="define"><name>SQLITE_DONE</name><anchorfile>rescode.html</anchorfile><anchor>done</anchor></member>
+    <member kind="define"><name>SQLITE_ERROR</name><anchorfile>rescode.html</anchorfile><anchor>error</anchor></member>
     <member kind="define"><name>SQLITE_ROW</name><anchorfile>rescode.html</anchorfile><anchor>row</anchor></member>
     <member kind="define"><name>SQLITE_STATIC</name><anchorfile>c3ref/c_static.html</anchorfile></member>
     <member kind="define"><name>SQLITE_TRANSIENT</name><anchorfile>c3ref/c_static.html</anchorfile></member>
 
+    <member kind="function"><name>sqlite3_aggregate_context</name><anchorfile>c3ref/aggregate_context.html</anchorfile></member>
     <member kind="function"><name>sqlite3_bind_blob</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_bind_double</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_bind_int</name><anchorfile>c3ref/bind_blob.html</anchorfile></member>
@@ -61,6 +63,7 @@
     <member kind="function"><name>sqlite3_column_value</name><anchorfile>c3ref/column_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_commit_hook</name><anchorfile>c3ref/commit_hook.html</anchorfile></member>
     <member kind="function"><name>sqlite3_config</name><anchorfile>c3ref/config.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_context_db_handle</name><anchorfile>c3ref/context_db_handle.html</anchorfile></member>
     <member kind="function"><name>sqlite3_create_collation_v2</name><anchorfile>c3ref/create_collation.html</anchorfile></member>
     <member kind="function"><name>sqlite3_create_function_v2</name><anchorfile>c3ref/create_function.html</anchorfile></member>
     <member kind="function"><name>sqlite3_create_window_function</name><anchorfile>c3ref/create_function.html</anchorfile></member>
@@ -101,6 +104,17 @@
     <member kind="function"><name>sqlite3_prepare_v3</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_progress_handler</name><anchorfile>c3ref/progress_handler.html</anchorfile></member>
     <member kind="function"><name>sqlite3_reset</name><anchorfile>c3ref/reset.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_blob</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_double</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_error</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_error_code</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_error_nomem</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_error_toobig</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_int</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_int64</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_null</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_text</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_zeroblob</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_rollback_hook</name><anchorfile>c3ref/commit_hook.html</anchorfile></member>
     <member kind="function"><name>sqlite3_set_last_insert_rowid</name><anchorfile>c3ref/set_last_insert_rowid.html</anchorfile></member>
     <member kind="function"><name>sqlite3_shutdown</name><anchorfile>c3ref/initialize.html</anchorfile></member>

@@ -49,6 +49,7 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_column_type
          * 
+         * @returns One of the [SQLite fundamental datatypes](https://www.sqlite.org/c3ref/c_blob.html)
          * @see statement::column_type
          */
         int type() const noexcept
