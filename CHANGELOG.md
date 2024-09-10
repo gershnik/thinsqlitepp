@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.2] - 2024-09-10
+
 ### Added
 - Documentation for public API
 - `row_range` range class to simplify use of `row_iterator`
@@ -39,3 +41,4 @@ to compile this library is no longer needed.
 
 [1.0]: https://github.com/gershnik/thinsqlitepp/releases/v1.0
 [1.1]: https://github.com/gershnik/thinsqlitepp/releases/v1.1
+[1.2]: https://github.com/gershnik/thinsqlitepp/releases/v1.2
