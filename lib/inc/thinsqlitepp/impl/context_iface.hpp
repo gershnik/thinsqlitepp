@@ -229,7 +229,7 @@ namespace thinsqlitepp
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
-                sqlite3_result_blob(c_ptr(), value.data(), int(value.size()), SQLITE_TRANSIENT);
+                sqlite3_result_blob(c_ptr(), data, int(value.size()), SQLITE_TRANSIENT);
             else
                 sqlite3_result_zeroblob(c_ptr(), 0);
         }
