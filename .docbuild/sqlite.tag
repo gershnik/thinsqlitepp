@@ -88,6 +88,7 @@
     <member kind="function"><name>sqlite3_finalize</name><anchorfile>c3ref/finalize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_free</name><anchorfile>c3ref/free.html</anchorfile></member>
     <member kind="function"><name>sqlite3_get_autocommit</name><anchorfile>c3ref/get_autocommit.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_get_auxdata</name><anchorfile>c3ref/get_auxdata.html</anchorfile></member>
     <member kind="function"><name>sqlite3_initialize</name><anchorfile>c3ref/initialize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_interrupt</name><anchorfile>c3ref/interrupt.html</anchorfile></member>
     <member kind="function"><name>sqlite3_is_interrupted</name><anchorfile>c3ref/interrupt.html</anchorfile></member>
@@ -113,9 +114,12 @@
     <member kind="function"><name>sqlite3_result_int</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_int64</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_null</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_subtype</name><anchorfile>c3ref/result_subtype.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_text</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_value</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_zeroblob</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_rollback_hook</name><anchorfile>c3ref/commit_hook.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_set_auxdata</name><anchorfile>c3ref/get_auxdata.html</anchorfile></member>
     <member kind="function"><name>sqlite3_set_last_insert_rowid</name><anchorfile>c3ref/set_last_insert_rowid.html</anchorfile></member>
     <member kind="function"><name>sqlite3_shutdown</name><anchorfile>c3ref/initialize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_sql</name><anchorfile>c3ref/expanded_sql.html</anchorfile></member>
@@ -127,6 +131,7 @@
     <member kind="function"><name>sqlite3_table_column_metadata</name><anchorfile>c3ref/table_column_metadata.html</anchorfile></member>
     <member kind="function"><name>sqlite3_total_changes</name><anchorfile>c3ref/total_changes.html</anchorfile></member>
     <member kind="function"><name>sqlite3_txn_state</name><anchorfile>c3ref/txn_state.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_user_data</name><anchorfile>c3ref/user_data.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_dup</name><anchorfile>c3ref/value_dup.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_free</name><anchorfile>c3ref/value_dup.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_frombind</name><anchorfile>c3ref/value_blob.html</anchorfile></member>

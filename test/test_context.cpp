@@ -3,6 +3,7 @@
 #include <thinsqlitepp/context.hpp>
 
 #include <type_traits>
+#include <ostream>
 
 using namespace thinsqlitepp;
 using namespace std;

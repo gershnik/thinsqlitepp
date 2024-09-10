@@ -294,22 +294,57 @@ namespace thinsqlitepp
         void result(std::unique_ptr<T> ptr) noexcept
             { this->result(ptr.release(), typeid(T).name(), [](T * p) { delete p;}); }
         
+        /**
+         * Return a copy of the passed @ref value from the implemented SQL function.
+         * 
+         * Equivalent to ::sqlite3_result_value
+         */
         void result(const value & val) noexcept
             { sqlite3_result_value(c_ptr(), val.c_ptr()); }
       
 #if SQLITE_VERSION_NUMBER >= 3009000
+        /**
+         * Sets the subtype of the result of the implemented SQL function
+         * 
+         * Equivalent to ::sqlite3_result_subtype
+         * 
+         * @since SQLite 3.9
+         */
         void result_subtype(unsigned value) noexcept
             { sqlite3_result_subtype(c_ptr(), value); }
 #endif
         
+        /**
+         * Get auxiliary data associated with argument values.
+         * 
+         * Equivalent to ::sqlite3_get_auxdata
+         * 
+         * @tparam T type of the data
+         */
         template<class T>
         T * get_auxdata(int arg) const noexcept
             { return (T *)sqlite3_get_auxdata(this->c_ptr(), arg); }
         
+        /**
+         * Associate auxiliary data with argument values.
+         * 
+         * Equivalent to ::sqlite3_set_auxdata
+         * 
+         * @tparam T type of the data
+         */
         template<class T>
         void set_auxdata(int arg, T * data, void (*destroy)(T*)noexcept) noexcept
             { sqlite3_set_auxdata(this->c_ptr(), arg, data, (void(*)(void*))destroy); }
 
+        /**
+         * Return the function's user data.
+         * 
+         * Equivalent to ::sqlite3_user_data
+         * 
+         * User data can be associated with a function during creation.
+         * 
+         * @see database::create_function
+         */
         template<class T>
         T * user_data() noexcept
             { return (T *)sqlite3_user_data(this->c_ptr()); }

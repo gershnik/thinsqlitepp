@@ -12,6 +12,7 @@ on:
       - 'LICENSE'
       - '.github/workflows/publish.yml'
       - 'tools/**'
+      - '.docbuild/**'
 
 
 jobs:

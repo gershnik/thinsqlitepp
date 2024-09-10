@@ -37,9 +37,40 @@ standard library facilities it uses should generally not throw. However, it is p
 internal bug in this library might case standard library misuse and result in an
 `std::exception` being thrown. Any such instances should be considered fatal errors.
 
-Functions that are guaranteed not to throw are marked `noexcept` in this library API. This includes
-any callbacks you provide. The callbacks are usually invoked by SQLite which is a C library that 
-does not expect any calls to throw and will likely get into a corrupt state if they do.
+Functions that are guaranteed not to throw are marked `noexcept` in this library API. **This includes
+any callbacks** for class that accept them. The callbacks are usually invoked by SQLite which is a C library that 
+does not expect any calls to throw and will likely get into a corrupt state if they do. This means that
+lambda callbacks usually need to be declared like this:
+```cpp
+
+foo->func_with_callback([](arguments) noexcept {
+
+});
+```
+
+If you want to pass a function that is not declared as `noexcept` but is known not to throw you can
+either explicitly cast it or wrap in a lambda like above.
 
 ## Thread safety
+
+Classes in this library are generally thread-agnostic. Fake wrappers of SQLite types follow whatever
+thread-safety is in effect for the underlying SQLite type. Any utility classes provided by this library 
+follow the basic thread-safety guarantee: simultaneous reads (e.g. invocations of `const` member functions)
+are allowed from multiple threads; simultaneous writes (e.g. invocations of non-`const` member functions) 
+require synchronization.
+
+
+## Reference
+
+Browse the [list of topics](topics.html), content of the [thinsqlitepp namespace](namespacethinsqlitepp.html) or
+the [list of classes](annotated.html)
+
+## Bugs and suggestions
+
+Please don't hesitate to report any bugs or suggestions via [Github issues](https://github.com/gershnik/thinsqlitepp/issues).
+Bug reports are most welcome and all effort will be made to address them promptly.
+
+
+
+
 
