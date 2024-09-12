@@ -184,7 +184,7 @@ namespace thinsqlitepp
         /**
          * Return a string by reference from the implemented SQL function.
          * 
-         * Equivalent to ::sqlite3_result_text(..., destructor)
+         * Equivalent to ::sqlite3_result_text(..., unref)
          * 
          * The string content is used **by reference**. 
          * 
@@ -259,7 +259,7 @@ namespace thinsqlitepp
         /**
          * Return a blob by reference from the implemented SQL function.
          * 
-         * Equivalent to ::sqlite3_result_blob(..., destructor)
+         * Equivalent to ::sqlite3_result_blob(..., unref)
          * 
          * The blob content is used **by reference**. 
          * 

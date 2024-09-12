@@ -203,22 +203,22 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_bind_int
          */
-        void bind(int idx, int value)
-            { check_error(sqlite3_bind_int(c_ptr(), idx, value)); }
+        void bind(int idx, int val)
+            { check_error(sqlite3_bind_int(c_ptr(), idx, val)); }
         /**
          * Bind an int64_t value to a parameter of the statement
          * 
          * Equivalent to ::sqlite3_bind_int64
          */
-        void bind(int idx, int64_t value)
-            { check_error(sqlite3_bind_int64(c_ptr(), idx, value)); }
+        void bind(int idx, int64_t val)
+            { check_error(sqlite3_bind_int64(c_ptr(), idx, val)); }
         /**
          * Bind a double value to a parameter of the statement
          * 
          * Equivalent to ::sqlite3_bind_double
          */
-        void bind(int idx, double value)
-            { check_error(sqlite3_bind_double(c_ptr(), idx, value)); }
+        void bind(int idx, double val)
+            { check_error(sqlite3_bind_double(c_ptr(), idx, val)); }
 
         
         /**
@@ -230,7 +230,7 @@ namespace thinsqlitepp
          * Thus the lifetime of the string referred to by `value` parameter is 
          * independent of the statement's
          */
-        void bind(int idx, const std::string_view & value);
+        void bind(int idx, const std::string_view & val);
 
         /**
          * Bind a string reference to a parameter of the statement
@@ -241,7 +241,21 @@ namespace thinsqlitepp
          * Thus the string referred to by `value` parameter must
          * remain valid during this statement's lifetime.
          */
-        void bind_reference(int idx, const std::string_view & value);
+        void bind_reference(int idx, const std::string_view & val);
+
+        /**
+         * Bind a string reference to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_text(..., unref)
+         * 
+         * The string content is used **by reference**.
+         * 
+         * @param idx index of the SQL parameter to be bound 
+         * @param val reference to string to bind to the parameter
+         * @param unref called when the reference is no longer needed. 
+         * Its argument is the pointer returned from `value.data()`
+         */
+        void bind_reference(int idx, const std::string_view & val, void (*unref)(const char *));
 
     #if __cpp_char8_t >= 201811
         /**
@@ -249,14 +263,21 @@ namespace thinsqlitepp
          * 
          * char8_t overload for bind(int, const std::string_view &)
          */
-        void bind(int idx, const std::u8string_view & value);
+        void bind(int idx, const std::u8string_view & val);
 
         /**
          * Bind a string reference to a parameter of the statement
          * 
          * char8_t overload for bind_reference(int, const std::string_view &)
          */
-        void bind_reference(int idx, const std::u8string_view & value);
+        void bind_reference(int idx, const std::u8string_view & val);
+
+        /**
+         * Bind a string reference to a parameter of the statement
+         * 
+         * char8_t overload for bind_reference(int, const std::string_view &, void (*)(const char *))
+         */
+        void bind_reference(int idx, const std::u8string_view & val, void (*unref)(const char8_t *));
     #endif
 
         /**
@@ -268,7 +289,7 @@ namespace thinsqlitepp
          * Thus the lifetime of the blob referred to by `value` parameter is 
          * independent of the statement's
          */
-        void bind(int idx, const blob_view & value);
+        void bind(int idx, const blob_view & val);
 
         /**
          * Bind a blob reference to a parameter of the statement
@@ -279,15 +300,29 @@ namespace thinsqlitepp
          * Thus the string referred to by `value` parameter must
          * remain valid during this statement's lifetime.
          */
-        void bind_reference(int idx, const blob_view & value);
+        void bind_reference(int idx, const blob_view & val);
+
+        /**
+         * Bind a blob reference to a parameter of the statement
+         * 
+         * Equivalent to ::sqlite3_bind_blob (..., unref)
+         * 
+         * The blob content is used **by reference**.
+         * 
+         * @param idx index of the SQL parameter to be bound 
+         * @param val reference to blob to bind to the parameter
+         * @param unref called when the reference is no longer needed. 
+         * Its argument is the pointer returned from `value.data()`
+         */
+        void bind_reference(int idx, const blob_view & val, void (*unref)(const std::byte *));
 
         /**
          * Bind a blob of zeroes to a parameter of the statement
          * 
          * Equivalent to ::sqlite3_bind_zeroblob.
          */
-        void bind(int idx, const zero_blob & value)
-            { check_error(sqlite3_bind_zeroblob(c_ptr(), idx, int(value.size()))); }
+        void bind(int idx, const zero_blob & val)
+            { check_error(sqlite3_bind_zeroblob(c_ptr(), idx, int(val.size()))); }
 
         /**
          * Bind a custom pointer to a parameter of the statement

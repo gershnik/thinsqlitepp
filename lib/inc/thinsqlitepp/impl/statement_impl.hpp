@@ -65,52 +65,91 @@ namespace thinsqlitepp
 
     inline void statement::bind(int idx, const std::string_view & value)
     {
-        check_error(sqlite3_bind_text(c_ptr(), idx,
-                                      value.size() ? &value[0] : "",
-                                      int(value.size()),
-                                      SQLITE_TRANSIENT));
+        if (auto data = value.data())
+            check_error(sqlite3_bind_text(c_ptr(), idx, data, int(value.size()), SQLITE_TRANSIENT));
+        else
+            check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
     }
 
     inline void statement::bind_reference(int idx, const std::string_view & value)
     {
-        check_error(sqlite3_bind_text(c_ptr(), idx,
-                                      value.size() ? &value[0] : "",
-                                      int(value.size()),
-                                      SQLITE_STATIC));
+        if (auto data = value.data())
+            check_error(sqlite3_bind_text(c_ptr(), idx, data, int(value.size()), SQLITE_STATIC));
+        else
+            check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
+    }
+
+    inline void statement::bind_reference(int idx, const std::string_view & value, void (*unref)(const char *))
+    {
+        if (auto data = value.data())
+        {
+            check_error(sqlite3_bind_text(c_ptr(), idx, data, int(value.size()), (void (*)(void *))unref));
+        }
+        else
+        {
+            unref(data);
+            check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
+        }
     }
 
 #if __cpp_char8_t >= 201811
     inline void statement::bind(int idx, const std::u8string_view & value)
     {
-        check_error(sqlite3_bind_text(c_ptr(), idx,
-                                      value.size() ? (const char *)&value[0] : "",
-                                      int(value.size()),
-                                      SQLITE_TRANSIENT));
+        if (auto data = value.data())
+            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int(value.size()), SQLITE_TRANSIENT));
+        else
+            check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
     }
 
     inline void statement::bind_reference(int idx, const std::u8string_view & value)
     {
-        check_error(sqlite3_bind_text(c_ptr(), idx,
-                                      value.size() ? (const char *)&value[0] : "",
-                                      int(value.size()),
-                                      SQLITE_STATIC));
+        if (auto data = value.data())
+            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int(value.size()), SQLITE_STATIC));
+        else
+            check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
+    }
+
+    inline void statement::bind_reference(int idx, const std::u8string_view & value, void (*unref)(const char8_t *))
+    {
+        if (auto data = value.data())
+        {
+            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int(value.size()), (void (*)(void *))unref));
+        }
+        else
+        {
+            unref(data);
+            check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
+        }
     }
 #endif
 
     inline void statement::bind(int idx, const blob_view & value)
     {
-        check_error(sqlite3_bind_blob(c_ptr(), idx,
-                                      value.size() ? &value[0] : (const std::byte *)"",
-                                      int(value.size()),
-                                      SQLITE_TRANSIENT));
+        if (auto data = value.data())
+            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int(value.size()), SQLITE_TRANSIENT));
+        else
+            check_error(sqlite3_bind_zeroblob(c_ptr(), idx, 0));
     }
 
     inline void statement::bind_reference(int idx, const blob_view & value)
     {
-        check_error(sqlite3_bind_blob(c_ptr(), idx,
-                                      value.size() ? &value[0] : (const std::byte *)"",
-                                      int(value.size()),
-                                      SQLITE_STATIC));
+        if (auto data = value.data())
+            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int(value.size()), SQLITE_STATIC));
+        else
+            check_error(sqlite3_bind_zeroblob(c_ptr(), idx, 0));
+    }
+
+    inline void statement::bind_reference(int idx, const blob_view & value, void (*unref)(const std::byte *))
+    {
+        if (auto data = value.data())
+        {
+            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int(value.size()), (void (*)(void *))unref));
+        }
+        else
+        {
+            unref(data);
+            check_error(sqlite3_bind_zeroblob(c_ptr(), idx, 0));
+        }
     }
     
     inline void statement::bind(int idx, const value & val)
