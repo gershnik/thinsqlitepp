@@ -191,7 +191,7 @@ namespace thinsqlitepp
             { return _error.system(); }
         
         /// Returns the stored error
-        const class error & error() noexcept
+        const class error & error() const noexcept
             { return _error; }
 
         /**

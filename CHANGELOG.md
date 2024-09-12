@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 - `statement::bind_reference` overloads that accept callback called on dereference
 
+### Fixed
+- `exception::error` is now `const`
+
 ## [1.2] - 2024-09-10
 
 ### Added
