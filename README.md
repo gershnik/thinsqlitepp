@@ -44,6 +44,8 @@ Using SQLite C API from C++ can be quite tedious and error prone. While the API 
 
 Full reference documentation is available at https://gershnik.github.io/thinsqlitepp/
 
+If you are not already familiar with SQLite C interface a good place to start is [An Introduction To ThinSQLite++](https://gershnik.github.io/thinsqlitepp/intro.html) page.
+
 ## Goals
 
 1. **0 overhead**. Using the library should introduce no overhead compared to an equivalent and *correct* C API use when compiled with optimizations turned on. In particular it should not introduce any memory allocations where an equivalent *correct* C code wouldn't.
@@ -112,7 +114,7 @@ try {
         assert(r[0].value<int>() == 42);
         return true;
     });
-    
+
 } catch (thinsqlitepp::exception & ex) {
     int err = ex.primary_error_code();
     int ext = ex.extended_error_code();

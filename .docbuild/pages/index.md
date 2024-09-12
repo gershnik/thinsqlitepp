@@ -1,6 +1,8 @@
 This is reference documentation for ThinSQLite++ library. For overview, rationale and other links see
 [GitHub README](https://github.com/gershnik/thinsqlitepp)
 
+[TOC]
+
 ## Basics
 
 The library is header only. In order to use it you need to either include an umbrella header:
@@ -20,7 +22,7 @@ is assumed for all code samples in this documentation.
 This library depends only on C++ standard library and SQLite. A header named `sqlite3.h` must be present
 in include path for it to compile.
 
-## Memory handling
+### Memory handling
 
 ThinSQLite++ code does not allocate any memory on its own. Any dynamic memory allocation that happens
 during its use is done by SQLite and is exactly the same as would have been if using its C API.
@@ -29,7 +31,7 @@ Ownership of allocated pointers is indicated by passing `std::unique_ptr<foo>` w
 by plain `foo *`. The library uses RAII pervasively and there should be no need to manually manage object 
 lifetimes while using it.
 
-## Error handling
+### Error handling
 
 All errors reported by SQLite as well as any internal issues this library detects are thrown 
 as `thinsqlitepp::exception` exceptions. Since ThinSQLite++ does not allocate memory the C++
@@ -51,7 +53,7 @@ foo->func_with_callback([](arguments) noexcept {
 If you want to pass a function that is not declared as `noexcept` but is known not to throw you can
 either explicitly cast it or wrap in a lambda like above.
 
-## Thread safety
+### Thread safety
 
 Classes in this library are generally thread-agnostic. Fake wrappers of SQLite types follow whatever
 thread-safety is in effect for the underlying SQLite type. Any utility classes provided by this library 
@@ -59,11 +61,11 @@ follow the basic thread-safety guarantee: simultaneous reads (e.g. invocations o
 are allowed from multiple threads; simultaneous writes (e.g. invocations of non-`const` member functions) 
 require synchronization.
 
+## More info
 
-## Reference
+Start with [An Introduction To ThinSQLite++](intro.md) page, especially if you are not already familiar with SQLite C interface.
 
-Browse the [list of topics](topics.html), content of the [thinsqlitepp namespace](namespacethinsqlitepp.html) or
-the [list of classes](annotated.html)
+Otherwise, browse the [**list of topics**](topics.html)</b>, content of the @ref thinsqlitepp "thinsqlitepp namespace" or the [**list of classes**](annotated.html)
 
 ## Bugs and suggestions
 

@@ -176,13 +176,21 @@ namespace thinsqlitepp
 #endif
         
         /**
-         * Determine the statement writes to the database
+         * Determine if the statement writes to the database
          * 
          * Equivalent to ::sqlite3_stmt_readonly
          */
         bool readonly() const noexcept
             { return sqlite3_stmt_readonly(c_ptr()); }
-        
+
+        /** @{
+         * @anchor statement_bind
+         * @name Binding values to parameters
+         * 
+         * This set of overloaded functions wraps @ref sqlite3_bind_ function
+         * group. 
+         */
+
         /**
          * Bind a NULL value to a parameter of the statement
          * 
@@ -311,7 +319,14 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_bind_value. 
          */
         void bind(int idx, const value & val);
+
+        ///@}
         
+        /** @{
+         * @anchor statement_managing_binding
+         * @name Managing parameter bindings
+         */
+
         /**
          * Reset all bindings on the statement
          * 
@@ -344,47 +359,9 @@ namespace thinsqlitepp
         const char * bind_parameter_name(int idx) const noexcept
             { return sqlite3_bind_parameter_name(c_ptr(), idx); }
 
-    private:
-        template<typename T>
-        static constexpr bool supported_column_type = 
-            std::is_same_v<T, int> ||
-            std::is_same_v<T, int64_t> ||
-            std::is_same_v<T, double> ||
-            std::is_same_v<T, std::string_view> ||
-        #if __cpp_char8_t >= 201811
-            std::is_same_v<T, std::u8string_view> ||
-        #endif
-            std::is_same_v<T, blob_view>;
+        ///@}
 
-    public:
-        
-        /**
-         * Get result value from a query 
-         * 
-         * Wraps @ref sqlite3_column_ function family. Unlike the C API you specify the
-         * desired type via T template parameter
-         * 
-         * @tparam T Desired output type. Must be one of:
-         * - int
-         * - int64_t
-         * - double
-         * - std::string_view
-         * - std::u8string_view (if `char8_t` is supported by your compiler/library)
-         * - blob_view
-         * @param idx Column index
-         */
-        template<class T>
-        SQLITEPP_ENABLE_IF(supported_column_type<T>,
-        T) column_value(int idx) const noexcept;
-        
-        /**
-         * Get result values from a query as a raw @ref value object
-         * 
-         * Equivalent to ::sqlite3_column_value
-         */
-        const value & raw_column_value(int idx) const noexcept
-            { return *(const value *)sqlite3_column_value(c_ptr(), idx); }
-        
+
         /**
          * Number of columns in a result set
          * 
@@ -412,7 +389,53 @@ namespace thinsqlitepp
          */
         int data_count() const noexcept
             { return sqlite3_data_count(c_ptr()); }
+
+    private:
+        template<typename T>
+        static constexpr bool supported_column_type = 
+            std::is_same_v<T, int> ||
+            std::is_same_v<T, int64_t> ||
+            std::is_same_v<T, double> ||
+            std::is_same_v<T, std::string_view> ||
+        #if __cpp_char8_t >= 201811
+            std::is_same_v<T, std::u8string_view> ||
+        #endif
+            std::is_same_v<T, blob_view>;
+
+    public:
+
+        /** @{
+         * @anchor statement_column_info
+         * @name Obtaining query results information by column
+         */
         
+        /**
+         * Get result value from a query 
+         * 
+         * Wraps @ref sqlite3_column_ function family. Unlike the C API you specify the
+         * desired type via T template parameter
+         * 
+         * @tparam T Desired output type. Must be one of:
+         * - int
+         * - int64_t
+         * - double
+         * - std::string_view
+         * - std::u8string_view (if `char8_t` is supported by your compiler/library)
+         * - blob_view
+         * @param idx Column index
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(supported_column_type<T>,
+        T) column_value(int idx) const noexcept;
+        
+        /**
+         * Get result values from a query as a raw @ref value object
+         * 
+         * Equivalent to ::sqlite3_column_value
+         */
+        const value & raw_column_value(int idx) const noexcept
+            { return *(const value *)sqlite3_column_value(c_ptr(), idx); }
+
         /**
          * Default datatype of the result column
          * 
@@ -467,6 +490,8 @@ namespace thinsqlitepp
          */
         const char * column_declared_type(int idx) const noexcept
             { return sqlite3_column_decltype(c_ptr(), idx); }
+
+        ///@}
         
         /**
          * Returns a pointer to a copy of the SQL text used to create the statement

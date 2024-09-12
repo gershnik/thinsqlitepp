@@ -101,6 +101,7 @@
     <member kind="function"><name>sqlite3_mutex_try</name><anchorfile>c3ref/mutex_alloc.html</anchorfile></member>
     <member kind="function"><name>sqlite3_next_stmt</name><anchorfile>c3ref/next_stmt.html</anchorfile></member>
     <member kind="function"><name>sqlite3_open_v2</name><anchorfile>c3ref/open.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_overload_function</name><anchorfile>c3ref/overload_function.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v2</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_prepare_v3</name><anchorfile>c3ref/prepare.html</anchorfile></member>
     <member kind="function"><name>sqlite3_progress_handler</name><anchorfile>c3ref/progress_handler.html</anchorfile></member>

@@ -108,6 +108,31 @@ namespace thinsqlitepp
             { sqlite3_close_v2(c_ptr()); }
         
         
+        //MARK:-
+
+        /**
+         * Set a busy timeout
+         * 
+         * Equivalent to ::sqlite3_busy_timeout
+         */
+        void busy_timeout(int ms)
+            { check_error(sqlite3_busy_timeout(c_ptr(), ms)); }
+        
+        //MARK:-
+
+        /**
+         * Count of the number of rows modified
+         * 
+         * Equivalent to ::sqlite3_changes
+         */
+        int changes() const noexcept
+            { return sqlite3_changes(c_ptr()); }
+
+        /** @{
+         * @anchor database_callbacks
+         * @name Callbacks and notifications
+         */
+
         //MARK:- busy_handler
 
         /**
@@ -142,26 +167,6 @@ namespace thinsqlitepp
         SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T, int>),
         void) busy_handler(T handler_ptr);
         
-        
-        //MARK:-
-
-        /**
-         * Set a busy timeout
-         * 
-         * Equivalent to ::sqlite3_busy_timeout
-         */
-        void busy_timeout(int ms)
-            { check_error(sqlite3_busy_timeout(c_ptr(), ms)); }
-        
-        //MARK:-
-
-        /**
-         * Count of the number of rows modified
-         * 
-         * Equivalent to ::sqlite3_changes
-         */
-        int changes() const noexcept
-            { return sqlite3_changes(c_ptr()); }
         
         //MARK:- collation_needed
 
@@ -265,9 +270,15 @@ namespace thinsqlitepp
         template<class T>
         SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T>),
         void) rollback_hook(T handler_ptr) noexcept;
-        
+
+        /// @}
         
         //MARK:- create_collation
+
+        /** @{
+         * @anchor database_create_collation
+         * @name Defining collating sequences
+         */
         
         /**
          * Define a new collating sequence
@@ -313,8 +324,15 @@ namespace thinsqlitepp
         SQLITEPP_ENABLE_IF((is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),
         void) create_collation(const string_param & name, int encoding, T collator_ptr, 
                               void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
+
+        /// @}
         
         //MARK:- create_function
+
+        /** @{
+         * @anchor database_create_function
+         * @name Creating or redefining SQL functions
+         */
         
         /**
          * Create or redefine SQL function
@@ -449,6 +467,8 @@ namespace thinsqlitepp
         void) create_window_function(const char * name, int arg_count, int flags, 
                                      T impl_ptr, void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
 #endif
+
+        ///@}
         
         //MARK:-
 #if SQLITE_VERSION_NUMBER >= 3010000
@@ -571,6 +591,11 @@ namespace thinsqlitepp
         
         //MARK:- exec
 
+        /** @{
+         * @anchor database_exec
+         * @name Executing queries
+         */
+
         /**
          * Run multiple statements of SQL
          * 
@@ -633,6 +658,8 @@ namespace thinsqlitepp
         T exec(std::u8string_view sql, T callback)
             {  return exec(std::string_view((const char *)sql.data(), sql.size()), callback); }
     #endif
+
+        /// @}
         
         //MARK:-
         
@@ -744,6 +771,11 @@ namespace thinsqlitepp
         class statement * next_statement(const class statement * prev) noexcept
             { return (class statement *)sqlite3_next_stmt(c_ptr(), (sqlite3_stmt *)prev); }
         
+        /**
+         * Overload a function for a virtual table
+         * 
+         * Equivalent to ::sqlite3_overload_function
+         */
         void overload_function(const string_param & name, int arg_count) noexcept
             { check_error(sqlite3_overload_function(c_ptr(), name.c_str(), arg_count)); }
         
