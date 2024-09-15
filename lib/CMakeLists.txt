@@ -45,6 +45,7 @@ set(PUBLIC_HEADERS
     inc/thinsqlitepp/database.hpp
     inc/thinsqlitepp/exception.hpp
     inc/thinsqlitepp/global.hpp
+    inc/thinsqlitepp/memory.hpp
     inc/thinsqlitepp/mutex.hpp
     inc/thinsqlitepp/statement.hpp
     inc/thinsqlitepp/value.hpp
@@ -61,7 +62,7 @@ set(IMPL_HEADERS
     inc/thinsqlitepp/impl/exception_impl.hpp
     inc/thinsqlitepp/impl/global_iface.hpp
     inc/thinsqlitepp/impl/handle.hpp
-    inc/thinsqlitepp/impl/memory.hpp
+    inc/thinsqlitepp/impl/memory_iface.hpp
     inc/thinsqlitepp/impl/meta.hpp
     inc/thinsqlitepp/impl/mutex_iface.hpp
     inc/thinsqlitepp/impl/row_iterator.hpp

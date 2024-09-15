@@ -15,14 +15,14 @@
 namespace thinsqlitepp
 {
     inline std::unique_ptr<statement> statement::create(const class database & db, const string_param & sql
-#if SQLITE_VERSION_NUMBER >= 3020000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
                                                         , unsigned int flags
 #endif
                                                         )
     {
         const char * tail = nullptr;
         sqlite3_stmt * ret = nullptr;
-#if SQLITE_VERSION_NUMBER >= 3020000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
         int res = sqlite3_prepare_v3(db.c_ptr(), sql.c_str(), -1, flags, &ret, &tail);
 #else
         int res = sqlite3_prepare_v2(db.c_ptr(), sql.c_str(), -1, &ret, &tail);
@@ -33,7 +33,7 @@ namespace thinsqlitepp
     }
 
     inline std::unique_ptr<statement> statement::create(const class database & db, std::string_view & sql
-#if SQLITE_VERSION_NUMBER >= 3020000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
                                                         , unsigned int flags
 #endif
                                                         )
@@ -41,7 +41,7 @@ namespace thinsqlitepp
         const char * start = sql.size() ? &sql[0] : "";
         const char * tail = nullptr;
         sqlite3_stmt * ret = nullptr;
-#if SQLITE_VERSION_NUMBER >= 3020000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
         int res = sqlite3_prepare_v3(db.c_ptr(), start, int(sql.size()), flags, &ret, &tail);
 #else
         int res = sqlite3_prepare_v2(db.c_ptr(), start, int(sql.size()), &ret, &tail);
@@ -185,7 +185,7 @@ namespace thinsqlitepp
         return blob_view(first, first + size);
     }
 
-#if SQLITE_VERSION_NUMBER >= 3014000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 14, 0)
     inline allocated_string statement::expanded_sql() const
     {
         auto ret = sqlite3_expanded_sql(c_ptr());

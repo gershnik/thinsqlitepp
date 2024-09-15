@@ -402,7 +402,7 @@ namespace thinsqlitepp
         
         //MARK:- create_window_function
 
-#if SQLITE_VERSION_NUMBER >= 3025000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 25, 0)
 
         /**
          * Create or redefine SQL [aggregate window function](https://www.sqlite.org/windowfunctions.html#aggwinfunc)
@@ -471,7 +471,7 @@ namespace thinsqlitepp
         ///@}
         
         //MARK:-
-#if SQLITE_VERSION_NUMBER >= 3010000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) 
         /**
          * Flush caches to disk mid-transaction
          * 
@@ -512,8 +512,50 @@ namespace thinsqlitepp
             { config_mapping<Code>::type::apply(*this, std::forward<Args>(args)...); }
         
 
+        //MARK:-
+
+        /** @{
+         * @anchor modules
+         * @name Virtual Table Modules
+         */
+
+        /**
+         * Register a virtual table implementation
+         * 
+         * Equivalent to ::sqlite3_create_module_v2
+         * 
+         * @param name name of the module
+         * @param mod pointer to ::sqlite3_module "vtable"
+         */
+        void create_module(const string_param & name, const sqlite3_module * mod)
+            { check_error(sqlite3_create_module_v2(c_ptr(), name.c_str(), mod, nullptr, nullptr)); }
+
+        /**
+         * Register a virtual table implementation
+         * 
+         * Equivalent to ::sqlite3_create_module_v2
+         * 
+         * @param name name of the module
+         * @param mod pointer to ::sqlite3_module "vtable"
+         * @param data data to be passed to virtual table xCreate function. Can be nullptr
+         * @param destructor function to call when data is no longer needed. Can be nullptr
+         */
+        template<typename T>
+        void create_module(const string_param & name, const sqlite3_module * mod, 
+                           T * data, void(*destructor)(T *) = nullptr)
+            { check_error(sqlite3_create_module_v2(c_ptr(), name.c_str(), mod, (void*)data, (void (*)(void *))destructor)); }
+
+        
+        /**
+         * Declare the schema of a virtual table
+         * 
+         * Equivalent to ::sqlite3_declare_vtab
+         */
+        void declare_vtab(const string_param & sdl)
+            { check_error(sqlite3_declare_vtab(c_ptr(), sdl.c_str())); }
+
         //MARK:- drop_modules
-#if SQLITE_VERSION_NUMBER >= 3030000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 30, 0)
         /**
          * Remove all virtual table modules from database connection
          * 
@@ -568,6 +610,8 @@ namespace thinsqlitepp
             check_error(sqlite3_drop_modules(this->c_ptr(), buf));
         }
 #endif
+
+        /// @}
         
         //MARK:-
 
@@ -698,7 +742,7 @@ namespace thinsqlitepp
         void interrupt() noexcept
             { sqlite3_interrupt(c_ptr()); }
 
-    #if SQLITE_VERSION_NUMBER >= 3041000
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 41, 0)
         /**
          * Returns whether or not an interrupt is currently in effect
          * 
@@ -718,7 +762,7 @@ namespace thinsqlitepp
         int64_t last_insert_rowid() const noexcept
             { return sqlite3_last_insert_rowid(c_ptr()); }
         
-#if SQLITE_VERSION_NUMBER >= 3018000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 18, 0)
         /** 
          * Set the last insert rowid value
          * 
@@ -890,7 +934,7 @@ namespace thinsqlitepp
         int total_changes() const noexcept
             { return sqlite3_total_changes(c_ptr()); }
         
-#if SQLITE_VERSION_NUMBER >= 3034000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 34, 0)
 
         /**
          * Returns the transaction state of a database

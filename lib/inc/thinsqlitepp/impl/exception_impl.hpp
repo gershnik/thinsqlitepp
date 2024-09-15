@@ -30,7 +30,7 @@ namespace thinsqlitepp
             return;
         
         _error_code = db_error_code;
-#if SQLITE_VERSION_NUMBER >= 3012000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 12, 0)
         _system_error_code = sqlite3_system_errno(c_ptr(db));
 #endif
         auto db_message = sqlite3_errmsg(c_ptr(db));

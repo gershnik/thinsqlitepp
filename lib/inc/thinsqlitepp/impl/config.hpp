@@ -15,9 +15,11 @@
 
 #endif
 
-#if SQLITE_VERSION_NUMBER < 3007015
+#define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
 
-#error This library requires SQLite 3.7.15 or greater
+#if SQLITE_VERSION_NUMBER < SQLITEPP_SQLITE_VERSION(3, 7, 15)
+
+    #error This library requires SQLite 3.7.15 or greater
 
 #endif
 

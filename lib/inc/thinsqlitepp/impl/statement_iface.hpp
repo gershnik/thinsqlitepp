@@ -12,7 +12,7 @@
 #include "handle.hpp"
 #include "string_param.hpp"
 #include "span.hpp"
-#include "memory.hpp"
+#include "memory_iface.hpp"
 
 #include <utility>
 #include <string>
@@ -51,7 +51,7 @@ namespace thinsqlitepp
          * @param flags Zero or more SQLITE_PREPARE_ flags. Only available for SQLite 3.2 or greater
          */
         static std::unique_ptr<statement> create(const database & db, const string_param & sql
-                                            #if SQLITE_VERSION_NUMBER >= 3020000
+                                            #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
                                                  , unsigned int flags = 0
                                             #endif
                                                  );
@@ -69,7 +69,7 @@ namespace thinsqlitepp
          * @param flags Zero or more SQLITE_PREPARE_ flags. Only available for SQLite 3.2 or greater
          */
         static std::unique_ptr<statement> create(const database & db, std::string_view & sql
-                                            #if SQLITE_VERSION_NUMBER >= 3020000
+                                            #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
                                                  , unsigned int flags = 0
                                             #endif
                                                  );
@@ -81,13 +81,13 @@ namespace thinsqlitepp
          * char8_t overload for create(const database &, const string_param &, unsigned int)
          */ 
         static std::unique_ptr<statement> create(const database & db, const u8string_param & sql
-                                            #if SQLITE_VERSION_NUMBER >= 3020000
+                                            #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
                                                  , unsigned int flags = 0
                                             #endif
                                                  )
         {
             return create(db, (const char *)sql.c_str()
-                        #if SQLITE_VERSION_NUMBER >= 3020000
+                        #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
                           , flags
                         #endif
                    );
@@ -99,13 +99,13 @@ namespace thinsqlitepp
          * char8_t overload for create(const database &, std::string_view &, unsigned int)
          */
         static std::unique_ptr<statement> create(const database & db, std::u8string_view & sql
-                                            #if SQLITE_VERSION_NUMBER >= 3020000
+                                            #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
                                                  , unsigned int flags = 0
                                             #endif
                                                  )
         {
             return create(db, *reinterpret_cast<std::string_view *>(&sql)
-                        #if SQLITE_VERSION_NUMBER >= 3020000
+                        #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
                           , flags
                         #endif
                    );
@@ -163,7 +163,7 @@ namespace thinsqlitepp
         };
         
         
-#if SQLITE_VERSION_NUMBER >= 3031001
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 31, 1)
         /**
          * Query the EXPLAIN Setting for the statement
          * 
@@ -536,7 +536,7 @@ namespace thinsqlitepp
         const char * sql() const noexcept
             { return sqlite3_sql(c_ptr()); }
         
-#if SQLITE_VERSION_NUMBER >= 3014000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 14, 0)
         /**
          * Returns SQL text of the statement with bound parameters expanded
          * 

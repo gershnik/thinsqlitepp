@@ -97,7 +97,7 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "database creation") {
         REQUIRE(flags == (SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX));
         REQUIRE(zVfs == nullptr);
         errcode = real_sqlite3_open_v2(filename, ppDb, flags, zVfs);
-#if SQLITE_VERSION_NUMBER >= 3012000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 12, 0)
         sys_errcode = sqlite3_system_errno(*ppDb);
 #else
         sys_errcode = 0;
@@ -435,7 +435,7 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create function") {
     });
     db->create_function("hoho", 1, SQLITE_UTF8, nullptr);
     
-#if SQLITE_VERSION_NUMBER >= 3025000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 25, 0)
     struct window
     {
         void step(context *, int, value **) noexcept {
@@ -507,7 +507,7 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create function") {
 #endif
 }
 
-#if SQLITE_VERSION_NUMBER >= 3030000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 30, 0)
 
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "drop modules") {
     

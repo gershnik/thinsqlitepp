@@ -307,7 +307,7 @@ namespace thinsqlitepp
         void result(const value & val) noexcept
             { sqlite3_result_value(c_ptr(), val.c_ptr()); }
       
-#if SQLITE_VERSION_NUMBER >= 3009000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 9, 0)
         /**
          * Sets the subtype of the result of the implemented SQL function
          * 

@@ -45,7 +45,7 @@ TEST_CASE( "statement looping" ) {
     REQUIRE(stmt);
     
     CHECK(stmt->sql() == "SELECT * FROM foo"s);
-#if SQLITE_VERSION_NUMBER >= 3014000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 14, 0)
     CHECK(stmt->expanded_sql().get() == "SELECT * FROM foo"s);
 #endif
     

@@ -229,7 +229,7 @@ namespace thinsqlitepp
         this->create_function(name, arg_count, flags, impl, func, step, last, destroy);
     }
 
-#if SQLITE_VERSION_NUMBER >= 3025000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 25, 0)
     template<class T>
     SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
     void) database::create_window_function(const char * name, int arg_count, int flags, T data,

@@ -8,6 +8,7 @@
   <compound kind="struct"><name>sqlite3_stmt</name><filename>c3ref/stmt.html</filename></compound>
   <compound kind="struct"><name>sqlite3_value</name><filename>c3ref/value.html</filename></compound>
   <compound kind="struct"><name>sqlite3_mem_methods</name><filename>c3ref/mem_methods.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_module</name><filename>c3ref/module.html</filename></compound>
   <compound kind="struct"><name>sqlite3_mutex</name><filename>c3ref/mutex.html</filename></compound>
   <compound kind="struct"><name>sqlite3_mutex_methods</name><filename>c3ref/mutex_methods.html</filename></compound>
   <compound kind="struct"><name>sqlite3_pcache_methods2</name><filename>c3ref/pcache_methods2.html</filename></compound>
@@ -66,6 +67,7 @@
     <member kind="function"><name>sqlite3_context_db_handle</name><anchorfile>c3ref/context_db_handle.html</anchorfile></member>
     <member kind="function"><name>sqlite3_create_collation_v2</name><anchorfile>c3ref/create_collation.html</anchorfile></member>
     <member kind="function"><name>sqlite3_create_function_v2</name><anchorfile>c3ref/create_function.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_create_module_v2</name><anchorfile>c3ref/create_module.html</anchorfile></member>
     <member kind="function"><name>sqlite3_create_window_function</name><anchorfile>c3ref/create_function.html</anchorfile></member>
     <member kind="function"><name>sqlite3_data_count</name><anchorfile>c3ref/data_count.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_cacheflush</name><anchorfile>c3ref/db_cacheflush.html</anchorfile></member>
@@ -76,6 +78,7 @@
     <member kind="function"><name>sqlite3_db_readonly</name><anchorfile>c3ref/db_readonly.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_release_memory</name><anchorfile>c3ref/db_release_memory.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_status</name><anchorfile>c3ref/db_status.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_declare_vtab</name><anchorfile>c3ref/declare_vtab.html</anchorfile></member>
     <member kind="function"><name>sqlite3_drop_modules</name><anchorfile>c3ref/drop_modules.html</anchorfile></member>
     <member kind="function"><name>sqlite3_enable_load_extension</name><anchorfile>c3ref/enable_load_extension.html</anchorfile></member>
     <member kind="function"><name>sqlite3_errmsg</name><anchorfile>c3ref/errcode.html</anchorfile></member>
@@ -95,6 +98,8 @@
     <member kind="function"><name>sqlite3_last_insert_rowid</name><anchorfile>c3ref/last_insert_rowid.html</anchorfile></member>
     <member kind="function"><name>sqlite3_limit</name><anchorfile>c3ref/limit.html</anchorfile></member>
     <member kind="function"><name>sqlite3_load_extension</name><anchorfile>c3ref/load_extension.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_malloc</name><anchorfile>c3ref/free.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_malloc64</name><anchorfile>c3ref/free.html</anchorfile></member>
     <member kind="function"><name>sqlite3_mutex_alloc</name><anchorfile>c3ref/mutex_alloc.html</anchorfile></member>
     <member kind="function"><name>sqlite3_mutex_enter</name><anchorfile>c3ref/mutex_alloc.html</anchorfile></member>
     <member kind="function"><name>sqlite3_mutex_leave</name><anchorfile>c3ref/mutex_alloc.html</anchorfile></member>

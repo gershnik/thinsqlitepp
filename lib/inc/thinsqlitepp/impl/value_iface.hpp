@@ -34,7 +34,7 @@ namespace thinsqlitepp
     class value final : public handle<sqlite3_value, value>
     {
     public:
-#if SQLITE_VERSION_NUMBER >= 3018011
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 18, 11)
         /**
          * Creates a new value by copying an original one
          * 
@@ -109,7 +109,7 @@ namespace thinsqlitepp
         int type() const noexcept
             { return sqlite3_value_type(c_ptr()); }
         
-#if SQLITE_VERSION_NUMBER >= 3009000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 9, 0)
         /**
          * Subtype of the value
          * 
@@ -131,7 +131,7 @@ namespace thinsqlitepp
         int numeric_type() const noexcept
             { return sqlite3_value_numeric_type(c_ptr()); }
         
-#if SQLITE_VERSION_NUMBER >= 3022000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 22, 0)
         /**
          * Whether the column is unchanged in an UPDATE against a virtual table.
          * 
@@ -143,7 +143,7 @@ namespace thinsqlitepp
             { return sqlite3_value_nochange(c_ptr()); }
 #endif
         
-#if SQLITE_VERSION_NUMBER >= 3028000
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 28, 0)
         /**
          * Whether if value originated from a [bound parameter](https://www.sqlite.org/lang_expr.html#varparam)
          * 
