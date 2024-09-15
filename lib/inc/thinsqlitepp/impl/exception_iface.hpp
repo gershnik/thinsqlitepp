@@ -130,6 +130,22 @@ namespace thinsqlitepp
         const char * message() const noexcept
             { return _message.get(); }
         
+        /**
+         * Move the message out of this object
+         * 
+         * This allows returning messages to SQLite from callbacks
+         * without allocating a copy
+         */
+        message_ptr extract_message() & noexcept
+            { return std::move(_message); }
+        /**
+         * Move the message out of this object
+         * 
+         * This allows returning messages to SQLite from callbacks
+         * without allocating a copy
+         */
+        message_ptr extract_message() && noexcept
+            { return std::move(_message); }
     private:
         static message_ptr copy_message(const char * src) noexcept;
     private:
@@ -191,8 +207,16 @@ namespace thinsqlitepp
             { return _error.system(); }
         
         /// Returns the stored error
-        const class error & error() const noexcept
+        const class error & error() const & noexcept
             { return _error; }
+
+        /// Returns the stored error
+        class error & error() & noexcept
+            { return _error; }
+
+        /// Returns the stored error
+        class error && error() && noexcept
+            { return std::move(_error); }
 
         /**
          * Returns error message
