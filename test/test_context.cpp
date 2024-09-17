@@ -1,4 +1,5 @@
 #include <doctest.h>
+#include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/context.hpp>
 
