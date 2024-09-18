@@ -64,18 +64,18 @@ namespace thinsqlitepp
             if (size == 0)
                 return sqlite3_malloc(1);
 
-            #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 8, 7) 
-                if constexpr (sizeof(size_t) > sizeof(sqlite3_uint64))
-                {
-                    if (size > size_t(std::numeric_limits<sqlite3_uint64>::max()))
-                        return nullptr;
-                }
-                return sqlite3_malloc64(size);
-            #else
-                if (size > std::numeric_limits<int>::max())
+        #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 8, 7) 
+            if constexpr (sizeof(size_t) > sizeof(sqlite3_uint64))
+            {
+                if (size > size_t(std::numeric_limits<sqlite3_uint64>::max()))
                     return nullptr;
-                return sqlite3_malloc(int(size));
-            #endif
+            }
+            return sqlite3_malloc64(size);
+        #else
+            if (size > std::numeric_limits<int>::max())
+                return nullptr;
+            return sqlite3_malloc(int(size));
+        #endif
         }
 
         void* operator new[](std::size_t size, const std::nothrow_t & tag)
