@@ -12,6 +12,7 @@
 #include "config.hpp"
 
 #include <memory>
+#include <limits>
 
 namespace thinsqlitepp
 {
