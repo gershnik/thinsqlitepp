@@ -4,6 +4,11 @@
   <!-- Objects -->
   <compound kind="struct"><name>sqlite3</name><filename>c3ref/sqlite3.html</filename></compound>
   <compound kind="struct"><name>sqlite3_context</name><filename>c3ref/context.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_index_info</name><filename>c3ref/index_info.html</filename>
+    <compound kind="struct"><name>sqlite3_index_info::sqlite3_index_constraint</name><filename>c3ref/index_info.html</filename></compound>
+    <compound kind="struct"><name>sqlite3_index_info::sqlite3_index_constraint_usage</name><filename>c3ref/index_info.html</filename></compound>
+    <compound kind="struct"><name>sqlite3_index_info::sqlite3_index_orderby</name><filename>c3ref/index_info.html</filename></compound>
+  </compound>
   <compound kind="struct"><name>sqlite3_int64</name><filename>c3ref/int64.html</filename></compound>
   <compound kind="struct"><name>sqlite3_stmt</name><filename>c3ref/stmt.html</filename></compound>
   <compound kind="struct"><name>sqlite3_value</name><filename>c3ref/value.html</filename></compound>
@@ -12,10 +17,12 @@
   <compound kind="struct"><name>sqlite3_mutex</name><filename>c3ref/mutex.html</filename></compound>
   <compound kind="struct"><name>sqlite3_mutex_methods</name><filename>c3ref/mutex_methods.html</filename></compound>
   <compound kind="struct"><name>sqlite3_pcache_methods2</name><filename>c3ref/pcache_methods2.html</filename></compound>
+  <compound kind="struct"><name>sqlite3_vtab_cursor</name><filename>c3ref/vtab_cursor.html</filename></compound>
 
   <!-- Macro Groups -->
   <compound kind="enum"><name>SQLITE_CONFIG_</name><filename>c3ref/c_config_covering_index_scan.html</filename></compound>
   <compound kind="enum"><name>SQLITE_DBCONFIG_</name><filename>c3ref/c_dbconfig_defensive.html</filename></compound>
+  <compound kind="enum"><name>SQLITE_INDEX_SCAN_</name><filename>c3ref/c_index_scan_unique.html</filename></compound>
   <compound kind="enum"><name>SQLITE_PREPARE_</name><filename>c3ref/c_prepare_normalize.html</filename></compound>
 
   <!-- Function Groups -->
@@ -29,6 +36,7 @@
     <name>sqlite3.h</name>
 
     <member kind="define"><name>SQLITE_BUSY</name><anchorfile>rescode.html</anchorfile><anchor>busy</anchor></member>
+    <member kind="define"><name>SQLITE_CONSTRAINT</name><anchorfile>rescode.html</anchorfile><anchor>constraint</anchor></member>
     <member kind="define"><name>SQLITE_DONE</name><anchorfile>rescode.html</anchorfile><anchor>done</anchor></member>
     <member kind="define"><name>SQLITE_ERROR</name><anchorfile>rescode.html</anchorfile><anchor>error</anchor></member>
     <member kind="define"><name>SQLITE_ROW</name><anchorfile>rescode.html</anchorfile><anchor>row</anchor></member>
@@ -145,8 +153,17 @@
     <member kind="function"><name>sqlite3_value_numeric_type</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_subtype</name><anchorfile>c3ref/value_subtype.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_type</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_vtab_collation</name><anchorfile>c3ref/vtab_collation.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_vtab_distinct</name><anchorfile>c3ref/vtab_distinct.html</anchorfile></member>
     
-
+    <member kind="function"><name>xBestIndex</name><anchorfile>vtab.html</anchorfile><anchor>xbestindex</anchor></member>
+    <member kind="function"><name>xColumn</name><anchorfile>vtab.html</anchorfile><anchor>xcolumn</anchor></member>
+    <member kind="function"><name>xEof</name><anchorfile>vtab.html</anchorfile><anchor>xeof</anchor></member>
+    <member kind="function"><name>xFilter</name><anchorfile>vtab.html</anchorfile><anchor>xfilter</anchor></member>
+    <member kind="function"><name>xFindFunction</name><anchorfile>vtab.html</anchorfile><anchor>xfindfunction</anchor></member>
+    <member kind="function"><name>xNext</name><anchorfile>vtab.html</anchorfile><anchor>xnext</anchor></member>
+    <member kind="function"><name>xOpen</name><anchorfile>vtab.html</anchorfile><anchor>xopen</anchor></member>
+    <member kind="function"><name>xRowid</name><anchorfile>vtab.html</anchorfile><anchor>xrowid</anchor></member>
   </compound>
 
 </tagfile>

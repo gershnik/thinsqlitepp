@@ -1,0 +1,576 @@
+/*
+ Copyright 2024 Eugene Gershnik
+
+ Use of this source code is governed by a BSD-style
+ license that can be found in the LICENSE file or at
+ https://github.com/gershnik/thinsqlitepp/blob/main/LICENSE
+*/
+
+#ifndef HEADER_SQLITEPP_VTAB_IMPL_INCLUDED
+#define HEADER_SQLITEPP_VTAB_IMPL_INCLUDED
+
+namespace thinsqlitepp
+{
+    template<class Derived>
+    inline sqlite3_module * vtab<Derived>::get_module()
+    {
+        check_requirements();
+        static sqlite3_module the_module = {
+            .iVersion = 4,
+            .xCreate = get_create_impl(),
+            .xConnect = get_connect_impl(),
+            .xBestIndex = best_index_impl,
+            .xDisconnect = disconnect_impl,
+            .xDestroy = destroy_impl,
+            .xOpen = open_impl,
+            .xClose = close_impl,
+            .xEof = eof_impl,
+            .xFilter = filter_impl,
+            .xNext = next_impl,
+            .xColumn = column_impl,
+            .xRowid = rowid_impl,
+            .xUpdate = get_update_impl(),
+            .xFindFunction = get_find_function_impl(),
+            .xBegin = get_begin_impl(),
+            .xSync = get_sync_impl(),
+            .xCommit = get_commit_impl(),
+            .xRollback = get_rollback_impl(),
+            .xRename = get_rename_impl(),
+            .xSavepoint = get_savepoint_impl(),
+            .xRelease = get_release_impl(),
+            .xRollbackTo = get_rollback_to_impl()
+        };
+
+        return &the_module;
+    }
+
+    struct vtab_detector
+    {
+    #define SQLITEPP_DETECTOR_IMPL(name, call, rettype, ...) \
+    private: \
+        template<class T> static std::true_type has_##name##_impl(decltype(call(__VA_ARGS__)) *); \
+        template<class T> static std::false_type has_##name##_impl(...); \
+    public: \
+        template<class T> static constexpr bool has_##name = decltype(has_##name##_impl<T>((rettype*)nullptr))::value; \
+        template<class T> static constexpr bool has_noexcept_##name = []() constexpr { \
+            if constexpr (has_##name<T>) \
+                return noexcept(call(__VA_ARGS__)); \
+            else \
+                return false; \
+        }()
+
+    #define SQLITEPP_STATIC_DETECTOR(name, rettype, ...) SQLITEPP_DETECTOR_IMPL(name, T::name, rettype, __VA_ARGS__)
+    #define SQLITEPP_DETECTOR(name, rettype, ...) SQLITEPP_DETECTOR_IMPL(name, ((T*)nullptr)->name, rettype, __VA_ARGS__)
+    
+    SQLITEPP_STATIC_DETECTOR(disconnect, void, std::unique_ptr<T>{});
+    SQLITEPP_STATIC_DETECTOR(destroy, void, std::unique_ptr<T>{});
+
+    SQLITEPP_DETECTOR(update, sqlite_int64, int{}, (value **)nullptr);
+    SQLITEPP_DETECTOR(find_function, int, int{}, 
+                                          (const char *)nullptr, 
+                                          (void (**)(sqlite3_context*,int,sqlite3_value**))nullptr,
+                                          (void **)nullptr);
+    SQLITEPP_DETECTOR(begin, void, );
+    SQLITEPP_DETECTOR(sync, void, );
+    SQLITEPP_DETECTOR(commit, void, );
+    SQLITEPP_DETECTOR(rollback, void, );
+    SQLITEPP_DETECTOR(rename, void, (const char *)nullptr);
+    SQLITEPP_DETECTOR(savepoint, void, int{});
+    SQLITEPP_DETECTOR(release, void, int{});
+    SQLITEPP_DETECTOR(rollback_to, void, int{});
+    SQLITEPP_STATIC_DETECTOR(shadow_name, bool, (const char *)nullptr);
+    SQLITEPP_DETECTOR(integrity, allocated_string, (const char *)nullptr, (const char *)nullptr, int{});
+
+    #undef SQLITEPP_STATIC_DETECTOR
+    #undef SQLITEPP_DETECTOR
+    #undef SQLITEPP_DETECTOR_IMPL
+    };
+
+    #if __cpp_concepts >= 201907L && __cpp_lib_concepts >= 202002L
+
+        template<class T>
+        concept is_vtab = 
+            std::is_base_of_v<vtab<T>, T> && 
+            requires 
+            {
+                typename T::constructor_data_type;
+                typename T::index_data_type;
+                typename T::cursor;
+            } &&
+            (std::is_void_v<typename T::index_data_type> || std::is_trivially_destructible_v<typename T::index_data_type>) &&
+            std::is_base_of_v<typename vtab<T>::cursor, typename T::cursor> &&
+            requires(T obj, const T cobj, index_info<typename T::index_data_type> & index) 
+            {
+                { cobj.best_index(index) } -> std::convertible_to<bool>;
+                { obj.open() } -> std::convertible_to<std::unique_ptr<typename T::cursor>>;
+            } &&
+            requires(typename T::cursor & cur, const typename T::cursor & ccur, context & ctxt)
+            {
+                { ccur.eof() } noexcept -> std::convertible_to<bool>;
+                { cur.filter(int{}, (typename T::index_data_type *)nullptr, int{}, (value **)nullptr) } -> std::same_as<void>;
+                { cur.next() } -> std::same_as<void>;
+                { ccur.column(ctxt, int{}) } -> std::same_as<void>;
+                { ccur.rowid() } -> std::same_as<sqlite_int64>;
+            };
+
+    #endif
+
+    template<class Derived>
+    constexpr void vtab<Derived>::check_requirements()
+    {
+        #if __cpp_concepts >= 201907L && __cpp_lib_concepts >= 202002L
+
+            static_assert(is_vtab<Derived>);
+
+        #endif
+
+        if constexpr (std::is_constructible_v<Derived, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+        {
+            static_assert(!std::is_constructible_v<Derived, create_t, database *, typename Derived::constructor_data_type *, int, const char * const *>,
+                            "if you declare a non-marked constructor you cannot also have a constructor that takes create_t");
+            static_assert(!std::is_constructible_v<Derived, connect_t, database *, typename Derived::constructor_data_type *, int, const char * const *>,
+                            "if you declare a non-marked constructor you cannot also have a constructor that takes connect_t");
+        }
+        else
+        {
+            static_assert(std::is_constructible_v<Derived, connect_t, database *, typename Derived::constructor_data_type *, int, const char * const *>,
+                          "you must declare either a constructor that takes a connect_t OR a non-marked constructor");
+
+            #if SQLITE_VERSION_NUMBER < SQLITEPP_SQLITE_VERSION(3, 9, 0)
+
+                static_assert(std::is_constructible_v<Derived, create_t, database *, void *, int, const char * const *>,
+                          "you must declare either a constructor that takes a create_t OR a non-marked constructor");
+
+            #endif
+        }
+
+        if constexpr (vtab_detector::has_disconnect<Derived>) 
+            static_assert(vtab_detector::has_noexcept_disconnect<Derived>, "disconnect() must be noexcept");
+
+        if constexpr (vtab_detector::has_destroy<Derived>) 
+            static_assert(vtab_detector::has_noexcept_destroy<Derived>, "destroy() must be noexcept");
+        
+        if constexpr (vtab_detector::has_find_function<Derived>) 
+            static_assert(vtab_detector::has_noexcept_find_function<Derived>, "find_function() must be noexcept");
+
+        if constexpr (vtab_detector::has_rollback<Derived>) 
+            static_assert(vtab_detector::has_noexcept_rollback<Derived>, "rollback() must be noexcept");
+
+        if constexpr (vtab_detector::has_shadow_name<Derived>) 
+            static_assert(vtab_detector::has_noexcept_shadow_name<Derived>, "shadow_name() must be noexcept");
+
+        static_assert(std::is_base_of_v<vtab<Derived>::cursor, typename Derived::cursor>,
+                      "Derived::cursor type must derive from vtab<Derived>::cursor");
+    }
+
+    template<class Derived>
+    int vtab<Derived>::create_impl(sqlite3 * db, void * aux, int argc, const char * const * argv, sqlite3_vtab ** pp_vtab, char ** err)
+    {
+        try 
+        {
+            if constexpr (std::is_constructible_v<Derived, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+                *pp_vtab = new Derived(database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
+            else if constexpr (std::is_constructible_v<Derived, create_t, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+                *pp_vtab = new Derived(create_t{}, database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
+            else
+                static_assert(dependent_false<Derived>, "neither required constructor form is present");
+            return SQLITE_OK;
+        }
+        catch(exception & ex) 
+        {
+            auto message = ex.error().extract_message();
+            *err = (char *)message.release();
+        }
+        catch(std::exception & ex)
+        {
+            auto message = ex.what();
+            const auto len = strlen(message) + 1;
+            if (char * const ret = (char *)sqlite3_malloc(int(len)))
+            {
+                memcpy(ret, message, len);
+                *err = ret;
+            }
+        }
+        return SQLITE_ERROR;
+    }
+
+    template<class Derived>
+    int vtab<Derived>::connect_impl(sqlite3 * db, void * aux, int argc, const char * const * argv, sqlite3_vtab ** pp_vtab, char ** err)
+    {
+        try 
+        {
+            if constexpr (std::is_constructible_v<Derived, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+                *pp_vtab = new Derived(database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
+            else if constexpr(std::is_constructible_v<Derived, connect_t, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+                *pp_vtab = new Derived(connect_t{}, database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
+            else
+                static_assert(dependent_false<Derived>, "neither required constructor form is present");
+            return SQLITE_OK;
+        }
+        catch(exception & ex) 
+        {
+            auto message = ex.error().extract_message();
+            *err = (char *)message.release();
+        }
+        catch(std::exception & ex)
+        {
+            auto message = ex.what();
+            const auto len = strlen(message) + 1;
+            if (char * const ret = (char *)sqlite3_malloc(int(len)))
+            {
+                memcpy(ret, message, len);
+                *err = ret;
+            }
+        }
+        return SQLITE_ERROR;
+    }
+
+    template<class Derived>
+    constexpr decltype(sqlite3_module::xCreate) vtab<Derived>::get_create_impl() 
+    {
+        if constexpr (std::is_constructible_v<Derived,           database *, typename Derived::constructor_data_type *, int, const char * const *> ||
+                      std::is_constructible_v<Derived, create_t, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+        {
+            return create_impl;
+        }
+        else 
+        {
+            return nullptr;
+        }
+    }
+
+    template<class Derived>
+    constexpr decltype(sqlite3_module::xCreate) vtab<Derived>::get_connect_impl() 
+    {
+        if constexpr (std::is_constructible_v<Derived, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+        {
+            return create_impl;
+        }
+        else
+        {
+            return connect_impl;
+        }
+    }
+
+    #define SQLITEPP_BEGIN_CALLBACK try
+    #define SQLITEPP_END_CALLBACK   catch(exception & ex) { \
+                                        me->set_error_message(ex); \
+                                        return ex.extended_error_code(); \
+                                    } catch(std::exception & ex) { \
+                                        me->set_error_message(ex); \
+                                        return SQLITE_ERROR; \
+                                    }
+
+    template<class Derived>
+    int vtab<Derived>::best_index_impl(sqlite3_vtab * vtab, sqlite3_index_info * info)
+    {
+        const auto * me = static_cast<Derived *>(vtab);
+        auto myinfo = index_info<typename Derived::index_data_type>::from(info);
+        SQLITEPP_BEGIN_CALLBACK 
+        {
+            bool res = me->best_index(*myinfo);
+            return res ? SQLITE_OK : SQLITE_CONSTRAINT;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::disconnect_impl(sqlite3_vtab * vtab)
+    {
+        auto me = std::unique_ptr<Derived>(static_cast<Derived *>(vtab));
+
+        if constexpr (vtab_detector::has_disconnect<Derived>) {
+            Derived::disconnect(std::move(me));
+        }
+        return SQLITE_OK;
+    }
+
+    template<class Derived>
+    int vtab<Derived>::destroy_impl(sqlite3_vtab * vtab)
+    {
+        auto me = std::unique_ptr<Derived>(static_cast<Derived *>(vtab));
+
+        if constexpr (vtab_detector::has_destroy<Derived>) {
+            Derived::destroy(std::move(me));
+        }
+        return SQLITE_OK;
+    }
+
+    template<class Derived>
+    int vtab<Derived>::open_impl(sqlite3_vtab * vtab, sqlite3_vtab_cursor ** cursor)
+    {
+        auto me = static_cast<Derived *>(vtab);
+
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            std::unique_ptr<typename Derived::cursor> res = me->open();
+            *cursor = res.release()->c_ptr();
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::close_impl(sqlite3_vtab_cursor * cursor)
+    {
+        auto me = static_cast<typename Derived::cursor *>(cursor);
+        delete me;
+        return SQLITE_OK;
+    }
+
+    template<class Derived>
+    int vtab<Derived>::eof_impl(sqlite3_vtab_cursor * cursor)
+    {
+        auto me = static_cast<typename Derived::cursor *>(cursor);
+
+        static_assert(noexcept(me->eof()), "cursor's eof() must be noexcept");
+
+        bool res = me->eof();
+        return res;
+    }
+
+    template<class Derived>
+    int vtab<Derived>::filter_impl(sqlite3_vtab_cursor * cursor, int idx_num, const char * idx_str,
+                                   int argc, sqlite3_value ** argv)
+    {
+        auto me_cursor = static_cast<typename Derived::cursor *>(cursor);
+        auto me = static_cast<Derived *>(cursor->pVtab);
+
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me_cursor->filter(idx_num, 
+                              (typename Derived::index_data_type *)idx_str, 
+                              argc, 
+                              (value **)argv);
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::next_impl(sqlite3_vtab_cursor * cursor)
+    {
+        auto me_cursor = static_cast<typename Derived::cursor *>(cursor);
+        auto me = static_cast<Derived *>(cursor->pVtab);
+
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me_cursor->next();
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::column_impl(sqlite3_vtab_cursor * cursor, sqlite3_context * ctxt, int n)
+    {
+        auto me_cursor = static_cast<typename Derived::cursor *>(cursor);
+        auto me = static_cast<Derived *>(cursor->pVtab);
+        auto myctxt = context::from(ctxt);
+
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me_cursor->column(*myctxt, n);
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::rowid_impl(sqlite3_vtab_cursor * cursor, sqlite_int64 * rowid)
+    {
+        auto me_cursor = static_cast<typename Derived::cursor *>(cursor);
+        auto me = static_cast<Derived *>(cursor->pVtab);
+
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            *rowid = me_cursor->rowid();
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::update_impl(sqlite3_vtab * vtab, int argc, sqlite3_value ** argv, sqlite_int64 * rowid)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            *rowid = me->update(argc, (value **)argv);
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::find_function_impl(sqlite3_vtab * vtab, int n_arg, const char * name, 
+                                          void (**func)(sqlite3_context*,int,sqlite3_value**), void ** args)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        return me->find_function(n_arg, name, (void (**)(context*,int,value**) noexcept)func, args);
+    }
+        
+    template<class Derived>
+    int vtab<Derived>::begin_impl(sqlite3_vtab * vtab)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me->begin();
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+
+    }
+
+    template<class Derived>
+    int vtab<Derived>::sync_impl(sqlite3_vtab * vtab)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me->sync();
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+
+    }
+
+    template<class Derived>
+    int vtab<Derived>::commit_impl(sqlite3_vtab * vtab)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me->commit();
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+
+    }
+
+    template<class Derived>
+    int vtab<Derived>::rollback_impl(sqlite3_vtab * vtab)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        me->rollback();
+        return SQLITE_OK;
+    }
+
+    template<class Derived>
+    int vtab<Derived>::rename_impl(sqlite3_vtab * vtab, const char * new_name)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me->rename(new_name);
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::savepoint_impl(sqlite3_vtab * vtab, int point)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me->savepoint(point);
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::release_impl(sqlite3_vtab * vtab, int point )
+    {
+        auto me = static_cast<Derived *>(vtab);
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me->release(point);
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    template<class Derived>
+    int vtab<Derived>::rollback_to_impl(sqlite3_vtab * vtab, int point)
+    {
+        auto me = static_cast<Derived *>(vtab);
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me->rollback_to(point);
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
+    }
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 26, 0)
+
+        template<class Derived>
+        int vtab<Derived>::shadow_name_impl(const char * name) 
+        {
+            return Derived::shadow_name(name);
+        }
+    #endif
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 44, 0)
+
+        template<class Derived>
+        int vtab<Derived>::integrity_impl(sqlite3_vtab * vtab, const char * schema,
+                                          const char * table_name, int flags, char ** err)
+        {
+            auto me = static_cast<Derived *>(vtab);
+            SQLITEPP_BEGIN_CALLBACK
+            {
+                auto message =  me->integrity(schema, table_name, flags);
+                *err = message.release();
+                return SQLITE_OK;
+            }
+            SQLITEPP_END_CALLBACK
+        }
+
+    #endif
+
+    
+
+    #undef SQLITEPP_END_CALLBACK
+    #undef SQLITEPP_BEGIN_CALLBACK
+
+    #define SQLITEPP_SIMPLE_GET_IMPL(xname, name) \
+    template<class Derived> \
+    constexpr decltype(sqlite3_module::xname) vtab<Derived>::get_##name##_impl() \
+    { \
+        if constexpr (vtab_detector::has_##name<Derived>) \
+            return name##_impl; \
+        else \
+            return nullptr; \
+    }
+
+    SQLITEPP_SIMPLE_GET_IMPL(xUpdate, update)
+    SQLITEPP_SIMPLE_GET_IMPL(xFindFunction, find_function)
+    SQLITEPP_SIMPLE_GET_IMPL(xBegin, begin)
+    SQLITEPP_SIMPLE_GET_IMPL(xSync, sync)
+    SQLITEPP_SIMPLE_GET_IMPL(xCommit, commit)
+    SQLITEPP_SIMPLE_GET_IMPL(xRollback, rollback)
+    SQLITEPP_SIMPLE_GET_IMPL(xRename, rename)
+    SQLITEPP_SIMPLE_GET_IMPL(xSavepoint, savepoint)
+    SQLITEPP_SIMPLE_GET_IMPL(xRelease, release)
+    SQLITEPP_SIMPLE_GET_IMPL(xRollbackTo, rollback_to)
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 26, 0)
+        SQLITEPP_SIMPLE_GET_IMPL(xShadowName, shadow_name)
+    #endif
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 44, 0)
+        SQLITEPP_SIMPLE_GET_IMPL(xIntegrity, integrity)
+    #endif
+
+    #undef SQLITEPP_SIMPLE_GET_IMPL
+
+
+    
+}
+
+
+#endif

@@ -32,6 +32,15 @@ namespace thinsqlitepp
 
     /** @cond PRIVATE */
 
+    template<class T, bool B>
+    constexpr bool dependent_bool = B;
+
+    template<class T>
+    constexpr bool dependent_false = dependent_bool<T, false>;
+
+    template<class T>
+    constexpr bool dependent_true = dependent_bool<T, true>;
+
     //MARK:- is_pointer_to_callback
 
     template<class R, class T, class... ArgTypes>

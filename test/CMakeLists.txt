@@ -63,6 +63,7 @@ function(configure_test_target target)
         test_statement.cpp
         test_general.cpp
         test_context.cpp
+        test_vtab.cpp
     )
     
 
@@ -124,6 +125,7 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
             $<$<BOOL:${EMSCRIPTEN}>:-sNO_DISABLE_EXCEPTION_CATCHING -fexceptions>
         )
 
+        list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite-${SQLITE_VERSION})
         list(APPEND TEST_COMMAND COMMAND)
         if (DEFINED EMSCRIPTEN)
             list(APPEND TEST_COMMAND node --trace-uncaught $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}>)
@@ -159,6 +161,7 @@ if (SQLite3_FOUND)
             $<$<PLATFORM_ID:Darwin>:SQLITE_OMIT_LOAD_EXTENSION=1>
         )
 
+        list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite: native)
         list(APPEND TEST_COMMAND COMMAND)
         list(APPEND TEST_COMMAND test-${CXX_STANDARD}-native)
 

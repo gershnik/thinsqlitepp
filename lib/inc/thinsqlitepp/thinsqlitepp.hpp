@@ -16,5 +16,6 @@
 #include <thinsqlitepp/mutex.hpp>
 #include <thinsqlitepp/statement.hpp>
 #include <thinsqlitepp/value.hpp>
+#include <thinsqlitepp/vtab.hpp>
 
 #endif 
