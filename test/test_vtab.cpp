@@ -34,6 +34,9 @@ namespace
             _entries(data)
         {
             db->declare_vtab("CREATE TABLE _ (name TEXT)");
+        #ifdef SQLITE_VTAB_DIRECTONLY
+            db->vtab_config<SQLITE_VTAB_DIRECTONLY>();
+        #endif
         }
 
         class cursor : public vtab::cursor

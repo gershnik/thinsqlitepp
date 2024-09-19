@@ -24,6 +24,7 @@
   <compound kind="enum"><name>SQLITE_DBCONFIG_</name><filename>c3ref/c_dbconfig_defensive.html</filename></compound>
   <compound kind="enum"><name>SQLITE_INDEX_SCAN_</name><filename>c3ref/c_index_scan_unique.html</filename></compound>
   <compound kind="enum"><name>SQLITE_PREPARE_</name><filename>c3ref/c_prepare_normalize.html</filename></compound>
+  <compound kind="enum"><name>SQLITE_VTAB_</name><filename>c3ref/c_vtab_constraint_support.html</filename></compound>
 
   <!-- Function Groups -->
   <compound kind="page"><name>sqlite3_column_</name><filename>c3ref/column_blob</filename></compound>
@@ -155,6 +156,8 @@
     <member kind="function"><name>sqlite3_value_type</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_vtab_collation</name><anchorfile>c3ref/vtab_collation.html</anchorfile></member>
     <member kind="function"><name>sqlite3_vtab_distinct</name><anchorfile>c3ref/vtab_distinct.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_vtab_config</name><anchorfile>c3ref/vtab_config.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_vtab_on_conflict</name><anchorfile>c3ref/vtab_on_conflict.html</anchorfile></member>
     
     <member kind="function"><name>xBestIndex</name><anchorfile>vtab.html</anchorfile><anchor>xbestindex</anchor></member>
     <member kind="function"><name>xColumn</name><anchorfile>vtab.html</anchorfile><anchor>xcolumn</anchor></member>

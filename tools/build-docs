@@ -30,8 +30,6 @@ if not cppreference_tags.exists():
 
 
 (ROOTDIR / 'build/doxygen').mkdir(parents=True, exist_ok=True)
-# if (ROOTDIR / 'build/sphinx').exists():
-#     shutil.rmtree(ROOTDIR / 'build/sphinx')
 
 def gen_options(src_path, dst_path, marker, enum, url):
     header = dedent('''
@@ -53,6 +51,8 @@ def gen_options(src_path, dst_path, marker, enum, url):
                         fields = [f.strip() if f is not None else '' for f in m.groups()]
                         anchor = fields[0].lower().replace('_', '')
                         fields[0] = f'[{fields[0]}]({url}#{anchor})'
+                        if len(fields[1]) == 0:
+                            fields[1] = '\\<none\\>'
                         dst.write(f'| {fields[0]} | {fields[1]} |\n')
 
 gen_options(ROOTDIR / 'lib/inc/thinsqlitepp/impl/database_iface.hpp',
@@ -67,11 +67,12 @@ gen_options(ROOTDIR / 'lib/inc/thinsqlitepp/impl/global_iface.hpp',
             r'SQLITEPP_DEFINE_OPTION_[0N]',
             'https://www.sqlite.org/c3ref/c_config_covering_index_scan.html')
 
+gen_options(ROOTDIR / 'lib/inc/thinsqlitepp/impl/database_iface.hpp',
+            GENDIR / 'vtab-options.md',
+            '//@ [VTab Options]',
+            r'SQLITEPP_DEFINE_VTAB_OPTION',
+            'https://www.sqlite.org/c3ref/c_vtab_constraint_support.html')
+
 res = subprocess.run(['doxygen', '.docbuild/Doxyfile'], cwd=ROOTDIR, check=False)
-# for tmp in (ROOTDIR / 'build/doxygen').glob('*.tmp'):
-#     tmp.unlink()
 if res.returncode != 0:
     sys.exit(1)
-# res = subprocess.run(['sphinx-build', '-M', 'html', '.docbuild', 'build/sphinx'], cwd=ROOTDIR)
-# if res.returncode != 0:
-#     sys.exit(1)
