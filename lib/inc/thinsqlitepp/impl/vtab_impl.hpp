@@ -62,24 +62,41 @@ namespace thinsqlitepp
     struct vtab_detector
     {
     public:
-        template<class T> static constexpr bool has_common_constructor = std::is_constructible_v<T, 
-                                                                                                 database *, 
-                                                                                                 typename T::constructor_data_type *, 
-                                                                                                 int, 
-                                                                                                 const char * const *>;
+        template<class T> static constexpr bool has_common_constructor = std::is_void_v<typename T::constructor_data_type> ?
+                                                                                 std::is_constructible_v<T, 
+                                                                                                         database *, 
+                                                                                                         int, 
+                                                                                                         const char * const *> :
+                                                                                 std::is_constructible_v<T, 
+                                                                                                         database *, 
+                                                                                                         typename T::constructor_data_type, 
+                                                                                                         int, 
+                                                                                                         const char * const *>;
 
-        template<class T> static constexpr bool has_create_constructor = std::is_constructible_v<T, 
-                                                                                                 typename T::create_t, 
-                                                                                                 database *, 
-                                                                                                 typename T::constructor_data_type *, 
-                                                                                                 int, 
-                                                                                                 const char * const *>;
-        template<class T> static constexpr bool has_connect_constructor = std::is_constructible_v<T, 
-                                                                                                  typename T::connect_t, 
-                                                                                                  database *, 
-                                                                                                  typename T::constructor_data_type *, 
-                                                                                                  int, 
-                                                                                                  const char * const *>;
+        template<class T> static constexpr bool has_create_constructor = std::is_void_v<typename T::constructor_data_type> ?
+                                                                                std::is_constructible_v<T, 
+                                                                                                        typename T::create_t, 
+                                                                                                        database *, 
+                                                                                                        int, 
+                                                                                                        const char * const *> :
+                                                                                std::is_constructible_v<T, 
+                                                                                                        typename T::create_t, 
+                                                                                                        database *, 
+                                                                                                        typename T::constructor_data_type, 
+                                                                                                        int, 
+                                                                                                        const char * const *>;
+        template<class T> static constexpr bool has_connect_constructor = std::is_void_v<typename T::constructor_data_type> ?
+                                                                                std::is_constructible_v<T, 
+                                                                                                        typename T::connect_t, 
+                                                                                                        database *, 
+                                                                                                        int, 
+                                                                                                        const char * const *> :
+                                                                                std::is_constructible_v<T, 
+                                                                                                        typename T::connect_t, 
+                                                                                                        database *, 
+                                                                                                        typename T::constructor_data_type, 
+                                                                                                        int, 
+                                                                                                        const char * const *>;
 
     #define SQLITEPP_DETECTOR_IMPL(name, call, rettype, ...) \
     private: \
@@ -126,13 +143,9 @@ namespace thinsqlitepp
         template<class T>
         concept is_vtab = 
             std::is_base_of_v<vtab<T>, T> && 
-            requires 
-            {
-                typename T::constructor_data_type;
-                typename T::index_data_type;
-                typename T::cursor;
-            } &&
-            (std::is_void_v<typename T::index_data_type> || std::is_trivially_destructible_v<typename T::index_data_type>) &&
+            (std::is_void_v<typename T::constructor_data_type> || std::is_pointer_v<typename T::constructor_data_type>) &&
+            (std::is_void_v<typename T::index_data_type> || 
+                (std::is_pointer_v<typename T::index_data_type> && std::is_trivially_destructible_v<typename T::index_data_type>)) &&
             std::is_base_of_v<typename vtab<T>::cursor, typename T::cursor> &&
             requires(T obj, const T cobj, index_info<typename T::index_data_type> & index) 
             {
@@ -142,7 +155,14 @@ namespace thinsqlitepp
             requires(typename T::cursor & cur, const typename T::cursor & ccur, context & ctxt)
             {
                 { ccur.eof() } noexcept -> std::convertible_to<bool>;
-                { cur.filter(int{}, (typename T::index_data_type *)nullptr, int{}, (value **)nullptr) } -> std::same_as<void>;
+                requires 
+                    (
+                        !std::is_void_v<typename T::index_data_type> && 
+                        requires { { cur.filter(int{}, (typename T::index_data_type *)nullptr, int{}, (value **)nullptr) } -> std::same_as<void>; }
+                    ) || (
+                        std::is_void_v<typename T::index_data_type> && 
+                        requires { { cur.filter(int{}, int{}, (value **)nullptr) } -> std::same_as<void>; }
+                    );
                 { cur.next() } -> std::same_as<void>;
                 { ccur.column(ctxt, int{}) } -> std::same_as<void>;
                 { ccur.rowid() } -> std::same_as<sqlite_int64>;
@@ -199,14 +219,20 @@ namespace thinsqlitepp
     }
 
     template<class Derived>
-    int vtab<Derived>::create_impl(sqlite3 * db, void * aux, int argc, const char * const * argv, sqlite3_vtab ** pp_vtab, char ** err)
+    int vtab<Derived>::create_impl(sqlite3 * db, [[maybe_unused]] void * aux, int argc, const char * const * argv, sqlite3_vtab ** pp_vtab, char ** err)
     {
         try 
         {
             if constexpr (vtab_detector::has_common_constructor<Derived>)
-                *pp_vtab = new Derived(database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
+                if constexpr (std::is_void_v<typename Derived::constructor_data_type>)
+                    *pp_vtab = new Derived(database::from(db), argc, argv);
+                else
+                    *pp_vtab = new Derived(database::from(db), (typename Derived::constructor_data_type)aux, argc, argv);
             else if constexpr (vtab_detector::has_create_constructor<Derived>)
-                *pp_vtab = new Derived(create_t{}, database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
+                if constexpr (std::is_void_v<typename Derived::constructor_data_type>)
+                    *pp_vtab = new Derived(create_t{}, database::from(db), argc, argv);
+                else
+                    *pp_vtab = new Derived(create_t{}, database::from(db), (typename Derived::constructor_data_type)aux, argc, argv);
             else
                 static_assert(dependent_false<Derived>, "neither required constructor form is present");
             return SQLITE_OK;
@@ -230,14 +256,20 @@ namespace thinsqlitepp
     }
 
     template<class Derived>
-    int vtab<Derived>::connect_impl(sqlite3 * db, void * aux, int argc, const char * const * argv, sqlite3_vtab ** pp_vtab, char ** err)
+    int vtab<Derived>::connect_impl(sqlite3 * db, [[maybe_unused]] void * aux, int argc, const char * const * argv, sqlite3_vtab ** pp_vtab, char ** err)
     {
         try 
         {
             if constexpr (vtab_detector::has_common_constructor<Derived>)
-                *pp_vtab = new Derived(database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
+                if constexpr (std::is_void_v<typename Derived::constructor_data_type>)
+                    *pp_vtab = new Derived(database::from(db), argc, argv);
+                else
+                    *pp_vtab = new Derived(database::from(db), (typename Derived::constructor_data_type)aux, argc, argv);
             else if constexpr(vtab_detector::has_connect_constructor<Derived>)
-                *pp_vtab = new Derived(connect_t{}, database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
+                if constexpr (std::is_void_v<typename Derived::constructor_data_type>)
+                    *pp_vtab = new Derived(connect_t{}, database::from(db), argc, argv);
+                else
+                    *pp_vtab = new Derived(connect_t{}, database::from(db), (typename Derived::constructor_data_type)aux, argc, argv);
             else
                 static_assert(dependent_false<Derived>, "neither required constructor form is present");
             return SQLITE_OK;
@@ -372,10 +404,11 @@ namespace thinsqlitepp
 
         SQLITEPP_BEGIN_CALLBACK
         {
-            me_cursor->filter(idx_num, 
-                              (typename Derived::index_data_type *)idx_str, 
-                              argc, 
-                              (value **)argv);
+            if constexpr (std::is_void_v<typename Derived::index_data_type>)
+                me_cursor->filter(idx_num, argc, (value **)argv);
+            else
+                me_cursor->filter(idx_num, (typename Derived::index_data_type)idx_str, 
+                                  argc, (value **)argv);
             return SQLITE_OK;
         }
         SQLITEPP_END_CALLBACK

@@ -549,8 +549,8 @@ namespace thinsqlitepp
          * 
          * @param name name of the module
          * @param mod pointer to ::sqlite3_module "vtable"
-         * @param data data to be passed to virtual table xCreate function. Can be nullptr
-         * @param destructor function to call when data is no longer needed. Can be nullptr
+         * @param data data to be passed to virtual table xCreate function.
+         * @param destructor function to call when data is no longer needed. Can be omitted
          */
         template<typename T>
         void create_module(const string_param & name, const sqlite3_module * mod, 

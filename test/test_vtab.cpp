@@ -23,7 +23,7 @@ namespace
                 { return !(*this == rhs); }
         };
         
-        using constructor_data_type = std::vector<entry>;
+        using constructor_data_type = std::vector<entry> *;
 
     public:
         vector_table(
@@ -60,7 +60,7 @@ namespace
                 ctxt.result(_current->value);
             }
 
-            void filter(int /*idx*/, const void * /*idx_data*/, int /*argc*/, value ** /*argv*/)
+            void filter(int /*idx*/, int /*argc*/, value ** /*argv*/)
             {
                 _current = owner()->_entries->begin();
                 _end = owner()->_entries->end();

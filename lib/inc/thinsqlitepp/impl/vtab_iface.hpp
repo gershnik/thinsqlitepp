@@ -39,11 +39,14 @@ namespace thinsqlitepp {
      * type. If desired you can directly access the struct members via c_ptr() but this wrapper provides
      * convenient and safe inline accessor methods for all members. 
      * 
-     * @tparam T The type of the index data (stored as T *) in sqlite3_index_info::idxStr.  
+     * @tparam T The type of the index data in sqlite3_index_info::idxStr. Must be a pointer or `void`.
+     * If `void` storing data is disabled.
      */
     template<class T>
     class index_info : public handle<sqlite3_index_info, index_info<T>>
     {
+        static_assert(std::is_void_v<T> || (std::is_pointer_v<T> && std::is_trivially_destructible_v<T>),
+                     "template argument must be void or a pointer to a trivially destructible type");
     public:
         /// Alias for unwieldy C struct name 
         using constraint = sqlite3_index_info::sqlite3_index_constraint;
@@ -111,19 +114,29 @@ namespace thinsqlitepp {
         void set_index_number(int val) noexcept
             { this->c_ptr()->idxNum = val; }
 
-        /// Returns data associated with the index
-        T * index_data() const noexcept
-            { return (T *)this->c_ptr()->idxStr; }
+        /**
+         * Returns data associated with the index
+         * 
+         * Only meaningful if template parameter T is non-void.
+         * Otherwise does nothing and returns nothing.
+         */
+        T index_data() const noexcept
+            { return (T)this->c_ptr()->idxStr; }
 
         /**
-         * Set the index data
+         * Set the index data.
+         * 
+         * Enabled only if template parameter T is non-void and
+         * @p data pointer can be converted to it.
          * 
          * @param data data to set
          * @param allocated if true SQLite will automatically free the data
          * using ::sqlite3_free. Otherwise you are responsible for the pointed
          * data lifecycle 
          */
-        void set_index_data(T * data, bool allocated = false) noexcept
+        template<class X>
+        SQLITEPP_ENABLE_IF((std::is_convertible_v<X *, T>),
+        void) set_index_data(X * data, bool allocated = false) noexcept
         {
             this->c_ptr()->idxStr = (char *)data;
             this->c_ptr()->needToFreeIdxStr = allocated;
@@ -132,11 +145,14 @@ namespace thinsqlitepp {
         /**
          * Set the index data
          * 
-         * This is a convenience overload of set_index_data(T *, bool) that
+         * This is a convenience overload of set_index_data(T, bool) that
          * takes a std::unique_pointer with an sqlite_deleter.
+         * 
+         * Enabled only if template parameter T is non-void and
+         * @p data pointer type can be converted to it.
          */
         template<class X>
-        SQLITEPP_ENABLE_IF((std::is_convertible_v<X *, T *>),
+        SQLITEPP_ENABLE_IF((std::is_convertible_v<X *, T>),
         void) set_index_data(std::unique_ptr<X, sqlite_deleter<X>> data) noexcept
             { set_index_data(data.release(), true); }
 
@@ -144,12 +160,14 @@ namespace thinsqlitepp {
          * Set the index data
          * 
          * This is a convenience overload of set_index_data(T *, bool) that
-         * takes a std::unique_pointer to T. It is only enabled 
-         * if T derives from sqlite_allocated
+         * takes a std::unique_pointer to T. 
+         * 
+         * Enabled only if template parameter T is a pointer to a class
+         * derived from sqlite_allocated
          */
         template<class X>
         SQLITEPP_ENABLE_IF((
-            std::is_convertible_v<X *, T *> &&
+            std::is_convertible_v<X *, T> &&
             std::is_base_of_v<sqlite_allocated, X>),
         void) set_index_data(std::unique_ptr<X> data) noexcept
             { set_index_data(data.release(), true); }
@@ -227,19 +245,23 @@ namespace thinsqlitepp {
     {
     public:
         /**
-         * Type of data passed by pointer via create_module to the constructor(s)
+         * Type of data passed via create_module to the constructor(s)
          * 
          * You can override this default by declaring a different typedef in your
          * derived class
+         * 
+         * The default is `void`, meaning no data is stored and passed
          */
         using constructor_data_type = void;
 
         /**
-         * Type of data stored by pointer in index_info and passed between
+         * Type of data stored in index_info and passed between
          * @ref best_index and @ref cursor::filter.
          * 
          * You can override this default by declaring a different typedef in your
-         * derived class
+         * derived class.
+         * 
+         * The default is `void`, meaning no data is stored and passed
          */
         using index_data_type = void;
 
@@ -266,6 +288,8 @@ namespace thinsqlitepp {
              * 
              * Equivalent to @ref xFilter
              * 
+             * This method is called if @ref index_data_type is defined as a pointer.
+             * 
              * Re-define this method as a non-templated function in your derived class. 
              * Your implementation can throw exceptions to indicate errors.
              * 
@@ -278,16 +302,48 @@ namespace thinsqlitepp {
              * internal implementation detail - your re-defined implementations do not need to be templated.
              * @param idx value passed to index_info::set_index_number in @ref best_index. Its significance is
              * entirely up to you
-             * @param idx_data ponter passed to index_info::set_index_data. Its significance is
+             * @param idx_data pointer passed to index_info::set_index_data. Its significance is
              * entirely up to you
              * @param argc count of items in @p argv array
              * @param argv requested values of certain expressions from @ref index_info::constraint_usage
              */
             template<class D=Derived> //defer resolution of nested data types
-            void filter([[maybe_unused]] int idx, 
-                        [[maybe_unused]] const typename D::index_data_type * idx_data, 
-                        [[maybe_unused]] int argc, 
-                        [[maybe_unused]] value ** argv)
+            SQLITEPP_ENABLE_IF((std::is_pointer_v<typename D::index_data_type>),
+            void) filter([[maybe_unused]] int idx, 
+                         [[maybe_unused]] typename D::index_data_type idx_data, 
+                         [[maybe_unused]] int argc, 
+                         [[maybe_unused]] value ** argv)
+            {
+                static_assert(std::is_same_v<D, Derived>, "please invoke this function only with default template parameter");
+            }
+
+            /**
+             * Begins a search of a virtual table
+             * 
+             * Equivalent to @ref xFilter
+             * 
+             * This method is called if @ref index_data_type is void.
+             * 
+             * Re-define this method as a non-templated function in your derived class. 
+             * Your implementation can throw exceptions to indicate errors.
+             * 
+             * This method can be called multiple times and should initialize cursor internals
+             * to start cursor iteration anew (do not rely on constructor to do that).
+             * 
+             * The default implementation does nothing.
+             * 
+             * @tparam D Defers resolution of nested data types declared in derived class. This is an 
+             * internal implementation detail - your re-defined implementations do not need to be templated.
+             * @param idx value passed to index_info::set_index_number in @ref best_index. Its significance is
+             * entirely up to you
+             * @param argc count of items in @p argv array
+             * @param argv requested values of certain expressions from @ref index_info::constraint_usage
+             */
+            template<class D=Derived> //defer resolution of nested data types
+            SQLITEPP_ENABLE_IF((std::is_void_v<typename D::index_data_type>),
+            void) filter([[maybe_unused]] int idx, 
+                         [[maybe_unused]] int argc, 
+                         [[maybe_unused]] value ** argv)
             {
                 static_assert(std::is_same_v<D, Derived>, "please invoke this function only with default template parameter");
             }
@@ -329,7 +385,7 @@ namespace thinsqlitepp {
              * 
              * This default implementation always return null
              * 
-             * @param ctxt the contenxt to set the column value on
+             * @param ctxt the context to set the column value on
              * @param idx column index
              */
             void column(context & ctxt, [[maybe_unused]] int idx) const
@@ -379,34 +435,71 @@ namespace thinsqlitepp {
          * 
          * Equivalent to ::sqlite3_create_module_v2
          * 
+         * If @ref constructor_data_type is not void using this method causes `nullptr` to be 
+         * passed to derived class constructor.
+         * 
+         * @param db database to register the implementation with
+         * @param name module name
+         */
+        static void create_module(database & db, const string_param & name)
+        {
+            db.create_module(name, vtab::get_module());
+        }
+
+        /**
+         * Register a virtual table implementation with a database connection
+         * 
+         * Equivalent to ::sqlite3_create_module_v2
+         * 
+         * This overload is available if @ref constructor_data_type is not `void`.
+         * 
          * @tparam D Defers resolution of nested data types declared in derived class. This is an 
          * internal implementation detail - never specify it explicitly.
          * 
          * @param db database to register the implementation with
          * @param name module name
          * @param data data to be passed to your derived class constructor. Can be nullptr. 
-         * You can change the type of the data by re-defining constructor_data_type in your derived
-         * class.
-         * @param destructor a destructor function for the data pointer. Can be nullptr.
+         * You can change the type of the data by re-defining @ref constructor_data_type in 
+         * your derived class.
+         * @param destructor an optional destructor function for the data pointer. Can be nullptr.
          */
-        template<class D=Derived>  
-        static void create_module(database & db,
-                                  const string_param & name, 
-                                  typename D::constructor_data_type * data = nullptr, 
-                                  void(*destructor)(typename D::constructor_data_type *) = nullptr)
+        template<class D=Derived>
+        static 
+        SQLITEPP_ENABLE_IF((std::is_pointer_v<typename D::constructor_data_type>),
+        void) create_module(database & db,
+                            const string_param & name, 
+                            typename D::constructor_data_type data, 
+                            void(*destructor)(typename D::constructor_data_type) = nullptr)
         {
             static_assert(std::is_same_v<D, Derived>, "please invoke this function only with default template parameter");
             db.create_module(name, vtab::get_module(), data, destructor);
         }
 
-        /// @overload
+        /**
+         * Register a virtual table implementation with a database connection
+         * 
+         * Equivalent to ::sqlite3_create_module_v2
+         * 
+         * This overload is available if @ref constructor_data_type is not `void`.
+         * 
+         * @tparam D Defers resolution of nested data types declared in derived class. This is an 
+         * internal implementation detail - never specify it explicitly.
+         * 
+         * @param db database to register the implementation with
+         * @param name module name
+         * @param data data to be passed to your derived class constructor. Can be nullptr. 
+         * You can change the type of the data by re-defining @ref constructor_data_type in 
+         * your derived class.
+         */
         template<class D=Derived> 
-        static void create_module(database & db,
-                                  const string_param & name, 
-                                  std::unique_ptr<typename D::constructor_data_type> data)
+        static 
+        SQLITEPP_ENABLE_IF((std::is_pointer_v<typename D::constructor_data_type>),
+        void) create_module(database & db,
+                            const string_param & name, 
+                            std::unique_ptr<std::remove_pointer_t<typename D::constructor_data_type>> data)
         {
             static_assert(std::is_same_v<D, Derived>, "please invoke this function only with default template parameter");
-            db.create_module(name, vtab::get_module(), data.release(), [](typename D::constructor_data_type * ptr) {
+            db.create_module(name, vtab::get_module(), data.release(), [](typename D::constructor_data_type ptr) {
                 delete ptr;
             });
         }

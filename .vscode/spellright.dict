@@ -11,3 +11,6 @@ cacheflush
 impl_ptr
 mutexes
 refmylib
+vtab
+argc
+argv
