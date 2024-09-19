@@ -58,8 +58,29 @@ namespace thinsqlitepp
 
     #undef SQLITEPP_DESIGNATED
 
+    //Detect vtab related things existing in a class
     struct vtab_detector
     {
+    public:
+        template<class T> static constexpr bool has_common_constructor = std::is_constructible_v<T, 
+                                                                                                 database *, 
+                                                                                                 typename T::constructor_data_type *, 
+                                                                                                 int, 
+                                                                                                 const char * const *>;
+
+        template<class T> static constexpr bool has_create_constructor = std::is_constructible_v<T, 
+                                                                                                 typename T::create_t, 
+                                                                                                 database *, 
+                                                                                                 typename T::constructor_data_type *, 
+                                                                                                 int, 
+                                                                                                 const char * const *>;
+        template<class T> static constexpr bool has_connect_constructor = std::is_constructible_v<T, 
+                                                                                                  typename T::connect_t, 
+                                                                                                  database *, 
+                                                                                                  typename T::constructor_data_type *, 
+                                                                                                  int, 
+                                                                                                  const char * const *>;
+
     #define SQLITEPP_DETECTOR_IMPL(name, call, rettype, ...) \
     private: \
         template<class T> static std::true_type has_##name##_impl(decltype(call(__VA_ARGS__)) *); \
@@ -138,22 +159,22 @@ namespace thinsqlitepp
 
         #endif
 
-        if constexpr (std::is_constructible_v<Derived, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+        if constexpr (vtab_detector::has_common_constructor<Derived>)
         {
-            static_assert(!std::is_constructible_v<Derived, create_t, database *, typename Derived::constructor_data_type *, int, const char * const *>,
-                            "if you declare a non-marked constructor you cannot also have a constructor that takes create_t");
-            static_assert(!std::is_constructible_v<Derived, connect_t, database *, typename Derived::constructor_data_type *, int, const char * const *>,
-                            "if you declare a non-marked constructor you cannot also have a constructor that takes connect_t");
+            static_assert(!vtab_detector::has_create_constructor<Derived>,
+                            "if you declare a common constructor you cannot also have a constructor that takes create_t");
+            static_assert(!vtab_detector::has_connect_constructor<Derived>,
+                            "if you declare a common constructor you cannot also have a constructor that takes connect_t");
         }
         else
         {
-            static_assert(std::is_constructible_v<Derived, connect_t, database *, typename Derived::constructor_data_type *, int, const char * const *>,
-                          "you must declare either a constructor that takes a connect_t OR a non-marked constructor");
+            static_assert(vtab_detector::has_connect_constructor<Derived>,
+                          "you must declare either a constructor that takes a connect_t OR a common constructor");
 
             #if SQLITE_VERSION_NUMBER < SQLITEPP_SQLITE_VERSION(3, 9, 0)
 
-                static_assert(std::is_constructible_v<Derived, create_t, database *, void *, int, const char * const *>,
-                          "you must declare either a constructor that takes a create_t OR a non-marked constructor");
+                static_assert(vtab_detector::has_create_constructor<Derived>,
+                              "you must declare either a constructor that takes a create_t OR a common constructor");
 
             #endif
         }
@@ -182,9 +203,9 @@ namespace thinsqlitepp
     {
         try 
         {
-            if constexpr (std::is_constructible_v<Derived, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+            if constexpr (vtab_detector::has_common_constructor<Derived>)
                 *pp_vtab = new Derived(database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
-            else if constexpr (std::is_constructible_v<Derived, create_t, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+            else if constexpr (vtab_detector::has_create_constructor<Derived>)
                 *pp_vtab = new Derived(create_t{}, database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
             else
                 static_assert(dependent_false<Derived>, "neither required constructor form is present");
@@ -213,9 +234,9 @@ namespace thinsqlitepp
     {
         try 
         {
-            if constexpr (std::is_constructible_v<Derived, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+            if constexpr (vtab_detector::has_common_constructor<Derived>)
                 *pp_vtab = new Derived(database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
-            else if constexpr(std::is_constructible_v<Derived, connect_t, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+            else if constexpr(vtab_detector::has_connect_constructor<Derived>)
                 *pp_vtab = new Derived(connect_t{}, database::from(db), (typename Derived::constructor_data_type *)aux, argc, argv);
             else
                 static_assert(dependent_false<Derived>, "neither required constructor form is present");
@@ -242,8 +263,7 @@ namespace thinsqlitepp
     template<class Derived>
     constexpr decltype(sqlite3_module::xCreate) vtab<Derived>::get_create_impl() 
     {
-        if constexpr (std::is_constructible_v<Derived,           database *, typename Derived::constructor_data_type *, int, const char * const *> ||
-                      std::is_constructible_v<Derived, create_t, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+        if constexpr (vtab_detector::has_common_constructor<Derived> || vtab_detector::has_create_constructor<Derived>)
         {
             return create_impl;
         }
@@ -256,7 +276,7 @@ namespace thinsqlitepp
     template<class Derived>
     constexpr decltype(sqlite3_module::xCreate) vtab<Derived>::get_connect_impl() 
     {
-        if constexpr (std::is_constructible_v<Derived, database *, typename Derived::constructor_data_type *, int, const char * const *>)
+        if constexpr (vtab_detector::has_common_constructor<Derived>)
         {
             return create_impl;
         }
