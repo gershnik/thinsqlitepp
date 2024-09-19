@@ -17,6 +17,7 @@
 #include "span.hpp"
 
 #include <type_traits>
+#include <string.h>
 
 namespace thinsqlitepp {
 
