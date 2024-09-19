@@ -11,38 +11,52 @@
 
 namespace thinsqlitepp
 {
+    #if __cpp_designated_initializers >= 201707L
+        #define SQLITEPP_DESIGNATED(name, value)  .name = value
+    #else
+        #define SQLITEPP_DESIGNATED(name, value)  value
+    #endif
+
     template<class Derived>
     inline sqlite3_module * vtab<Derived>::get_module()
     {
         check_requirements();
         static sqlite3_module the_module = {
-            .iVersion = 4,
-            .xCreate = get_create_impl(),
-            .xConnect = get_connect_impl(),
-            .xBestIndex = best_index_impl,
-            .xDisconnect = disconnect_impl,
-            .xDestroy = destroy_impl,
-            .xOpen = open_impl,
-            .xClose = close_impl,
-            .xFilter = filter_impl,
-            .xNext = next_impl,
-            .xEof = eof_impl,
-            .xColumn = column_impl,
-            .xRowid = rowid_impl,
-            .xUpdate = get_update_impl(),
-            .xBegin = get_begin_impl(),
-            .xSync = get_sync_impl(),
-            .xCommit = get_commit_impl(),
-            .xRollback = get_rollback_impl(),
-            .xFindFunction = get_find_function_impl(),
-            .xRename = get_rename_impl(),
-            .xSavepoint = get_savepoint_impl(),
-            .xRelease = get_release_impl(),
-            .xRollbackTo = get_rollback_to_impl()
+            SQLITEPP_DESIGNATED(iVersion,       4),
+            SQLITEPP_DESIGNATED(xCreate,        get_create_impl()),
+            SQLITEPP_DESIGNATED(xConnect,       get_connect_impl()),
+            SQLITEPP_DESIGNATED(xBestIndex,     best_index_impl),
+            SQLITEPP_DESIGNATED(xDisconnect,    disconnect_impl),
+            SQLITEPP_DESIGNATED(xDestroy,       destroy_impl),
+            SQLITEPP_DESIGNATED(xOpen,          open_impl),
+            SQLITEPP_DESIGNATED(xClose,         close_impl),
+            SQLITEPP_DESIGNATED(xFilter,        filter_impl),
+            SQLITEPP_DESIGNATED(xNext,          next_impl),
+            SQLITEPP_DESIGNATED(xEof,           eof_impl),
+            SQLITEPP_DESIGNATED(xColumn,        column_impl),
+            SQLITEPP_DESIGNATED(xRowid,         rowid_impl),
+            SQLITEPP_DESIGNATED(xUpdate,        get_update_impl()),
+            SQLITEPP_DESIGNATED(xBegin,         get_begin_impl()),
+            SQLITEPP_DESIGNATED(xSync,          get_sync_impl()),
+            SQLITEPP_DESIGNATED(xCommit,        get_commit_impl()),
+            SQLITEPP_DESIGNATED(xRollback,      get_rollback_impl()),
+            SQLITEPP_DESIGNATED(xFindFunction,  get_find_function_impl()),
+            SQLITEPP_DESIGNATED(xRename,        get_rename_impl()),
+            SQLITEPP_DESIGNATED(xSavepoint,     get_savepoint_impl()),
+            SQLITEPP_DESIGNATED(xRelease,       get_release_impl()),
+            SQLITEPP_DESIGNATED(xRollbackTo,    get_rollback_to_impl()),
+            #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 26, 0)
+            SQLITEPP_DESIGNATED(xShadowName,    get_shadow_name_impl()),
+            #endif
+            #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 44, 0)
+            SQLITEPP_DESIGNATED(xIntegrity,     get_integrity_impl()),
+            #endif
         };
 
         return &the_module;
     }
+
+    #undef SQLITEPP_DESIGNATED
 
     struct vtab_detector
     {
