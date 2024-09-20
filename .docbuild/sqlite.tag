@@ -160,6 +160,8 @@
     <member kind="function"><name>sqlite3_vtab_on_conflict</name><anchorfile>c3ref/vtab_on_conflict.html</anchorfile></member>
     
     <member kind="function"><name>xBestIndex</name><anchorfile>vtab.html</anchorfile><anchor>xbestindex</anchor></member>
+    <member kind="function"><name>xConnect</name><anchorfile>vtab.html</anchorfile><anchor>xconnect</anchor></member>
+    <member kind="function"><name>xCreate</name><anchorfile>vtab.html</anchorfile><anchor>xcreate</anchor></member>
     <member kind="function"><name>xColumn</name><anchorfile>vtab.html</anchorfile><anchor>xcolumn</anchor></member>
     <member kind="function"><name>xEof</name><anchorfile>vtab.html</anchorfile><anchor>xeof</anchor></member>
     <member kind="function"><name>xFilter</name><anchorfile>vtab.html</anchorfile><anchor>xfilter</anchor></member>

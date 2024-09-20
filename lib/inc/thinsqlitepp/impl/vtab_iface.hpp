@@ -41,6 +41,8 @@ namespace thinsqlitepp {
      * 
      * @tparam T The type of the index data in sqlite3_index_info::idxStr. Must be a pointer or `void`.
      * If `void` storing data is disabled.
+     * 
+     * `#include <thinsqlitepp/vtab.hpp>`
      */
     template<class T>
     class index_info : public handle<sqlite3_index_info, index_info<T>>
@@ -239,6 +241,13 @@ namespace thinsqlitepp {
      * 
      * It is intended to be used as [CRTP](https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern) 
      * base class for your own virtual table implementations. 
+     * 
+     * @important
+     * This documentation only describes the base class interface. 
+     * Please refer to @ref vtab-guide for detailed information about how to create classes derived from @ref vtab
+     * to implement virtual tables.  
+     * 
+     * `#include <thinsqlitepp/vtab.hpp>`
      */
     template<class Derived>
     class vtab : private sqlite3_vtab
