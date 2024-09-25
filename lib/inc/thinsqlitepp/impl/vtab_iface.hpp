@@ -44,7 +44,7 @@ namespace thinsqlitepp {
      * 
      * `#include <thinsqlitepp/vtab.hpp>`
      */
-    template<class T>
+    template<class T = void>
     class index_info : public handle<sqlite3_index_info, index_info<T>>
     {
         static_assert(std::is_void_v<T> || (std::is_pointer_v<T> && std::is_trivially_destructible_v<T>),
@@ -92,6 +92,26 @@ namespace thinsqlitepp {
          */
         int distinct() const noexcept 
             { return sqlite3_vtab_distinct(this->c_ptr()); }
+
+        #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 38, 0)
+
+            /**
+             * Determine if a constraint is an IN that can be processed all at once
+             * 
+             * Equivalent to ::sqlite3_vtab_in with last argument -1 
+             */
+            bool is_in(int constraint_idx) const noexcept 
+                { return sqlite3_vtab_in(this->c_ptr(), constraint_idx, -1); }
+
+            /**
+             * Set all-at-once processing of an IN operator
+             * 
+             * Equivalent to ::sqlite3_vtab_in
+             */
+            void handle_in(int constraint_idx, bool handle) const noexcept 
+                { sqlite3_vtab_in(this->c_ptr(), constraint_idx, handle); }
+
+         #endif
 
         
         /**
@@ -150,11 +170,11 @@ namespace thinsqlitepp {
          * This is a convenience overload of set_index_data(T, bool) that
          * takes a std::unique_pointer with an sqlite_deleter.
          * 
-         * Enabled only if template parameter T is non-void and
+         * Enabled only if template parameter T is non-void, trivially destructible and
          * @p data pointer type can be converted to it.
          */
         template<class X>
-        SQLITEPP_ENABLE_IF((std::is_convertible_v<X *, T>),
+        SQLITEPP_ENABLE_IF((std::is_convertible_v<X *, T> && std::is_trivially_destructible_v<X>),
         void) set_index_data(std::unique_ptr<X, sqlite_deleter<X>> data) noexcept
             { set_index_data(data.release(), true); }
 
@@ -164,12 +184,13 @@ namespace thinsqlitepp {
          * This is a convenience overload of set_index_data(T *, bool) that
          * takes a std::unique_pointer to T. 
          * 
-         * Enabled only if template parameter T is a pointer to a class
+         * Enabled only if template parameter T is a pointer to a trivially destructible class
          * derived from sqlite_allocated
          */
         template<class X>
         SQLITEPP_ENABLE_IF((
             std::is_convertible_v<X *, T> &&
+            std::is_trivially_destructible_v<X> &&
             std::is_base_of_v<sqlite_allocated, X>),
         void) set_index_data(std::unique_ptr<X> data) noexcept
             { set_index_data(data.release(), true); }

@@ -155,6 +155,35 @@ namespace thinsqlitepp
             { return sqlite3_value_frombind(c_ptr()); }
 #endif
 
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 38, 0)
+        /**
+         * Get first element on the right-hand side of an IN constraint
+         * 
+         * Equivalent to ::sqlite3_vtab_in_first
+         */
+        value * in_first() const 
+        {
+            sqlite3_value * ret;
+            int res = sqlite3_vtab_in_first(c_ptr(), &ret);
+            if (res != SQLITE_OK && res != SQLITE_DONE)
+                throw exception(res);
+            return from(ret);
+        }
+
+        /**
+         * Get next element on the right-hand side of an IN constraint
+         * 
+         * Equivalent to ::sqlite3_vtab_in_next
+         */
+        value * in_next() const 
+        {
+            sqlite3_value * ret;
+            int res = sqlite3_vtab_in_next(c_ptr(), &ret);
+            if (res != SQLITE_OK && res != SQLITE_DONE)
+                throw exception(res);
+            return from(ret);
+        }
+#endif
     };
 
     /** @} */

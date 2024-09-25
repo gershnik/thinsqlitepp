@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Added
-- `statement::bind_reference` overloads that accept callback called on dereference
+- Wrappers for all SQLite virtual table-related interfaces and base class for virtual table implementations.
+  See [Implementing Virtual Tables](https://gershnik.github.io/thinsqlitepp/vtab-guide.html) for more details
+- `statement::bind_reference` overloads that accept callback to be invoked on dereference
+- `sqlite_allocated` empty base class that makes derived classes use operators new/delete based on SQLite
+  memory APIs
+- `sqlite_allocator<T>` allocator that uses SQLite memory APIs
 
 ### Fixed
 - `exception::error` is now `const`

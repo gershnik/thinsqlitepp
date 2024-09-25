@@ -120,7 +120,7 @@ namespace thinsqlitepp
     SQLITEPP_DETECTOR(update, sqlite_int64, int{}, (value **)nullptr);
     SQLITEPP_DETECTOR(find_function, int, int{}, 
                                           (const char *)nullptr, 
-                                          (void (**)(sqlite3_context*,int,sqlite3_value**))nullptr,
+                                          (void (**)(context*,int,value**) noexcept)nullptr,
                                           (void **)nullptr);
     SQLITEPP_DETECTOR(begin, void, );
     SQLITEPP_DETECTOR(sync, void, );
@@ -207,9 +207,6 @@ namespace thinsqlitepp
         
         if constexpr (vtab_detector::has_find_function<Derived>) 
             static_assert(vtab_detector::has_noexcept_find_function<Derived>, "find_function() must be noexcept");
-
-        if constexpr (vtab_detector::has_rollback<Derived>) 
-            static_assert(vtab_detector::has_noexcept_rollback<Derived>, "rollback() must be noexcept");
 
         if constexpr (vtab_detector::has_shadow_name<Derived>) 
             static_assert(vtab_detector::has_noexcept_shadow_name<Derived>, "shadow_name() must be noexcept");

@@ -353,6 +353,16 @@ namespace thinsqlitepp
         template<class T>
         T * user_data() noexcept
             { return (T *)sqlite3_user_data(this->c_ptr()); }
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 22, 0)
+        /**
+         * Return if a value being fetched as part of an UPDATE operation during which the column value will not change.
+         * 
+         * Equivalent to ::sqlite3_vtab_nochange
+         */
+        bool vtab_nochange() const noexcept 
+            { return sqlite3_vtab_nochange(c_ptr()); }
+#endif
     };
 
     /** @} */

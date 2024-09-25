@@ -157,18 +157,34 @@
     <member kind="function"><name>sqlite3_vtab_collation</name><anchorfile>c3ref/vtab_collation.html</anchorfile></member>
     <member kind="function"><name>sqlite3_vtab_distinct</name><anchorfile>c3ref/vtab_distinct.html</anchorfile></member>
     <member kind="function"><name>sqlite3_vtab_config</name><anchorfile>c3ref/vtab_config.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_vtab_in</name><anchorfile>c3ref/vtab_in.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_vtab_in_first</name><anchorfile>c3ref/vtab_in_first.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_vtab_in_next</name><anchorfile>c3ref/vtab_in_first.html</anchorfile></member>
     <member kind="function"><name>sqlite3_vtab_on_conflict</name><anchorfile>c3ref/vtab_on_conflict.html</anchorfile></member>
     
+    <member kind="function"><name>xBegin</name><anchorfile>vtab.html</anchorfile><anchor>xBegin</anchor></member>
     <member kind="function"><name>xBestIndex</name><anchorfile>vtab.html</anchorfile><anchor>xbestindex</anchor></member>
+    <member kind="function"><name>xCommit</name><anchorfile>vtab.html</anchorfile><anchor>xcommit</anchor></member>
     <member kind="function"><name>xConnect</name><anchorfile>vtab.html</anchorfile><anchor>xconnect</anchor></member>
     <member kind="function"><name>xCreate</name><anchorfile>vtab.html</anchorfile><anchor>xcreate</anchor></member>
     <member kind="function"><name>xColumn</name><anchorfile>vtab.html</anchorfile><anchor>xcolumn</anchor></member>
+    <member kind="function"><name>xDestroy</name><anchorfile>vtab.html</anchorfile><anchor>sqlite3_module.xDestroy</anchor></member>
+    <member kind="function"><name>xDisconnect</name><anchorfile>vtab.html</anchorfile><anchor>xdisconnect</anchor></member>
     <member kind="function"><name>xEof</name><anchorfile>vtab.html</anchorfile><anchor>xeof</anchor></member>
     <member kind="function"><name>xFilter</name><anchorfile>vtab.html</anchorfile><anchor>xfilter</anchor></member>
     <member kind="function"><name>xFindFunction</name><anchorfile>vtab.html</anchorfile><anchor>xfindfunction</anchor></member>
+    <member kind="function"><name>xIntegrity</name><anchorfile>vtab.html</anchorfile><anchor>xintegrity</anchor></member>
     <member kind="function"><name>xNext</name><anchorfile>vtab.html</anchorfile><anchor>xnext</anchor></member>
     <member kind="function"><name>xOpen</name><anchorfile>vtab.html</anchorfile><anchor>xopen</anchor></member>
+    <member kind="function"><name>xRelease</name><anchorfile>vtab.html</anchorfile><anchor>xsavepoint</anchor></member>
+    <member kind="function"><name>xRename</name><anchorfile>vtab.html</anchorfile><anchor>xrename</anchor></member>
+    <member kind="function"><name>xRollback</name><anchorfile>vtab.html</anchorfile><anchor>xrollback</anchor></member>
+    <member kind="function"><name>xRollbackTo</name><anchorfile>vtab.html</anchorfile><anchor>xsavepoint</anchor></member>
     <member kind="function"><name>xRowid</name><anchorfile>vtab.html</anchorfile><anchor>xrowid</anchor></member>
+    <member kind="function"><name>xSavepoint</name><anchorfile>vtab.html</anchorfile><anchor>xsavepoint</anchor></member>
+    <member kind="function"><name>xShadowName</name><anchorfile>vtab.html</anchorfile><anchor>xshadowname</anchor></member>
+    <member kind="function"><name>xSync</name><anchorfile>vtab.html</anchorfile><anchor>xsync</anchor></member>
+    <member kind="function"><name>xUpdate</name><anchorfile>vtab.html</anchorfile><anchor>xupdate</anchor></member>
   </compound>
 
 </tagfile>
