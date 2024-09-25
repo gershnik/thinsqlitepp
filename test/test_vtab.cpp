@@ -14,7 +14,7 @@ namespace
     public:
         struct entry
         {
-            sqlite3_int64 rowid;
+            int64_t rowid;
             std::string value;
 
             bool operator==(const entry & rhs) const 
@@ -50,7 +50,7 @@ namespace
             void next()
                 { ++_current; }
 
-            sqlite_int64 rowid() const
+            int64_t rowid() const
                 { return _current->rowid; }
 
             void column(context & ctxt, int idx) const
