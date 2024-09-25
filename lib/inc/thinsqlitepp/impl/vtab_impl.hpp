@@ -117,7 +117,7 @@ namespace thinsqlitepp
     SQLITEPP_STATIC_DETECTOR(disconnect, void, std::unique_ptr<T>{});
     SQLITEPP_STATIC_DETECTOR(destroy, void, std::unique_ptr<T>{});
 
-    SQLITEPP_DETECTOR(update, sqlite_int64, int{}, (value **)nullptr);
+    SQLITEPP_DETECTOR(update, int64_t, int{}, (value **)nullptr);
     SQLITEPP_DETECTOR(find_function, int, int{}, 
                                           (const char *)nullptr, 
                                           (void (**)(context*,int,value**) noexcept)nullptr,
@@ -165,7 +165,7 @@ namespace thinsqlitepp
                     );
                 { cur.next() } -> std::same_as<void>;
                 { ccur.column(ctxt, int{}) } -> std::same_as<void>;
-                { ccur.rowid() } -> std::same_as<sqlite_int64>;
+                { ccur.rowid() } -> std::same_as<int64_t>;
             };
 
     #endif
@@ -448,7 +448,7 @@ namespace thinsqlitepp
 
         SQLITEPP_BEGIN_CALLBACK
         {
-            *rowid = me_cursor->rowid();
+            *rowid = sqlite_int64(me_cursor->rowid());
             return SQLITE_OK;
         }
         SQLITEPP_END_CALLBACK
@@ -460,7 +460,7 @@ namespace thinsqlitepp
         auto me = static_cast<Derived *>(vtab);
         SQLITEPP_BEGIN_CALLBACK
         {
-            *rowid = me->update(argc, (value **)argv);
+            *rowid = sqlite_int64(me->update(argc, (value **)argv));
             return SQLITE_OK;
         }
         SQLITEPP_END_CALLBACK

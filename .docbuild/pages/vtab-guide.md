@@ -174,7 +174,7 @@ in your `cursor` class.
 * **column() and rowid()**
   ```cpp
   void column(context & ctxt, int idx) const;
-  sqlite_int64 rowid() const;
+  int64_t rowid() const;
   ```
   These retrieve values for the table row currently pointed to by the cursor. They are never called 
   once `eof()` returns `false`. They correspond to `xColumn` and `xRowid` SQLite calls. The base
@@ -214,8 +214,8 @@ public:
         void next()
             { ++_current; }
 
-        sqlite_int64 rowid() const
-            { return sqlite_int64(_current - _begin); }
+        int64_t rowid() const
+            { return _current - _begin; }
 
         void column(context & ctxt, int idx) const {
             ctxt.result(*_current);
@@ -461,8 +461,8 @@ public:
         void next() 
             { ++_current; }
 
-        sqlite_int64 rowid() const
-            { return sqlite_int64(_current->first); }
+        int64_t rowid() const
+            { return int64_t(_current->first); }
 
         void column(context & ctxt, int idx) const {
             if (idx == 0)
@@ -512,7 +512,7 @@ documentation for further details.
 
 | Method                                                                    |  SQLite Equivalent |
 |---------------------------------------------------------------------------|--------------------|
-| @code{.cpp} sqlite_int64 update(int argc, value ** argv) @endcode         | @ref xUpdate
+| @code{.cpp} int64_t update(int argc, value ** argv) @endcode              | @ref xUpdate
 | @code{.cpp} int find_function(int n_arg, const char * name, void (**func)(context*,int,value**) noexcept, void ** user_data) const noexcept @endcode | @ref xFindFunction
 | @code{.cpp} void begin() @endcode                                         | @ref xBegin
 | @code{.cpp} void sync() @endcode                                          | @ref xSync

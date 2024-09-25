@@ -72,8 +72,8 @@ namespace thinsqlitepp {
              * Returns mask of columns used by statement
              * @since SQLite 3.10.0
              */
-            sqlite3_uint64 columns_used() const noexcept
-                { return this->c_ptr()->colUsed; }
+            uint64_t columns_used() const noexcept
+                { return uint64_t(this->c_ptr()->colUsed); }
 
         #endif
 
@@ -215,14 +215,14 @@ namespace thinsqlitepp {
              * Returns estimated number of rows returned
              * @since SQLite 3.8.2
              */
-            sqlite3_int64 estimated_rows() const noexcept
-                { return this->c_ptr()->estimatedRows; }
+            int64_t estimated_rows() const noexcept
+                { return int64_t(this->c_ptr()->estimatedRows); }
             /**
              * Sets estimated number of rows returned
              * @since SQLite 3.8.2
              */
-            void set_estimated_rows(sqlite3_int64 val) noexcept
-                { this->c_ptr()->estimatedRows = val; }
+            void set_estimated_rows(int64_t val) noexcept
+                { this->c_ptr()->estimatedRows = sqlite3_int64(val); }
 
         #endif
 

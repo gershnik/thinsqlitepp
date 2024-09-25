@@ -150,7 +150,7 @@ namespace thinsqlitepp
         SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_SQLLOG,               void (*)(void *, sqlite3 *, const char *, int), void *);
         #endif
         #ifdef SQLITE_CONFIG_MMAP_SIZE
-        SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_MMAP_SIZE,            sqlite3_int64, sqlite3_int64);
+        SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_MMAP_SIZE,            int64_t, int64_t);
         #endif
         #ifdef SQLITE_CONFIG_WIN32_HEAPSIZE
         SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_WIN32_HEAPSIZE,       int);
@@ -168,7 +168,7 @@ namespace thinsqlitepp
         SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_SORTERREF_SIZE,       int);
         #endif
         #ifdef SQLITE_CONFIG_MEMDB_MAXSIZE
-        SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_MEMDB_MAXSIZE,        sqlite3_int64);
+        SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_MEMDB_MAXSIZE,        int64_t);
         #endif
 
         //@ [Config Options]
