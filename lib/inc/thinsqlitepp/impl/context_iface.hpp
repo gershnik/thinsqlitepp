@@ -61,11 +61,11 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_result_error
          */
         void error(const std::string_view & value) noexcept
-            { sqlite3_result_error(c_ptr(), value.size() ? &value[0] : "", int(value.size())); }
+            { sqlite3_result_error(c_ptr(), value.size() ? &value[0] : "", int_size(value.size())); }
     #if __cpp_char8_t >= 201811
         /// @overload
         void error(const std::u8string_view & value) noexcept
-            { sqlite3_result_error(c_ptr(), value.size() ? (const char *)&value[0] : "", int(value.size())); }
+            { sqlite3_result_error(c_ptr(), value.size() ? (const char *)&value[0] : "", int_size(value.size())); }
     #endif
 
         /**
@@ -139,7 +139,7 @@ namespace thinsqlitepp
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
-                sqlite3_result_text(c_ptr(), data, int(value.size()), SQLITE_TRANSIENT);
+                sqlite3_result_text(c_ptr(), data, int_size(value.size()), SQLITE_TRANSIENT);
             else
                 sqlite3_result_text(c_ptr(), "", 0, SQLITE_STATIC);
         }
@@ -149,7 +149,7 @@ namespace thinsqlitepp
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
-                sqlite3_result_text(c_ptr(), (const char *)data, int(value.size()), SQLITE_TRANSIENT);
+                sqlite3_result_text(c_ptr(), (const char *)data, int_size(value.size()), SQLITE_TRANSIENT);
             else
                 sqlite3_result_text(c_ptr(), "", 0, SQLITE_STATIC);
         }
@@ -166,7 +166,7 @@ namespace thinsqlitepp
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
-                sqlite3_result_text(c_ptr(), data, int(value.size()), SQLITE_STATIC);
+                sqlite3_result_text(c_ptr(), data, int_size(value.size()), SQLITE_STATIC);
             else
                 sqlite3_result_text(c_ptr(), "", 0, SQLITE_STATIC);
         }
@@ -176,7 +176,7 @@ namespace thinsqlitepp
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
-                sqlite3_result_text(c_ptr(), (const char *)data, int(value.size()), SQLITE_STATIC);
+                sqlite3_result_text(c_ptr(), (const char *)data, int_size(value.size()), SQLITE_STATIC);
             else
                 sqlite3_result_text(c_ptr(), "", 0, SQLITE_STATIC);
         }
@@ -197,7 +197,7 @@ namespace thinsqlitepp
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
             {
-                sqlite3_result_text(c_ptr(), data, int(value.size()), (void (*)(void*))unref);
+                sqlite3_result_text(c_ptr(), data, int_size(value.size()), (void (*)(void*))unref);
             }
             else 
             {
@@ -213,7 +213,7 @@ namespace thinsqlitepp
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
             {
-                sqlite3_result_text(c_ptr(), (const char *)data, int(value.size()), (void (*)(void *))unref);
+                sqlite3_result_text(c_ptr(), (const char *)data, int_size(value.size()), (void (*)(void *))unref);
             }
             else 
             {
@@ -234,7 +234,7 @@ namespace thinsqlitepp
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
-                sqlite3_result_blob(c_ptr(), data, int(value.size()), SQLITE_TRANSIENT);
+                sqlite3_result_blob(c_ptr(), data, int_size(value.size()), SQLITE_TRANSIENT);
             else
                 sqlite3_result_zeroblob(c_ptr(), 0);
         }
@@ -251,7 +251,7 @@ namespace thinsqlitepp
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
-                sqlite3_result_blob(c_ptr(), data, int(value.size()), SQLITE_STATIC);
+                sqlite3_result_blob(c_ptr(), data, int_size(value.size()), SQLITE_STATIC);
             else
                 sqlite3_result_zeroblob(c_ptr(), 0);
         }
@@ -272,7 +272,7 @@ namespace thinsqlitepp
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
             {
-                sqlite3_result_blob(c_ptr(), data, int(value.size()), (void (*)(void *))unref);
+                sqlite3_result_blob(c_ptr(), data, int_size(value.size()), (void (*)(void *))unref);
             }
             else
             {
@@ -289,7 +289,7 @@ namespace thinsqlitepp
          * 
          */
         void result(const zero_blob & value) noexcept
-            { sqlite3_result_zeroblob(c_ptr(), int(value.size())); }
+            { sqlite3_result_zeroblob(c_ptr(), int_size(value.size())); }
         
         template<class T>
         void result(T * ptr, const char * type, void(*destroy)(T*)) noexcept

@@ -634,7 +634,7 @@ namespace thinsqlitepp {
             }
             auto message = ex.what();
             const auto len = strlen(message) + 1;
-            if (char * const ret = (char *)sqlite3_malloc(int(len)))
+            if (char * const ret = (char *)sqlite_allocate_nothrow(len))
             {
                 memcpy(ret, message, len);
                 me->zErrMsg = ret;

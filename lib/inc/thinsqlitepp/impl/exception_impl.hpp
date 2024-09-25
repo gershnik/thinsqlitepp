@@ -11,6 +11,7 @@
 
 #include "exception_iface.hpp"
 #include "database_iface.hpp"
+#include "memory_iface.hpp"
 
 #include <memory.h>
 
@@ -43,7 +44,7 @@ namespace thinsqlitepp
         if (!src)
             return nullptr;
         const auto len = strlen(src);
-        char * const ret = (char *)sqlite3_malloc(int(len + 1));
+        char * const ret = (char *)sqlite_allocate_nothrow(len + 1);
         if (!ret)
             return nullptr;
         memcpy(ret, src, len + 1);
