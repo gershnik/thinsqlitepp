@@ -291,10 +291,28 @@ namespace thinsqlitepp
         void result(const zero_blob & value) noexcept
             { sqlite3_result_zeroblob(c_ptr(), int_size(value.size())); }
         
+        ///@anchor result_pointer
+        /**
+         * 
+         * Return a custom pointer from the implemented SQL function.
+         * 
+         * Equivalent to ::sqlite3_result_pointer()
+         * 
+         */
         template<class T>
         void result(T * ptr, const char * type, void(*destroy)(T*)) noexcept
             { sqlite3_result_pointer(this->c_ptr(), ptr, type, (void(*)(void*))destroy); }
         
+        /**
+         * Return a custom pointer from the implemented SQL function.
+         * 
+         * Equivalent to ::sqlite3_result_pointer()
+         * 
+         * This is a safer overload of 
+         * @ref result_pointer "result(T * , const char * , void( * )(T * ))"
+         * that takes a pointer via std::unique_ptr ownership transfer. The inferred
+         * "type" for ::sqlite3_result_pointer is `typeid(T).name()`.
+         */
         template<class T>
         void result(std::unique_ptr<T> ptr) noexcept
             { this->result(ptr.release(), typeid(T).name(), [](T * p) { delete p;}); }

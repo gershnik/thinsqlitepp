@@ -129,6 +129,7 @@
     <member kind="function"><name>sqlite3_result_int</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_int64</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_null</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_result_pointer</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_subtype</name><anchorfile>c3ref/result_subtype.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_text</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_result_value</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
@@ -152,6 +153,7 @@
     <member kind="function"><name>sqlite3_value_frombind</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_nochange</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_numeric_type</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_value_pointer</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_subtype</name><anchorfile>c3ref/value_subtype.html</anchorfile></member>
     <member kind="function"><name>sqlite3_value_type</name><anchorfile>c3ref/value_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_vtab_collation</name><anchorfile>c3ref/vtab_collation.html</anchorfile></member>

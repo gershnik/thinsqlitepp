@@ -324,6 +324,7 @@ namespace thinsqlitepp
         void bind(int idx, const zero_blob & val)
             { check_error(sqlite3_bind_zeroblob(c_ptr(), idx, int(val.size()))); }
 
+        ///@anchor bind_pointer
         /**
          * Bind a custom pointer to a parameter of the statement
          * 
@@ -340,7 +341,8 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_bind_pointer. 
          * 
-         * This is a safer overload of bind(int, T *, const char *, void(*)(T*))
+         * This is a safer overload of 
+         * @ref bind_pointer "bind(int, T * , const char * , void( * )(T * ))"
          * that takes a pointer via std::unique_ptr ownership transfer. The inferred
          * "type" for ::sqlite3_bind_pointer is `typeid(T).name()`.
          */

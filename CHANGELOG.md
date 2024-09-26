@@ -9,12 +9,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Wrappers for all SQLite virtual table-related interfaces and base class for virtual table implementations.
   See [Implementing Virtual Tables](https://gershnik.github.io/thinsqlitepp/vtab-guide.html) for more details
 - `statement::bind_reference` overloads that accept callback to be invoked on dereference
+- `value::get` overload wrapping `sqlite3_value_pointer`
 - `sqlite_allocated` empty base class that makes derived classes use operators new/delete based on SQLite
   memory APIs
 - `sqlite_allocator<T>` allocator that uses SQLite memory APIs
 
 ### Fixed
 - `exception::error` is now `const`
+- Passing oversized data to the API now properly reports SQLITE_TOOBIG exception.
 
 ## [1.2] - 2024-09-10
 

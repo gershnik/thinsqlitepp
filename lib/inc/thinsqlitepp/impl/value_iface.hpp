@@ -98,6 +98,32 @@ namespace thinsqlitepp
         template<class T>
         SQLITEPP_ENABLE_IF(supported_column_type<T>,
         T) get() const noexcept;
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
+
+        /**
+         * Obtain a pointer stored in the value
+         * 
+         * Wraps @ref sqlite3_value_pointer function. 
+         * 
+         * @param type the "type name" of the stored pointer. If nullptr 
+         * the result of `typeid(T).name()` is used.
+         * 
+         * @see 
+         * - @ref bind_pointer "statement::bind(int, T * , const char * , void( * )(T * ))"
+         * - @ref "statement::bind(int, std::unique_ptr<T>)"
+         * - @ref result_pointer "context::result(T * , const char * , void( * )(T * ))"
+         * - @ref "context::result(std::unique_ptr<T>)"
+         * 
+         * @since SQLite 3.20
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T>,
+        T) get(const char * type = nullptr) const noexcept 
+            { return sqlite3_value_pointer(c_ptr(), type ? type : typeid(T).name()); }
+
+
+    #endif
         
         /**
          * Default datatype of the value
