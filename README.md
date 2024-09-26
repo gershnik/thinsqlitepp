@@ -216,7 +216,11 @@ You can also simply download the headers of this repository from [Releases](http
 ## Configuration
 
 Whichever method you use in order to use ThinSQLite++ your compiler needs to be set to C++17 mode or higher. 
-ThinSQLite++ should compile cleanly even on a highest warnings level. 
+ThinSQLite++ should compile cleanly even on a highest warnings level.
+
+If you wish to use ThinSQLite++ in an [SQLite extension](https://www.sqlite.org/loadext.html) you can
+set `THINSQLITEPP_BUILDING_EXTENSION` macro to 1 in your build system. More details are available 
+[in the documentation](https://gershnik.github.io/thinsqlitepp/extension.html).
 
 
 ## Implementation choices

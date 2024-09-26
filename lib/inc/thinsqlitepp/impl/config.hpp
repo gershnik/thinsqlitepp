@@ -10,9 +10,12 @@
 #define HEADER_SQLITEPP_CONFIG_INCLUDED
 
 #ifndef SQLITE_VERSION
-
-    #include <sqlite3.h>
-
+    #if THINSQLITEPP_BUILDING_EXTENSION
+        #include <sqlite3ext.h>
+        SQLITE_EXTENSION_INIT3
+    #else
+        #include <sqlite3.h>
+    #endif
 #endif
 
 #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
