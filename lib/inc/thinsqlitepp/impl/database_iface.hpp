@@ -850,7 +850,7 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_load_extension
          */
-        void load_extension(const string_param & file, const string_param & proc);
+        void load_extension(const string_param & file, const string_param & proc = nullptr);
         
         /**
          * Retrieve the mutex for the database connection
