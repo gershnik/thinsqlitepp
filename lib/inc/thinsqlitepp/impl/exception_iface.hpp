@@ -13,6 +13,7 @@
 
 #include <exception>
 #include <memory>
+#include <limits>
 
 namespace thinsqlitepp
 {
