@@ -137,8 +137,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_changes
          */
-        int changes() const noexcept
-            { return sqlite3_changes(c_ptr()); }
+        int64_t changes() const noexcept
+        {
+        #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 1)
+            return sqlite3_changes64(c_ptr()); 
+        #else
+            return sqlite3_changes(c_ptr()); 
+        #endif
+        }
 
         /** @{
          * @anchor database_callbacks
@@ -982,8 +988,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_total_changes
          */
-        int total_changes() const noexcept
-            { return sqlite3_total_changes(c_ptr()); }
+        int64_t total_changes() const noexcept
+        { 
+        #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 1)
+            return sqlite3_total_changes64(c_ptr()); 
+        #else
+            return sqlite3_total_changes(c_ptr()); 
+        #endif
+        }
         
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 34, 0)
 
