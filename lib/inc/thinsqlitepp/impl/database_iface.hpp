@@ -1025,9 +1025,9 @@ namespace thinsqlitepp
     /** @cond PRIVATE */
     
 
-    #if SQLITEPP_USE_VARARG_POUND_POUND_TRICK
+    SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN
 
-        SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN
+    #if SQLITEPP_USE_VARARG_POUND_POUND_TRICK
 
         #define SQLITEPP_DEFINE_DB_OPTION(code, ...) \
             template<> struct database::config_mapping<code> { using type = database::config_option<code, ##__VA_ARGS__>; };
@@ -1038,8 +1038,6 @@ namespace thinsqlitepp
             template<> struct database::vtab_config_mapping<code> { using type = database::vtab_config_option<code>; };
         #define SQLITEPP_DEFINE_VTAB_OPTION_N(code, ...) \
             template<> struct database::vtab_config_mapping<code> { using type = database::vtab_config_option<code, ##__VA_ARGS__>; };
-
-        SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 
     #else
 
@@ -1109,7 +1107,10 @@ namespace thinsqlitepp
     //@ [VTab Options]
 
     #undef SQLITEPP_DEFINE_DB_OPTION
-    #undef SQLITEPP_DEFINE_VTAB_OPTION
+    #undef SQLITEPP_DEFINE_VTAB_OPTION_0
+    #undef SQLITEPP_DEFINE_VTAB_OPTION_N
+
+    SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 
     /** @endcond */
 }
