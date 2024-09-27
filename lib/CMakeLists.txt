@@ -49,6 +49,7 @@ set(PUBLIC_HEADERS
     inc/thinsqlitepp/mutex.hpp
     inc/thinsqlitepp/statement.hpp
     inc/thinsqlitepp/value.hpp
+    inc/thinsqlitepp/vtab.hpp
     inc/thinsqlitepp/thinsqlitepp.hpp
 )
 source_group("Public Headers" FILES ${PUBLIC_HEADERS})
@@ -71,6 +72,8 @@ set(IMPL_HEADERS
     inc/thinsqlitepp/impl/span.hpp
     inc/thinsqlitepp/impl/string_param.hpp
     inc/thinsqlitepp/impl/value_iface.hpp
+    inc/thinsqlitepp/impl/vtab_iface.hpp
+    inc/thinsqlitepp/impl/vtab_impl.hpp
 )
 source_group("Implementation Headers" FILES ${IMPL_HEADERS})
 

@@ -42,9 +42,9 @@ namespace thinsqlitepp
         const char * tail = nullptr;
         sqlite3_stmt * ret = nullptr;
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
-        int res = sqlite3_prepare_v3(db.c_ptr(), start, int(sql.size()), flags, &ret, &tail);
+        int res = sqlite3_prepare_v3(db.c_ptr(), start, int_size(sql.size()), flags, &ret, &tail);
 #else
-        int res = sqlite3_prepare_v2(db.c_ptr(), start, int(sql.size()), &ret, &tail);
+        int res = sqlite3_prepare_v2(db.c_ptr(), start, int_size(sql.size()), &ret, &tail);
 #endif
         if (res != SQLITE_OK)
             throw exception(res, db);
@@ -66,7 +66,7 @@ namespace thinsqlitepp
     inline void statement::bind(int idx, const std::string_view & value)
     {
         if (auto data = value.data())
-            check_error(sqlite3_bind_text(c_ptr(), idx, data, int(value.size()), SQLITE_TRANSIENT));
+            check_error(sqlite3_bind_text(c_ptr(), idx, data, int_size(value.size()), SQLITE_TRANSIENT));
         else
             check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
     }
@@ -74,7 +74,7 @@ namespace thinsqlitepp
     inline void statement::bind_reference(int idx, const std::string_view & value)
     {
         if (auto data = value.data())
-            check_error(sqlite3_bind_text(c_ptr(), idx, data, int(value.size()), SQLITE_STATIC));
+            check_error(sqlite3_bind_text(c_ptr(), idx, data, int_size(value.size()), SQLITE_STATIC));
         else
             check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
     }
@@ -83,7 +83,7 @@ namespace thinsqlitepp
     {
         if (auto data = value.data())
         {
-            check_error(sqlite3_bind_text(c_ptr(), idx, data, int(value.size()), (void (*)(void *))unref));
+            check_error(sqlite3_bind_text(c_ptr(), idx, data, int_size(value.size()), (void (*)(void *))unref));
         }
         else
         {
@@ -96,7 +96,7 @@ namespace thinsqlitepp
     inline void statement::bind(int idx, const std::u8string_view & value)
     {
         if (auto data = value.data())
-            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int(value.size()), SQLITE_TRANSIENT));
+            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int_size(value.size()), SQLITE_TRANSIENT));
         else
             check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
     }
@@ -104,7 +104,7 @@ namespace thinsqlitepp
     inline void statement::bind_reference(int idx, const std::u8string_view & value)
     {
         if (auto data = value.data())
-            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int(value.size()), SQLITE_STATIC));
+            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int_size(value.size()), SQLITE_STATIC));
         else
             check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
     }
@@ -113,7 +113,7 @@ namespace thinsqlitepp
     {
         if (auto data = value.data())
         {
-            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int(value.size()), (void (*)(void *))unref));
+            check_error(sqlite3_bind_text(c_ptr(), idx, (const char *)data, int_size(value.size()), (void (*)(void *))unref));
         }
         else
         {
@@ -126,7 +126,7 @@ namespace thinsqlitepp
     inline void statement::bind(int idx, const blob_view & value)
     {
         if (auto data = value.data())
-            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int(value.size()), SQLITE_TRANSIENT));
+            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int_size(value.size()), SQLITE_TRANSIENT));
         else
             check_error(sqlite3_bind_zeroblob(c_ptr(), idx, 0));
     }
@@ -134,7 +134,7 @@ namespace thinsqlitepp
     inline void statement::bind_reference(int idx, const blob_view & value)
     {
         if (auto data = value.data())
-            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int(value.size()), SQLITE_STATIC));
+            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int_size(value.size()), SQLITE_STATIC));
         else
             check_error(sqlite3_bind_zeroblob(c_ptr(), idx, 0));
     }
@@ -143,7 +143,7 @@ namespace thinsqlitepp
     {
         if (auto data = value.data())
         {
-            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int(value.size()), (void (*)(void *))unref));
+            check_error(sqlite3_bind_blob(c_ptr(), idx, data, int_size(value.size()), (void (*)(void *))unref));
         }
         else
         {

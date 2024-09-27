@@ -42,6 +42,9 @@ namespace thinsqlitepp
         /// Construct an instance from std::basic_string<T>::c_str()
         basic_string_param(const std::basic_string<T> & str) noexcept : _str(str.c_str())
         {}
+        /// Construct an instance from a nullptr
+        basic_string_param(std::nullptr_t) noexcept : _str(nullptr)
+        {}
 
         /// Returns the stored pointer
         const T * c_str() const noexcept

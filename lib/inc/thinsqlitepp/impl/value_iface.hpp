@@ -98,6 +98,32 @@ namespace thinsqlitepp
         template<class T>
         SQLITEPP_ENABLE_IF(supported_column_type<T>,
         T) get() const noexcept;
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
+
+        /**
+         * Obtain a pointer stored in the value
+         * 
+         * Wraps @ref sqlite3_value_pointer function. 
+         * 
+         * @param type the "type name" of the stored pointer. If nullptr 
+         * the result of `typeid(T).name()` is used.
+         * 
+         * @see 
+         * - @ref bind_pointer "statement::bind(int, T * , const char * , void( * )(T * ))"
+         * - @ref "statement::bind(int, std::unique_ptr<T>)"
+         * - @ref result_pointer "context::result(T * , const char * , void( * )(T * ))"
+         * - @ref "context::result(std::unique_ptr<T>)"
+         * 
+         * @since SQLite 3.20
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T>,
+        T) get(const char * type = nullptr) const noexcept 
+            { return sqlite3_value_pointer(c_ptr(), type ? type : typeid(T).name()); }
+
+
+    #endif
         
         /**
          * Default datatype of the value
@@ -155,6 +181,35 @@ namespace thinsqlitepp
             { return sqlite3_value_frombind(c_ptr()); }
 #endif
 
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 38, 0)
+        /**
+         * Get first element on the right-hand side of an IN constraint
+         * 
+         * Equivalent to ::sqlite3_vtab_in_first
+         */
+        value * in_first() const 
+        {
+            sqlite3_value * ret;
+            int res = sqlite3_vtab_in_first(c_ptr(), &ret);
+            if (res != SQLITE_OK && res != SQLITE_DONE)
+                throw exception(res);
+            return from(ret);
+        }
+
+        /**
+         * Get next element on the right-hand side of an IN constraint
+         * 
+         * Equivalent to ::sqlite3_vtab_in_next
+         */
+        value * in_next() const 
+        {
+            sqlite3_value * ret;
+            int res = sqlite3_vtab_in_next(c_ptr(), &ret);
+            if (res != SQLITE_OK && res != SQLITE_DONE)
+                throw exception(res);
+            return from(ret);
+        }
+#endif
     };
 
     /** @} */

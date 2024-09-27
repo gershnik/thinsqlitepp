@@ -63,7 +63,9 @@ require synchronization.
 
 ## More info
 
-Start with [An Introduction To ThinSQLite++](intro.md) page, especially if you are not already familiar with SQLite C interface.
+Start with [An Introduction To ThinSQLite++](1_intro.md) page, especially if you are not already familiar with SQLite C interface.
+
+If you are familiar with SQLite C interface a list of mappings from SQLite to ThinSQLite++ can be found [here](2_mapping.md)
 
 Otherwise, browse the [**list of topics**](topics.html), content of the @ref thinsqlitepp "thinsqlitepp namespace" or the [**list of classes**](annotated.html)
 

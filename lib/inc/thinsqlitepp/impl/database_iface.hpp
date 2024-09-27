@@ -94,6 +94,18 @@ namespace thinsqlitepp
             }
         };
         template<int Code> struct config_mapping;
+
+        template<int Code, class ...Args>
+        struct vtab_config_option
+        {
+            static void apply(database & db, Args && ...args)
+            {
+                int res = sqlite3_vtab_config(db.c_ptr(), Code, std::forward<Args>(args)...);
+                if (res != SQLITE_OK)
+                    throw exception(res, db);
+            }
+        };
+        template<int Code> struct vtab_config_mapping;
         
     public:
         /**
@@ -125,8 +137,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_changes
          */
-        int changes() const noexcept
-            { return sqlite3_changes(c_ptr()); }
+        int64_t changes() const noexcept
+        {
+        #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 1)
+            return sqlite3_changes64(c_ptr()); 
+        #else
+            return sqlite3_changes(c_ptr()); 
+        #endif
+        }
 
         /** @{
          * @anchor database_callbacks
@@ -537,8 +555,8 @@ namespace thinsqlitepp
          * 
          * @param name name of the module
          * @param mod pointer to ::sqlite3_module "vtable"
-         * @param data data to be passed to virtual table xCreate function. Can be nullptr
-         * @param destructor function to call when data is no longer needed. Can be nullptr
+         * @param data data to be passed to virtual table xCreate function.
+         * @param destructor function to call when data is no longer needed. Can be omitted
          */
         template<typename T>
         void create_module(const string_param & name, const sqlite3_module * mod, 
@@ -553,6 +571,45 @@ namespace thinsqlitepp
          */
         void declare_vtab(const string_param & sdl)
             { check_error(sqlite3_declare_vtab(c_ptr(), sdl.c_str())); }
+
+
+        /**
+         * Configure virtual table
+         * 
+         * Wraps ::sqlite3_vtab_config
+         * 
+         * @tparam Code One of the SQLITE_VTAB_ options. Needs to be explicitly specified
+         * @tparam Args depend on the @p Code template parameter
+         * 
+         * The following table lists required argument types for each option.
+         * Supplying wrong argument types will result in compile-time error.
+         * 
+         * @include{doc} vtab-options.md
+         * 
+         */
+        template<int Code, class ...Args>
+        auto vtab_config(Args && ...args) -> 
+        #ifndef DOXYGEN
+            //void but prevents instantiation with wrong types
+            decltype(
+              vtab_config_mapping<Code>::type::apply(*this, std::forward<decltype(args)>(args)...)
+            )
+        #else
+            void
+        #endif
+            { vtab_config_mapping<Code>::type::apply(*this, std::forward<Args>(args)...); }
+
+        /**
+         * Determine the virtual table conflict policy
+         * 
+         * Equivalent to ::sqlite3_vtab_on_conflict
+         * 
+         * @returns One of the [SQLITE_ROLLBACK, SQLITE_IGNORE, SQLITE_FAIL, 
+         * SQLITE_ABORT, or SQLITE_REPLACE](https://www.sqlite.org/c3ref/c_fail.html)
+         * conflict resolution modes
+         */
+        int vtab_on_conflict() const noexcept 
+            { return sqlite3_vtab_on_conflict(c_ptr()); }
 
         //MARK:- drop_modules
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 30, 0)
@@ -793,7 +850,7 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_load_extension
          */
-        void load_extension(const string_param & file, const string_param & proc);
+        void load_extension(const string_param & file, const string_param & proc = nullptr);
         
         /**
          * Retrieve the mutex for the database connection
@@ -931,8 +988,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_total_changes
          */
-        int total_changes() const noexcept
-            { return sqlite3_total_changes(c_ptr()); }
+        int64_t total_changes() const noexcept
+        { 
+        #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 1)
+            return sqlite3_total_changes64(c_ptr()); 
+        #else
+            return sqlite3_total_changes(c_ptr()); 
+        #endif
+        }
         
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 34, 0)
 
@@ -969,12 +1032,18 @@ namespace thinsqlitepp
         #define SQLITEPP_DEFINE_DB_OPTION(code, ...) \
             template<> struct database::config_mapping<code> { using type = database::config_option<code, ##__VA_ARGS__>; };
 
+        #define SQLITEPP_DEFINE_VTAB_OPTION(code, ...) \
+            template<> struct database::vtab_config_mapping<code> { using type = database::vtab_config_option<code, ##__VA_ARGS__>; };
+
         SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 
     #else
 
         #define SQLITEPP_DEFINE_DB_OPTION(code, ...) \
             template<> struct database::config_mapping<code> { using type = database::config_option<code __VA_OPT__(,) __VA_ARGS__>; };
+
+         #define SQLITEPP_DEFINE_VTAB_OPTION(code, ...) \
+            template<> struct database::vtab_config_mapping<code> { using type = database::vtab_config_option<code __VA_OPT__(,) __VA_ARGS__>; };
 
     #endif
 
@@ -1018,7 +1087,23 @@ namespace thinsqlitepp
 #endif
     //@ [DB Options]
 
+    //@ [VTab Options]
+
+    SQLITEPP_DEFINE_VTAB_OPTION(SQLITE_VTAB_CONSTRAINT_SUPPORT,         int);
+#ifdef SQLITE_VTAB_INNOCUOUS
+    SQLITEPP_DEFINE_VTAB_OPTION(SQLITE_VTAB_INNOCUOUS                   );
+#endif
+#ifdef SQLITE_VTAB_DIRECTONLY
+    SQLITEPP_DEFINE_VTAB_OPTION(SQLITE_VTAB_DIRECTONLY                  );
+#endif
+#ifdef SQLITE_VTAB_USES_ALL_SCHEMAS
+    SQLITEPP_DEFINE_VTAB_OPTION(SQLITE_VTAB_USES_ALL_SCHEMAS            );
+#endif
+
+    //@ [VTab Options]
+
     #undef SQLITEPP_DEFINE_DB_OPTION
+    #undef SQLITEPP_DEFINE_VTAB_OPTION
 
     /** @endcond */
 }

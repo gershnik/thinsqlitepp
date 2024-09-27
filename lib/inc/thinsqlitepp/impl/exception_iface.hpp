@@ -13,6 +13,7 @@
 
 #include <exception>
 #include <memory>
+#include <limits>
 
 namespace thinsqlitepp
 {
@@ -229,6 +230,17 @@ namespace thinsqlitepp
     private:
         class error _error;
     };
+
+    /// @cond PRIVATE
+
+    inline int int_size(size_t size)
+    {
+        if (size > std::numeric_limits<int>::max())
+            throw exception(SQLITE_TOOBIG);
+        return int(size);
+    }
+
+    /// @endcond
 
     /** @} */
 }

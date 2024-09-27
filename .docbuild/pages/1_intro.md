@@ -1,4 +1,4 @@
-# An Introduction To ThinSQLite++
+# An Introduction To ThinSQLite++ {#intro}
 
 @note
 This page closely follows [An Introduction To The SQLite C/C++ Interface](https://www.sqlite.org/cintro.html). Since ThinSQLite++ is a thin and exact wrapper of SQLite's C API all the conceptual parts are exactly the same. The difference is in safety and convenience.
