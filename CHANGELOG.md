@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.3] - 2024-09-27
+
 ### Added
 - Wrappers for all SQLite virtual table-related interfaces and base class for virtual table implementations.
   See [Implementing Virtual Tables](https://gershnik.github.io/thinsqlitepp/vtab-guide.html) for more details
@@ -58,3 +60,4 @@ to compile this library is no longer needed.
 [1.0]: https://github.com/gershnik/thinsqlitepp/releases/v1.0
 [1.1]: https://github.com/gershnik/thinsqlitepp/releases/v1.1
 [1.2]: https://github.com/gershnik/thinsqlitepp/releases/v1.2
+[1.3]: https://github.com/gershnik/thinsqlitepp/releases/v1.3
