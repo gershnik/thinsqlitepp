@@ -40,10 +40,6 @@
     #define SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 #endif
 
-#if !defined(__clang__) && defined(__GNUC__)
-    #define SQLITEPP_NO_PEDANTIC __extension__
-#endif
-
 #ifndef DOXYGEN
     #define SQLITEPP_ENABLE_IF(cond, t) std::enable_if_t<(cond), t>
 #else

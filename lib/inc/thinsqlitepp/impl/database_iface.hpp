@@ -1032,7 +1032,11 @@ namespace thinsqlitepp
         #define SQLITEPP_DEFINE_DB_OPTION(code, ...) \
             template<> struct database::config_mapping<code> { using type = database::config_option<code, ##__VA_ARGS__>; };
 
-        #define SQLITEPP_DEFINE_VTAB_OPTION(code, ...) \
+        //Idiotic GCC in pedantic mode warns on MACRO(arg) for MARCO(x,...) in < C++20 mode
+        //with no way to disable the warning(!!!). 
+        #define SQLITEPP_DEFINE_VTAB_OPTION_0(code) \
+            template<> struct database::vtab_config_mapping<code> { using type = database::vtab_config_option<code>; };
+        #define SQLITEPP_DEFINE_VTAB_OPTION_N(code, ...) \
             template<> struct database::vtab_config_mapping<code> { using type = database::vtab_config_option<code, ##__VA_ARGS__>; };
 
         SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
@@ -1042,8 +1046,10 @@ namespace thinsqlitepp
         #define SQLITEPP_DEFINE_DB_OPTION(code, ...) \
             template<> struct database::config_mapping<code> { using type = database::config_option<code __VA_OPT__(,) __VA_ARGS__>; };
 
-         #define SQLITEPP_DEFINE_VTAB_OPTION(code, ...) \
+        #define SQLITEPP_DEFINE_VTAB_OPTION_N(code, ...) \
             template<> struct database::vtab_config_mapping<code> { using type = database::vtab_config_option<code __VA_OPT__(,) __VA_ARGS__>; };
+
+        #define SQLITEPP_DEFINE_VTAB_OPTION_0(code) SQLITEPP_DEFINE_VTAB_OPTION_N(code)
 
     #endif
 
@@ -1089,15 +1095,15 @@ namespace thinsqlitepp
 
     //@ [VTab Options]
 
-    SQLITEPP_DEFINE_VTAB_OPTION(SQLITE_VTAB_CONSTRAINT_SUPPORT,         int);
+    SQLITEPP_DEFINE_VTAB_OPTION_N(SQLITE_VTAB_CONSTRAINT_SUPPORT,       int);
 #ifdef SQLITE_VTAB_INNOCUOUS
-    SQLITEPP_DEFINE_VTAB_OPTION(SQLITE_VTAB_INNOCUOUS                   );
+    SQLITEPP_DEFINE_VTAB_OPTION_0(SQLITE_VTAB_INNOCUOUS                 );
 #endif
 #ifdef SQLITE_VTAB_DIRECTONLY
-    SQLITEPP_DEFINE_VTAB_OPTION(SQLITE_VTAB_DIRECTONLY                  );
+    SQLITEPP_DEFINE_VTAB_OPTION_0(SQLITE_VTAB_DIRECTONLY                );
 #endif
 #ifdef SQLITE_VTAB_USES_ALL_SCHEMAS
-    SQLITEPP_DEFINE_VTAB_OPTION(SQLITE_VTAB_USES_ALL_SCHEMAS            );
+    SQLITEPP_DEFINE_VTAB_OPTION_0(SQLITE_VTAB_USES_ALL_SCHEMAS          );
 #endif
 
     //@ [VTab Options]

@@ -102,9 +102,9 @@ namespace thinsqlitepp
 
     namespace internal 
     {
-        SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN
-
         #if SQLITEPP_USE_VARARG_POUND_POUND_TRICK
+
+             SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_BEGIN
 
             //Idiotic GCC in pedantic mode warns on MACRO(arg) for MARCO(x,...) in < C++20 mode
             //with no way to disable the warning(!!!). 
@@ -113,13 +113,15 @@ namespace thinsqlitepp
             #define SQLITEPP_DEFINE_OPTION_N(code, ...) \
                 template<> struct config_mapping<code> { using type = config_option<code, ##__VA_ARGS__>; };
 
+            SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
+
         #else
 
             #define SQLITEPP_DEFINE_OPTION(code, ...) \
                 template<> struct config_mapping<code> { using type = config_option<code __VA_OPT__(,) __VA_ARGS__>; };
 
-            #define SQLITEPP_DEFINE_OPTION_0(code) SQLITEPP_DEFINE_OPTION(code)
             #define SQLITEPP_DEFINE_OPTION_N(code, ...) SQLITEPP_DEFINE_OPTION(code __VA_OPT__(,) __VA_ARGS__)
+            #define SQLITEPP_DEFINE_OPTION_0(code) SQLITEPP_DEFINE_OPTION_N(code)
 
         #endif
 
@@ -173,7 +175,6 @@ namespace thinsqlitepp
 
         //@ [Config Options]
 
-        SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
         #undef SQLITEPP_DEFINE_OPTION
 
     }
