@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+- `blob` type to wrap `sqlite3_blob`
+
+### Fixed
+- Bogus warnings with GCC in C++17 mode
+
 ## [1.3] - 2024-09-27
 
 ### Added

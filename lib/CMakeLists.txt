@@ -41,6 +41,7 @@ INTERFACE
 )
 
 set(PUBLIC_HEADERS
+    inc/thinsqlitepp/blob.hpp
     inc/thinsqlitepp/context.hpp
     inc/thinsqlitepp/database.hpp
     inc/thinsqlitepp/exception.hpp
@@ -55,6 +56,7 @@ set(PUBLIC_HEADERS
 source_group("Public Headers" FILES ${PUBLIC_HEADERS})
 
 set(IMPL_HEADERS
+    inc/thinsqlitepp/impl/blob_iface.hpp
     inc/thinsqlitepp/impl/config.hpp
     inc/thinsqlitepp/impl/context_iface.hpp
     inc/thinsqlitepp/impl/database_iface.hpp

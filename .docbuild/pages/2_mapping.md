@@ -22,7 +22,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3                         | @refmylib{database}
 | ::sqlite3_api_routines            | **out of scope**
 | ::sqlite3_backup                  | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_blob                    | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_blob                    | @refmylib{blob}
 | ::sqlite3_context                 | @refmylib{context}
 | ::sqlite3_file                    | **out of scope**
 | ::sqlite3_index_info              | @refmylib{index_info}
@@ -74,12 +74,12 @@ status page of what is or isn't available in this library.
 | ::sqlite3_bind_value              | @refmylib{statement::bind}
 | ::sqlite3_bind_zeroblob           | @refmylib{statement::bind}
 | ::sqlite3_bind_zeroblob64         | @refmylib{statement::bind}
-| ::sqlite3_blob_bytes              | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_blob_close              | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_blob_open               | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_blob_read               | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_blob_reopen             | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_blob_write              | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_blob_bytes              | @refmylib{blob::bytes}
+| ::sqlite3_blob_close              | @refmylib{blob}
+| ::sqlite3_blob_open               | @refmylib{blob::open}
+| ::sqlite3_blob_read               | @refmylib{blob::read}
+| ::sqlite3_blob_reopen             | @refmylib{blob::reopen}
+| ::sqlite3_blob_write              | @refmylib{blob::write}
 | ::sqlite3_busy_handler            | @refmylib{database::busy_handler}
 | ::sqlite3_busy_timeout            | @refmylib{database::busy_timeout}
 

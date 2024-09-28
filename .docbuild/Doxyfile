@@ -2494,7 +2494,8 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = DOXYGEN=1 \
                          SQLITE_VERSION_NUMBER=0xFFFFFFFF \
                          __cplusplus=0xFFFFFFFF \
-                         __cpp_char8_t=0xFFFFFFFF
+                         __cpp_char8_t=0xFFFFFFFF \
+                         __cpp_lib_ranges=0xFFFFFFFF
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
