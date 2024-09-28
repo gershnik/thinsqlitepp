@@ -163,7 +163,7 @@ namespace thinsqlitepp
             auto size = std::size(range);
             if (size > std::numeric_limits<int>::max() / sizeof(value_type))
                 throw exception(SQLITE_TOOBIG);
-            int res = sqlite3_blob_write(c_ptr(), data(), size * sizeof(value_type), int_size(offset));
+            int res = sqlite3_blob_write(c_ptr(), data, size * sizeof(value_type), int_size(offset));
             if (res != SQLITE_OK)
                 throw exception(res); //we do not know the db here, unfortunately
         }

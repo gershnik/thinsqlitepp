@@ -30,7 +30,7 @@ TEST_CASE( "blob type properties") {
 }
 
 
-TEST_CASE( "basics") {
+TEST_CASE( "basics" ) {
 
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
 
@@ -65,6 +65,42 @@ TEST_CASE( "basics") {
     CHECK(buf[1] == std::byte('y'));
     CHECK(buf[2] == std::byte('z'));
 }
+
+#if __cpp_lib_ranges >= 201911L
+
+TEST_CASE( "ranges" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(value BLOB)  ");
+    db->exec("INSERT INTO foo(value) VALUES (x'01020304'), (x'01020304')");
+
+    auto b = blob::open(*db, "main", "foo", "value", 1, true);
+    REQUIRE(b);
+
+    std::vector<int32_t> buf(1);
+    b->read(0, buf);
+    union {
+        uint8_t byte[4];
+        int32_t value;
+    } int_by_bytes = {.byte = {0x1, 0x2, 0x3, 0x4}};
+    CHECK(buf[0] == int_by_bytes.value);
+
+    int_by_bytes.value = 0x05060708;
+    buf[0] = int_by_bytes.value;
+
+    b->write(0, buf);
+    db->exec("SELECT value FROM foo WHERE rowid = 1", [&](int, row r) noexcept {
+        auto val = r[0].value<blob_view>();
+        CHECK(val[0] == std::byte(int_by_bytes.byte[0]));
+        CHECK(val[1] == std::byte(int_by_bytes.byte[1]));
+        CHECK(val[2] == std::byte(int_by_bytes.byte[2]));
+        CHECK(val[3] == std::byte(int_by_bytes.byte[3]));
+        return true;
+    });
+}
+
+#endif
 
 
 TEST_SUITE_END();
