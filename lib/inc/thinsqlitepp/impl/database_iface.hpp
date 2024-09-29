@@ -13,6 +13,7 @@
 #include "exception_iface.hpp"
 #include "mutex_iface.hpp"
 #include "blob_iface.hpp"
+#include "snapshot_iface.hpp"
 #include "string_param.hpp"
 #include "span.hpp"
 #include "meta.hpp"
@@ -1035,6 +1036,61 @@ namespace thinsqlitepp
                 throw exception(res, this);
             return ret;
         }
+
+        /** @{
+         * @name Snapshots
+         */
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && THINSQLITEPP_ENABLE_EXPIREMENTAL
+        /**
+         * Record a database snapshot
+         * 
+         * Equivalent to ::sqlite3_snapshot_get
+         * 
+         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * feature is experimental.
+         * 
+         * @since SQLite 3.10
+         */
+        std::unique_ptr<snapshot> get_snapshot(const string_param & schema)
+        {
+            sqlite3_snapshot * snapshot_ptr = nullptr;
+            int res = sqlite3_snapshot_get(c_ptr(), schema.c_str(), &snapshot_ptr);
+            std::unique_ptr<snapshot> ret(snapshot::from(snapshot_ptr));
+            if (res != SQLITE_OK)
+                throw exception(res, this);
+            return ret;
+        }
+
+        /**
+         * Start a read transaction on an historical snapshot
+         * 
+         * Equivalent to ::sqlite3_snapshot_open
+         * 
+         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * feature is experimental.
+         * 
+         * @since SQLite 3.10
+         */
+        void open_snapshot(const string_param & schema, const snapshot & snap)
+            { check_error(sqlite3_snapshot_open(c_ptr(), schema.c_str(), snap.c_ptr())); }
+
+        /**
+         * Recover snapshots from a wal file
+         * 
+         * Equivalent to ::sqlite3_snapshot_recover
+         * 
+         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * feature is experimental.
+         * 
+         * @since SQLite 3.10
+         */
+        void recover_snapshot(const string_param & db)
+            { check_error(sqlite3_snapshot_recover(c_ptr(), db.c_str())); }
+
+#endif
+
+        /** @} */
         
         //MARK: -
         

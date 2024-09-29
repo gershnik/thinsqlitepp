@@ -15,6 +15,7 @@
 #include <thinsqlitepp/exception.hpp>
 #include <thinsqlitepp/global.hpp>
 #include <thinsqlitepp/mutex.hpp>
+#include <thinsqlitepp/snapshot.hpp>
 #include <thinsqlitepp/statement.hpp>
 #include <thinsqlitepp/value.hpp>
 #include <thinsqlitepp/vtab.hpp>

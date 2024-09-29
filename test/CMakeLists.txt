@@ -61,6 +61,7 @@ function(configure_test_target target)
         test_blob.cpp
         test_database.cpp
         test_main.cpp
+        test_snapshot.cpp
         test_statement.cpp
         test_general.cpp
         test_context.cpp
@@ -94,6 +95,7 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
         SQLITE_ENABLE_MEMORY_MANAGEMENT=1
         SQLITE_MEMDEBUG=1
         SQLITE_ENABLE_COLUMN_METADATA=1
+        SQLITE_ENABLE_SNAPSHOT=1
     )
 
     target_sources(sqlite3-${SQLITE_VERSION} PRIVATE

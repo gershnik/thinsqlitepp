@@ -36,7 +36,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_pcache                  | **out of scope**
 | ::sqlite3_pcache_methods2         | **out of scope**
 | ::sqlite3_pcache_page             | **out of scope**
-| ::sqlite3_snapshot                | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_snapshot                | @refmylib{snapshot}
 | ::sqlite3_stmt                    | @refmylib{statement}
 | ::sqlite3_str                     | **out of scope**
 | ::sqlite3_value                   | @refmylib{value}
@@ -281,11 +281,11 @@ status page of what is or isn't available in this library.
 | ::sqlite3_set_last_insert_rowid   | @refmylib{database::set_last_insert_rowid}
 | ::sqlite3_shutdown                | @refmylib{shutdown}
 | ::sqlite3_sleep                   | **out of scope**
-| ::sqlite3_snapshot_cmp            | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_snapshot_free           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_snapshot_get            | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_snapshot_open           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_snapshot_recover        | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_snapshot_cmp            | @refmylib{snapshot::compare} and comparison operators
+| ::sqlite3_snapshot_free           | @refmylib{snapshot}
+| ::sqlite3_snapshot_get            | @refmylib{database::get_snapshot}
+| ::sqlite3_snapshot_open           | @refmylib{database::open_snapshot}
+| ::sqlite3_snapshot_recover        | @refmylib{database::recover_snapshot}
 | ::sqlite3_snprintf                | **out of scope**
 | ::sqlite3_soft_heap_limit64       | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_sourceid                | <span style="color:orange"> **not implemented** </span>
