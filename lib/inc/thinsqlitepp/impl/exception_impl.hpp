@@ -27,7 +27,8 @@ namespace thinsqlitepp
         error(error_code)
     {
         auto db_error_code = sqlite3_extended_errcode(c_ptr(db));
-        if (error_code == SQLITE_MISUSE && (db_error_code & 0x0FF) != SQLITE_MISUSE)
+        if ((error_code == SQLITE_MISUSE && (db_error_code & 0x0FF) != SQLITE_MISUSE) ||
+            db_error_code == SQLITE_OK)
             return;
         
         _error_code = db_error_code;
