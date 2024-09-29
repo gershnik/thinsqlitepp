@@ -12,6 +12,7 @@
 #include "handle.hpp"
 #include "exception_iface.hpp"
 #include "mutex_iface.hpp"
+#include "blob_iface.hpp"
 #include "string_param.hpp"
 #include "span.hpp"
 #include "meta.hpp"
@@ -120,7 +121,7 @@ namespace thinsqlitepp
             { sqlite3_close_v2(c_ptr()); }
         
         
-        //MARK:-
+        //MARK: -
 
         /**
          * Set a busy timeout
@@ -130,7 +131,7 @@ namespace thinsqlitepp
         void busy_timeout(int ms)
             { check_error(sqlite3_busy_timeout(c_ptr(), ms)); }
         
-        //MARK:-
+        //MARK: -
 
         /**
          * Count of the number of rows modified
@@ -151,7 +152,7 @@ namespace thinsqlitepp
          * @name Callbacks and notifications
          */
 
-        //MARK:- busy_handler
+        //MARK: - busy_handler
 
         /**
          * Register a callback to handle #SQLITE_BUSY errors
@@ -186,7 +187,7 @@ namespace thinsqlitepp
         void) busy_handler(T handler_ptr);
         
         
-        //MARK:- collation_needed
+        //MARK: - collation_needed
 
         /**
          * Register a callback to be called when undefined collation sequence is required
@@ -222,7 +223,7 @@ namespace thinsqlitepp
         SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, database *, int, const char *>),
         void) collation_needed(T handler_ptr);
         
-        //MARK:- commit_hook
+        //MARK: - commit_hook
 
         /**
          * Register a callback to be called on commit
@@ -256,7 +257,7 @@ namespace thinsqlitepp
         void) commit_hook(T handler_ptr) noexcept;
         
         
-        //MARK:- rollback_hook
+        //MARK: - rollback_hook
 
         /**
          * Register a callback to be called on rollback
@@ -291,7 +292,7 @@ namespace thinsqlitepp
 
         /// @}
         
-        //MARK:- create_collation
+        //MARK: - create_collation
 
         /** @{
          * @anchor database_create_collation
@@ -345,7 +346,7 @@ namespace thinsqlitepp
 
         /// @}
         
-        //MARK:- create_function
+        //MARK: - create_function
 
         /** @{
          * @anchor database_create_function
@@ -418,7 +419,7 @@ namespace thinsqlitepp
         void) create_function(const char * name, int arg_count, int flags, 
                               T impl_ptr, void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
         
-        //MARK:- create_window_function
+        //MARK: - create_window_function
 
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 25, 0)
 
@@ -488,7 +489,7 @@ namespace thinsqlitepp
 
         ///@}
         
-        //MARK:-
+        //MARK: -
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) 
         /**
          * Flush caches to disk mid-transaction
@@ -530,7 +531,7 @@ namespace thinsqlitepp
             { config_mapping<Code>::type::apply(*this, std::forward<Args>(args)...); }
         
 
-        //MARK:-
+        //MARK: - create_module
 
         /** @{
          * @anchor modules
@@ -563,6 +564,8 @@ namespace thinsqlitepp
                            T * data, void(*destructor)(T *) = nullptr)
             { check_error(sqlite3_create_module_v2(c_ptr(), name.c_str(), mod, (void*)data, (void (*)(void *))destructor)); }
 
+        
+        //MARK: -
         
         /**
          * Declare the schema of a virtual table
@@ -611,7 +614,7 @@ namespace thinsqlitepp
         int vtab_on_conflict() const noexcept 
             { return sqlite3_vtab_on_conflict(c_ptr()); }
 
-        //MARK:- drop_modules
+        //MARK: - drop_modules
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 30, 0)
         /**
          * Remove all virtual table modules from database connection
@@ -670,7 +673,7 @@ namespace thinsqlitepp
 
         /// @}
         
-        //MARK:-
+        //MARK: -
 
         /**
          * Enable or disable extension loading
@@ -680,7 +683,7 @@ namespace thinsqlitepp
         void enable_load_extension(bool val)
             { check_error(call_sqlite3_enable_load_extension(this->c_ptr(), val)); }
         
-        //MARK:-
+        //MARK: -
 
         /**
          * Enable or disable extended result codes
@@ -690,7 +693,7 @@ namespace thinsqlitepp
         void extended_result_codes(bool onoff)
             { check_error(sqlite3_extended_result_codes(c_ptr(), onoff)); }
         
-        //MARK:- exec
+        //MARK: - exec
 
         /** @{
          * @anchor database_exec
@@ -762,7 +765,7 @@ namespace thinsqlitepp
 
         /// @}
         
-        //MARK:-
+        //MARK: -
         
         /**
          * Low-level control of database file
@@ -860,6 +863,8 @@ namespace thinsqlitepp
         class mutex * mutex() const noexcept
             { return (class mutex *)sqlite3_db_mutex(c_ptr()); }
         
+        //MARK: - next_statement
+        
         /**
          * Find the next prepared statement
          * 
@@ -872,6 +877,8 @@ namespace thinsqlitepp
         class statement * next_statement(const class statement * prev) noexcept
             { return (class statement *)sqlite3_next_stmt(c_ptr(), (sqlite3_stmt *)prev); }
         
+        //MARK: -
+        
         /**
          * Overload a function for a virtual table
          * 
@@ -880,7 +887,7 @@ namespace thinsqlitepp
         void overload_function(const string_param & name, int arg_count) noexcept
             { check_error(sqlite3_overload_function(c_ptr(), name.c_str(), arg_count)); }
         
-        //MARK:- progress_handler
+        //MARK: - progress_handler
 
         /**
          * Register a callback to be called on query progress
@@ -944,7 +951,7 @@ namespace thinsqlitepp
         void release_memory() const
             { check_error(sqlite3_db_release_memory(c_ptr())); }
         
-        //MARK:- status
+        //MARK: - status
 
         /// Return type for @ref status()
         struct status
@@ -960,7 +967,7 @@ namespace thinsqlitepp
          */
         struct status status(int op, bool reset = false) const;
         
-        //MARK:- table_column_metadata
+        //MARK: - table_column_metadata
         
         /// Return type for table_column_metadata()
         struct column_metadata
@@ -981,7 +988,7 @@ namespace thinsqlitepp
                                               const string_param & table_name, 
                                               const string_param & column_name) const;
         
-        //MARK:-
+        //MARK: -
         
         /**
          * Returns total number of rows modified
@@ -1009,8 +1016,27 @@ namespace thinsqlitepp
         int txn_state(const string_param & schema) const noexcept
             { return sqlite3_txn_state(c_ptr(), schema.c_str()); }
 #endif
+
+        /**
+         * Open a blob
+         * 
+         * Equivalent to ::sqlite3_blob_open
+         */
+        std::unique_ptr<blob> open_blob(const string_param & dbname, 
+                                        const string_param & table,
+                                        const string_param & column,
+                                        int64_t rowid,
+                                        bool writable)
+        {
+            sqlite3_blob * blob_ptr = nullptr;
+            int res = sqlite3_blob_open(c_ptr(), dbname.c_str(), table.c_str(), column.c_str(), rowid, writable, &blob_ptr);
+            std::unique_ptr<blob> ret(blob::from(blob_ptr));
+            if (res != SQLITE_OK)
+                throw exception(res, this);
+            return ret;
+        }
         
-        //MARK:-
+        //MARK: -
         
     private:
         void check_error(int res) const

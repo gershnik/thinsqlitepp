@@ -10,13 +10,12 @@
 #define HEADER_SQLITEPP_BLOB_IFACE_INCLUDED
 
 #include "handle.hpp"
-#include "database_iface.hpp"
+#include "exception_iface.hpp"
 #include "string_param.hpp"
 #include "span.hpp"
 
 namespace thinsqlitepp
 {
-    class database;
 
     /**
      * @addtogroup SQL SQLite API Wrappers
@@ -29,32 +28,14 @@ namespace thinsqlitepp
      * This is a [fake wrapper class](https://github.com/gershnik/thinsqlitepp#fake-classes) for 
      * sqlite3_blob.
      * 
+     * Use database::open_blob to create blob objects.
+     * 
      * `#include <thinsqlitepp/blob.hpp>`
      * 
      */
     class blob final : public handle<sqlite3_blob, blob>
     {
     public:
-        /**
-         * Open a blob
-         * 
-         * Equivalent to ::sqlite3_blob_open
-         */
-        static std::unique_ptr<blob> open(const database & db, 
-                                          const string_param & dbname, 
-                                          const string_param & table,
-                                          const string_param & column,
-                                          int64_t rowid,
-                                          bool writable)
-        {
-            sqlite3_blob * blob_ptr = nullptr;
-            int res = sqlite3_blob_open(db.c_ptr(), dbname.c_str(), table.c_str(), column.c_str(), rowid, writable, &blob_ptr);
-            std::unique_ptr<blob> ret(from(blob_ptr));
-            if (res != SQLITE_OK)
-                throw exception(res, db);
-            return ret;
-        }
-
         /// Equivalent to ::sqlite3_blob_close
         ~blob() noexcept
             { sqlite3_blob_close(c_ptr()); }
@@ -115,7 +96,7 @@ namespace thinsqlitepp
             auto size = std::size(range);
             if (size > std::numeric_limits<int>::max() / sizeof(value_type))
                 throw exception(SQLITE_TOOBIG);
-            int res = sqlite3_blob_read(c_ptr(), data, size * sizeof(value_type), int_size(offset));
+            int res = sqlite3_blob_read(c_ptr(), data, int(size * sizeof(value_type)), int_size(offset));
             if (res != SQLITE_OK)
                 throw exception(res); //we do not know the db here, unfortunately
         }
@@ -163,7 +144,7 @@ namespace thinsqlitepp
             auto size = std::size(range);
             if (size > std::numeric_limits<int>::max() / sizeof(value_type))
                 throw exception(SQLITE_TOOBIG);
-            int res = sqlite3_blob_write(c_ptr(), data, size * sizeof(value_type), int_size(offset));
+            int res = sqlite3_blob_write(c_ptr(), data, int(size * sizeof(value_type)), int_size(offset));
             if (res != SQLITE_OK)
                 throw exception(res); //we do not know the db here, unfortunately
         }

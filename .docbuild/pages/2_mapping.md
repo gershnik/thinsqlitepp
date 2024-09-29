@@ -76,7 +76,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_bind_zeroblob64         | @refmylib{statement::bind}
 | ::sqlite3_blob_bytes              | @refmylib{blob::bytes}
 | ::sqlite3_blob_close              | @refmylib{blob}
-| ::sqlite3_blob_open               | @refmylib{blob::open}
+| ::sqlite3_blob_open               | @refmylib{database::open_blob}
 | ::sqlite3_blob_read               | @refmylib{blob::read}
 | ::sqlite3_blob_reopen             | @refmylib{blob::reopen}
 | ::sqlite3_blob_write              | @refmylib{blob::write}
