@@ -2,6 +2,7 @@
 #include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/backup.hpp>
+#include <thinsqlitepp/database.hpp>
 
 using namespace thinsqlitepp;
 
