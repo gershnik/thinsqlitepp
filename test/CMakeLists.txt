@@ -58,6 +58,7 @@ function(configure_test_target target)
     PRIVATE
         mock_sqlite.hpp
         mock_sqlite.cpp
+        test_backup.cpp
         test_blob.cpp
         test_database.cpp
         test_main.cpp

@@ -52,6 +52,7 @@
     <member kind="define"><name>SQLITE_CONSTRAINT</name><anchorfile>rescode.html</anchorfile><anchor>constraint</anchor></member>
     <member kind="define"><name>SQLITE_DONE</name><anchorfile>rescode.html</anchorfile><anchor>done</anchor></member>
     <member kind="define"><name>SQLITE_ERROR</name><anchorfile>rescode.html</anchorfile><anchor>error</anchor></member>
+    <member kind="define"><name>SQLITE_LOCKED</name><anchorfile>rescode.html</anchorfile><anchor>locked</anchor></member>
     <member kind="define"><name>SQLITE_ROW</name><anchorfile>rescode.html</anchorfile><anchor>row</anchor></member>
     <member kind="define"><name>SQLITE_STATIC</name><anchorfile>c3ref/c_static.html</anchorfile></member>
     <member kind="define"><name>SQLITE_TRANSIENT</name><anchorfile>c3ref/c_static.html</anchorfile></member>

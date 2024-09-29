@@ -21,7 +21,7 @@ status page of what is or isn't available in this library.
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3                         | @refmylib{database}
 | ::sqlite3_api_routines            | **out of scope**
-| ::sqlite3_backup                  | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_backup                  | @refmylib{backup}
 | ::sqlite3_blob                    | @refmylib{blob}
 | ::sqlite3_context                 | @refmylib{context}
 | ::sqlite3_file                    | **out of scope**
@@ -53,11 +53,11 @@ status page of what is or isn't available in this library.
 | ::sqlite3_aggregate_context       | @refmylib{context::aggregate_context}
 | ::sqlite3_auto_extension          | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_autovacuum_pages        | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_backup_finish           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_backup_init             | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_backup_pagecount        | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_backup_remaining        | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_backup_step             | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_backup_finish           | @refmylib{backup}
+| ::sqlite3_backup_init             | @refmylib{backup::init}
+| ::sqlite3_backup_pagecount        | @refmylib{backup::pagecount}
+| ::sqlite3_backup_remaining        | @refmylib{backup::remaining}
+| ::sqlite3_backup_step             | @refmylib{backup::step}
 | ::sqlite3_bind_blob               | @refmylib{statement::bind}, @refmylib{statement::bind_reference}
 | ::sqlite3_bind_blob64             | @refmylib{statement::bind}, @refmylib{statement::bind_reference}
 | ::sqlite3_bind_double             | @refmylib{statement::bind}

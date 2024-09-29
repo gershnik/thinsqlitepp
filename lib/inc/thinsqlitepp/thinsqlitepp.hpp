@@ -9,6 +9,7 @@
 #ifndef HEADER_SQLITEPP_SQLITEPP_INCLUDED
 #define HEADER_SQLITEPP_SQLITEPP_INCLUDED
 
+#include <thinsqlitepp/backup.hpp>
 #include <thinsqlitepp/blob.hpp>
 #include <thinsqlitepp/context.hpp>
 #include <thinsqlitepp/database.hpp>
