@@ -11,6 +11,7 @@
 
 #include "handle.hpp"
 #include "database_iface.hpp"
+#include "exception_iface.hpp"
 
 namespace thinsqlitepp
 {
