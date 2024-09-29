@@ -1,6 +1,8 @@
 #include <doctest.h>
 #include "mock_sqlite.hpp"
 
+#if ! THINSQLITEPP_OMIT_SNAPSHOT
+
 #define THINSQLITEPP_ENABLE_EXPIREMENTAL 1
 
 #include <thinsqlitepp/snapshot.hpp>
@@ -53,6 +55,8 @@ TEST_CASE( "basics" ) {
 
 TEST_SUITE_END();
 
+
+#endif
 
 #endif
 

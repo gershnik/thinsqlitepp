@@ -555,7 +555,7 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "drop modules") {
 
 #endif
 
-#if ! SQLITE_OMIT_LOAD_EXTENSION
+#if ! THINSQLITEPP_OMIT_LOAD_EXTENSION
 
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "load extension") {
 

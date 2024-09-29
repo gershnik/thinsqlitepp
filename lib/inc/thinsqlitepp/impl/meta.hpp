@@ -16,6 +16,9 @@
 #if __cpp_impl_three_way_comparison >= 201907
     #include <compare>
 #endif
+#if __cpp_lib_bit_cast >= 201806L
+    #include <bit>
+#endif
 
 
 namespace thinsqlitepp
@@ -112,7 +115,11 @@ namespace thinsqlitepp
             if constexpr (!std::is_void_v<equivalent>)
             {
                 equivalent eq_val = equivalent((val > 0) - (val < 0));
-                return std::bit_cast<std::strong_ordering>(eq_val);
+                #if __cpp_lib_bit_cast >= 201806L
+                    return std::bit_cast<std::strong_ordering>(eq_val);
+                #else
+                    return *(std::strong_ordering *)&eq_val;
+                #endif
             }
             else
             {

@@ -161,7 +161,8 @@ if (SQLite3_FOUND)
 
         target_compile_definitions(test-${CXX_STANDARD}-native  
         PRIVATE
-            $<$<PLATFORM_ID:Darwin>:SQLITE_OMIT_LOAD_EXTENSION=1>
+            $<$<PLATFORM_ID:Darwin>:THINSQLITEPP_OMIT_LOAD_EXTENSION=1>
+            THINSQLITEPP_OMIT_SNAPSHOT=1
         )
 
         list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite: native)

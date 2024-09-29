@@ -102,7 +102,7 @@ MAKE_MOCK(sqlite3_drop_modules, (sqlite3 *db, const char ** keep), (db, keep));
 
 #endif
 
-#if ! SQLITE_OMIT_LOAD_EXTENSION
+#if ! THINSQLITEPP_OMIT_LOAD_EXTENSION
 
 MAKE_MOCK(sqlite3_load_extension, (sqlite3 *db, const char * file, const char * proc, char ** err), (db, file, proc, err));
 #define sqlite3_load_extension mock_sqlite3_load_extension
