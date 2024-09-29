@@ -343,6 +343,33 @@ namespace thinsqlitepp
         ret.auto_increment = auto_increment;
         return ret;
     }
+
+    inline std::unique_ptr<blob> database::open_blob(const string_param & dbname, 
+                                                     const string_param & table,
+                                                     const string_param & column,
+                                                     int64_t rowid,
+                                                     bool writable)
+    {
+        sqlite3_blob * blob_ptr = nullptr;
+        int res = sqlite3_blob_open(c_ptr(), dbname.c_str(), table.c_str(), column.c_str(), rowid, writable, &blob_ptr);
+        std::unique_ptr<blob> ret(blob::from(blob_ptr));
+        if (res != SQLITE_OK)
+            throw exception(res, this);
+        return ret;
+    }
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && THINSQLITEPP_ENABLE_EXPIREMENTAL
+
+    inline std::unique_ptr<snapshot> database::get_snapshot(const string_param & schema)
+    {
+        sqlite3_snapshot * snapshot_ptr = nullptr;
+        int res = sqlite3_snapshot_get(c_ptr(), schema.c_str(), &snapshot_ptr);
+        std::unique_ptr<snapshot> ret(snapshot::from(snapshot_ptr));
+        if (res != SQLITE_OK)
+            throw exception(res, this);
+        return ret;
+    }
+#endif
 }
 
 #ifdef __GNUC__

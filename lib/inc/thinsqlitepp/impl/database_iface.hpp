@@ -1027,15 +1027,7 @@ namespace thinsqlitepp
                                         const string_param & table,
                                         const string_param & column,
                                         int64_t rowid,
-                                        bool writable)
-        {
-            sqlite3_blob * blob_ptr = nullptr;
-            int res = sqlite3_blob_open(c_ptr(), dbname.c_str(), table.c_str(), column.c_str(), rowid, writable, &blob_ptr);
-            std::unique_ptr<blob> ret(blob::from(blob_ptr));
-            if (res != SQLITE_OK)
-                throw exception(res, this);
-            return ret;
-        }
+                                        bool writable);
 
         /** @{
          * @name Snapshots
@@ -1052,15 +1044,7 @@ namespace thinsqlitepp
          * 
          * @since SQLite 3.10
          */
-        std::unique_ptr<snapshot> get_snapshot(const string_param & schema)
-        {
-            sqlite3_snapshot * snapshot_ptr = nullptr;
-            int res = sqlite3_snapshot_get(c_ptr(), schema.c_str(), &snapshot_ptr);
-            std::unique_ptr<snapshot> ret(snapshot::from(snapshot_ptr));
-            if (res != SQLITE_OK)
-                throw exception(res, this);
-            return ret;
-        }
+        std::unique_ptr<snapshot> get_snapshot(const string_param & schema);
 
         /**
          * Start a read transaction on an historical snapshot
@@ -1091,7 +1075,7 @@ namespace thinsqlitepp
 #endif
 
         /** @} */
-        
+
         //MARK: -
         
     private:
