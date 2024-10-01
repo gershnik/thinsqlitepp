@@ -14,7 +14,7 @@ PRIVATE
 
 target_sources(sample
 PRIVATE
-    main.cpp
+    map-table.cpp
 )
 
 

@@ -32,7 +32,7 @@ function(configure_test_target target)
 
     target_compile_options(${target}
     PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8;/W4;/WX>
+        $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8>
         $<$<CXX_COMPILER_ID:Clang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
         $<$<CXX_COMPILER_ID:AppleClang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
         $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-pedantic>
