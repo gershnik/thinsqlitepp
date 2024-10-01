@@ -52,8 +52,8 @@
 
 #define SQLITEPP_STATIC_METHOD_DETECTOR_0(rettype, name) SQLITEPP_CALL_DETECTOR_0(name, rettype, T::name)
 #define SQLITEPP_STATIC_METHOD_DETECTOR(rettype, name, ...) SQLITEPP_CALL_DETECTOR(name, rettype, T::name, __VA_ARGS__)
-#define SQLITEPP_METHOD_DETECTOR_0(rettype, name) SQLITEPP_CALL_DETECTOR_0(name, rettype, ((T*)nullptr)->name)
-#define SQLITEPP_METHOD_DETECTOR(rettype, name, ...) SQLITEPP_CALL_DETECTOR(name, rettype, ((T*)nullptr)->name, __VA_ARGS__)
+#define SQLITEPP_METHOD_DETECTOR_0(rettype, name) SQLITEPP_CALL_DETECTOR_0(name, rettype, std::declval<T>().name)
+#define SQLITEPP_METHOD_DETECTOR(rettype, name, ...) SQLITEPP_CALL_DETECTOR(name, rettype, std::declval<T>().name, __VA_ARGS__)
     
 
 
