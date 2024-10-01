@@ -299,7 +299,7 @@ namespace thinsqlitepp
          * 
          * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
          * ```
-         * bool result = (*handler_ptr)();
+         * (*handler_ptr)();
          * ```
          * This invocation must be `noexcept`. 
          * This parameter can also be nullptr to reset the handler.
@@ -308,6 +308,42 @@ namespace thinsqlitepp
         template<class T>
         SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T>),
         void) rollback_hook(T handler_ptr) noexcept;
+
+
+        //MARK: - update_hook
+
+        /**
+         * Register a callback to be called whenever a row is updated, inserted or deleted in a rowid table.
+         * 
+         * Equivalent to ::sqlite3_update_hook
+         * 
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
+         *  nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) update_hook(void (* handler)(type_identity_t<T> data_ptr, int op, const char * db_name, const char * table, sqlite3_int64 rowid) noexcept, 
+                          T data_ptr) noexcept
+            { sqlite3_update_hook(this->c_ptr(), (void(*)(void*,int,char const *,char const *,sqlite3_int64))(handler), data_ptr); }
+
+
+        /**
+         * Register a callback to be called whenever a row is updated, inserted or deleted in a rowid table.
+         * 
+         * Equivalent to ::sqlite3_update_hook
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * (*handler_ptr)(int op, const char * db_name, const char * table, int64_t rowid);
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, int, const char *, const char *, int64_t>),
+        void) update_hook(T handler_ptr) noexcept;
 
         /// @}
         

@@ -68,6 +68,11 @@ MAKE_MOCK(sqlite3_commit_hook, (sqlite3 *db, int(*handler)(void*), void *data), 
 MAKE_MOCK(sqlite3_rollback_hook, (sqlite3 *db, void(*handler)(void*), void *data), (db, handler, data));
 #define sqlite3_rollback_hook mock_sqlite3_rollback_hook
 
+MAKE_MOCK(sqlite3_update_hook, (sqlite3 *db,
+                                void(*handler)(void *,int,char const *,char const *,sqlite3_int64),
+                                void * data), (db, handler, data));
+#define sqlite3_update_hook mock_sqlite3_update_hook
+
 MAKE_MOCK(sqlite3_create_collation_v2, (sqlite3 *db, const char * name, int flags,
                                         void * arg,
                                         int(*compare)(void*,int,const void*,int,const void*),

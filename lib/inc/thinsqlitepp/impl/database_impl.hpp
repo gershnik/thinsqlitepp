@@ -79,12 +79,12 @@ namespace thinsqlitepp
 
     template<class T>
     SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<bool, T, int>),
-    void) database::busy_handler(T handler)
+    void) database::busy_handler(T handler_ptr)
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
-            if (handler)
-                this->busy_handler([] (T data, int count_invoked) noexcept -> int { return (*data)(count_invoked); }, handler);
+            if (handler_ptr)
+                this->busy_handler([] (T data, int count_invoked) noexcept -> int { return (*data)(count_invoked); }, handler_ptr);
             else
                 this->busy_handler(nullptr, nullptr);
         }
@@ -96,11 +96,11 @@ namespace thinsqlitepp
 
     template<class T>
     SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, database *, int, const char *>),
-    void) database::collation_needed(T handler)
+    void) database::collation_needed(T handler_ptr)
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
-            this->collation_needed(handler, handler ? [] (T data, sqlite3 * db, int encoding, const char * name) noexcept ->void {
+            this->collation_needed(handler_ptr, handler_ptr ? [] (T data, sqlite3 * db, int encoding, const char * name) noexcept ->void {
                 
                 (*data)((database*)db, encoding, name);
                 
@@ -114,12 +114,12 @@ namespace thinsqlitepp
 
     template<class T>
     SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<bool, T>),
-    void) database::commit_hook(T handler) noexcept
+    void) database::commit_hook(T handler_ptr) noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
-            if (handler)
-                this->commit_hook([] (T data) noexcept -> int { return (*data)(); }, handler);
+            if (handler_ptr)
+                this->commit_hook([] (T data) noexcept -> int { return (*data)(); }, handler_ptr);
             else
                 this->commit_hook(nullptr, nullptr);
         }
@@ -131,18 +131,39 @@ namespace thinsqlitepp
 
     template<class T>
     SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T>),
-    void) database::rollback_hook(T handler) noexcept
+    void) database::rollback_hook(T handler_ptr) noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
         {
-            if (handler)
-                this->rollback_hook([] (T data) noexcept -> void { (*data)(); }, handler);
+            if (handler_ptr)
+                this->rollback_hook([] (T data) noexcept -> void { (*data)(); }, handler_ptr);
             else
                 this->rollback_hook(nullptr, nullptr);
         }
         else
         {
             this->rollback_hook(nullptr, nullptr);
+        }
+    }
+
+    template<class T>
+    SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, int, const char * , const char * , int64_t>),
+    void) database::update_hook(T handler_ptr) noexcept
+    {
+        if constexpr (!std::is_null_pointer_v<T>)
+        {
+            if (handler_ptr)
+                this->update_hook([] (T data, int op,
+                                      const char * db_name, const char * table, 
+                                      sqlite3_int64 rowid) noexcept -> void { 
+                    (*data)(op, db_name, table, rowid); 
+                }, handler_ptr);
+            else
+                this->update_hook(nullptr, nullptr);
+        }
+        else
+        {
+            this->update_hook(nullptr, nullptr);
         }
     }
 

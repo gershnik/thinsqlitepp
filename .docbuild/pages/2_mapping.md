@@ -331,7 +331,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_trace_v2                | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_txn_state               | @refmylib{database::txn_state}
 | ::sqlite3_unlock_notify           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_update_hook             | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_update_hook             | @refmylib{database::update_hook}
 | ::sqlite3_uri_boolean             | **out of scope**
 | ::sqlite3_uri_int64               | **out of scope**
 | ::sqlite3_uri_key                 | **out of scope**

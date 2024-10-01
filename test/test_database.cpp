@@ -276,6 +276,35 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "rollback hook") {
     db->rollback_hook(nullptr);
 }
 
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "update hook") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
+    
+    bool called = false;
+    auto hook = [&] (int op, const char * db_name, const char * table, int64_t rowid) noexcept -> void {
+        
+        called = true;
+    };
+    set_mock_sqlite3_update_hook([&] (sqlite3 *dbx, void(*handler)(void*,int,const char *,const char *,sqlite3_int64), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(data == &hook);
+        return real_sqlite3_update_hook(dbx, handler, data);
+    });
+    db->update_hook(&hook);
+    db->exec("INSERT INTO foo VALUES('haha')");
+    CHECK(called);
+    set_mock_sqlite3_update_hook([&] (sqlite3 *dbx, void(*handler)(void*,int,const char *,const char *,sqlite3_int64), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(handler == nullptr);
+        REQUIRE(data == nullptr);
+        return real_sqlite3_update_hook(dbx, handler, data);
+    });
+    db->rollback_hook(nullptr);
+}
+
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create collation") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
