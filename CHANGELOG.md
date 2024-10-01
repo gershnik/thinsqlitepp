@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `backup` type to wrap `sqlite3_backup` and related methods
 - `snapshot` type to wrap `sqlite3_snapshot` and related methods
 - Wrappers for `xxx_auto_extension` methods
+- Wrapper for `sqlite3_db_name`
 
 ### Changed
 - `database::exec` now supports multiple simplified callback variants.

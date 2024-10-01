@@ -145,7 +145,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_db_filename             | @refmylib{database::filename}
 | ::sqlite3_db_handle               | @refmylib{statement::database}
 | ::sqlite3_db_mutex                | @refmylib{database::mutex}
-| ::sqlite3_db_name                 | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_db_name                 | @refmylib{database::db_name}
 | ::sqlite3_db_readonly             | @refmylib{database::readonly}
 | ::sqlite3_db_release_memory       | @refmylib{database::release_memory}
 | ::sqlite3_db_status               | @refmylib{database::status()}

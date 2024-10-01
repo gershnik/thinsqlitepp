@@ -864,8 +864,6 @@ namespace thinsqlitepp
 
 
 
-        //MARK: -
-
         /** @{
          * @name Extension management
          */
@@ -1143,8 +1141,25 @@ namespace thinsqlitepp
 #endif
 
         /** @} */
+        
+        
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 39, 0)
+        /**
+         * Return schema names
+         *
+         * Equivalent to ::sqlite3_db_name
+         * 
+         * @param idx Schema index. 0 means the main database file and 1 is 
+         * the "temp" schema. Larger values correspond to various ATTACH-ed databases.
+         * 
+         * @since SQLite 3.39
+         */
+        const char * db_name(int idx) noexcept
+            { return sqlite3_db_name(c_ptr(), idx); }
 
-        //MARK: -
+    #endif
+
+        //MARK: - Private methods
         
     private:
         void check_error(int res) const
