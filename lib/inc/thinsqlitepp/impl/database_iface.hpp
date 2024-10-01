@@ -733,14 +733,25 @@ namespace thinsqlitepp
          * It runs zero or more UTF-8 encoded, semicolon-separate SQL statements passed
          * as the `sql` argument. The `callback` callable is passed by value and
          * is invoked for each result row coming out of the evaluated SQL statements. 
-         * The callable must support being invoked as:
+         * The callable can have one of the 4 possible variants:
+         * ```cpp
+         * 1. bool callback(int statement_idx, row current_row)
+         * 2. void callback(int statement_idx, row current_row)
+         * 3. bool callback(row current_row)
+         * 4. void callback(row current_row)
          * ```
-         * bool res = callback(int statement_idx, thinsqlitepp::row current_row);
-         * ```
-         * If an invocation of callback returns `false` then execution of the current 
-         * statement stops and subsequent statements are skipped.
          * 
-         * The `callback` argument is returned back from the function which allows it to 
+         * If more than one way of calling the callback is possible the way it will
+         * be invoked is chosen in the order given above.
+         * 
+         * For variants 1 and 3 if an invocation of callback returns `false` then 
+         * the execution of the current statement stops and subsequent statements are skipped.
+         * 
+         * For variants 1 and 2 the `statement_idx` is the index of the SQL statement 
+         * being executed. If you only pass a single statement to `exec()` you 
+         * generally don't need these variants.
+         * 
+         * The @p callback argument is returned back from the function which allows it to 
          * accumulate state.
          * 
          * If an error occurs while evaluating the SQL statements
@@ -754,7 +765,10 @@ namespace thinsqlitepp
          */
         template<class T>
         SQLITEPP_ENABLE_IF((
-            std::is_invocable_r_v<bool, T, int, row>),
+            std::is_invocable_r_v<bool, T, int, row> ||
+            std::is_invocable_r_v<void, T, int, row> ||
+            std::is_invocable_r_v<bool, T, row> ||
+            std::is_invocable_r_v<void, T, row>),
         T) exec(std::string_view sql, T callback);
 
     #if __cpp_char8_t >= 201811

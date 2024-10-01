@@ -59,7 +59,7 @@ And here is how to load and use it:
 auto db = database::open(...);
 my_table::create_module(*db, "my_table_module");
 
-db->exec("SELECT a_column FROM my_table_module", [] (int, row r) noexcept {
+db->exec("SELECT a_column FROM my_table_module", [] (int, row r) {
     std::cout << r[0].value<std::string_view>() << '\n';
     return true;
 });
@@ -245,7 +245,7 @@ Which can be used as follows:
 std::vector vec{74, 42, 50};
 my_table::create_module(*db, "my_table_module", &vec);
 
-db->exec("SELECT value FROM my_table_module", [] (int, row r) noexcept {
+db->exec("SELECT value FROM my_table_module", [] (int, row r) {
     std::cout << r[0].value<int>() << '\n';
     return true;
 });
@@ -492,7 +492,7 @@ std::map<int, std::string> map{
     {80, "d"}
 };
 my_table::create_module(*db, "my_table_module", &map);
-db->exec("SELECT key, value FROM my_table_module WHERE key > 70 AND key < 80", [] (int, row r) noexcept {
+db->exec("SELECT key, value FROM my_table_module WHERE key > 70 AND key < 80", [] (int, row r) {
     std::cout << r[0].value<int>() << ": " << r[1].value<std::string_view>() << '\n';
     return true;
 });

@@ -10,7 +10,7 @@ int main() {
     db->enable_load_extension(true);
     db->load_extension("libsample-extension");
 
-    db->exec("SELECT sample_function(5)", [] (int, row r) noexcept {
+    db->exec("SELECT sample_function(5)", [] (int, row r) {
         std::cout << r[0].value<int>() << '\n';
         return true;
     });

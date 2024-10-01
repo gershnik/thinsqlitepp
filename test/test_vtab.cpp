@@ -98,21 +98,21 @@ TEST_CASE( "basics" ) {
     #endif
 
     std::vector<vector_table::entry> selected;
-    db->exec("SELECT rowid, * FROM blah", [&selected] (int, row r) noexcept {
+    db->exec("SELECT rowid, * FROM blah", [&selected] (row r) {
         selected.push_back(vector_table::entry{r[0].value<int64_t>(), std::string(r[1].value<std::string_view>())});
         return true;
     });
     CHECK(equalRanges(selected, entries));
 
     selected.clear();
-    db->exec("SELECT rowid, * FROM blah WHERE rowid = 2", [&selected] (int, row r) noexcept {
+    db->exec("SELECT rowid, * FROM blah WHERE rowid = 2", [&selected] (row r) {
         selected.push_back(vector_table::entry{r[0].value<int64_t>(), std::string(r[1].value<std::string_view>())});
         return true;
     });
     CHECK(equalRanges(selected, std::vector<vector_table::entry>{{2, "hoho"}}));
     
     selected.clear();
-    db->exec("SELECT rowid, * FROM blah WHERE name = 'hoho'", [&selected] (int, row r) noexcept {
+    db->exec("SELECT rowid, * FROM blah WHERE name = 'hoho'", [&selected] (row r) {
         selected.push_back(vector_table::entry{r[0].value<int64_t>(), std::string(r[1].value<std::string_view>())});
         return true;
     });

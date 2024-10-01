@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `snapshot` type to wrap `sqlite3_snapshot` and related methods
 - Wrappers for `xxx_auto_extension` methods
 
+### Changed
+- `database::exec` now supports multiple simplified callback variants.
+
 ### Fixed
 - Bogus warnings with GCC in C++17 mode
 - Incorrect exception raised in some cases where an SQLite API returns an error but no error is set on database

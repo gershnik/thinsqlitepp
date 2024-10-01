@@ -35,7 +35,10 @@ namespace thinsqlitepp
 
     template<class T>
     SQLITEPP_ENABLE_IF((
-        std::is_invocable_r_v<bool, T, int, row>),
+        std::is_invocable_r_v<bool, T, int, row> ||
+        std::is_invocable_r_v<void, T, int, row> ||
+        std::is_invocable_r_v<bool, T, row> ||
+        std::is_invocable_r_v<void, T, row>),
     T) database::exec(std::string_view sql, T callback)
     {
         int statement_count = 0;
@@ -44,8 +47,24 @@ namespace thinsqlitepp
         {
             while(stmt->step())
             {
-                if (!callback(statement_count, row(stmt)))
-                    return callback;
+                if constexpr (std::is_invocable_r_v<bool, T, int, row>)
+                {
+                    if (!callback(statement_count, row(stmt)))
+                        break;
+                } 
+                else if constexpr (std::is_invocable_r_v<void, T, int, row>)
+                {
+                    callback(statement_count, row(stmt));
+                }
+                else if constexpr (std::is_invocable_r_v<bool, T, row>)
+                {
+                    if (!callback(row(stmt)))
+                        break;
+                }
+                else
+                {
+                    callback(row(stmt));
+                }
             }
         }
         return callback;

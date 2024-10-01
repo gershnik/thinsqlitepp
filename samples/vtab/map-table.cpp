@@ -191,8 +191,8 @@ int main() {
         {80, "d"}
     };
     map_table::create_module(*db, "map_table_module", &map);
-    
-    db->exec("SELECT key, value FROM map_table_module WHERE key > 50 ORDER BY key ASC", [] (int, row r) noexcept {
+
+    db->exec("SELECT key, value FROM map_table_module WHERE key > 50 ORDER BY key ASC", [] (row r) {
         std::cout << r[0].value<int>() << ": " << r[1].value<std::string_view>() << '\n';
         return true;
     });
