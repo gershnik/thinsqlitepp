@@ -51,7 +51,7 @@ status page of what is or isn't available in this library.
 | Function                          |  Mapped To                                                     |
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3_aggregate_context       | @refmylib{context::aggregate_context}
-| ::sqlite3_auto_extension          | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_auto_extension          | @refmylib{database::auto_extension}
 | ::sqlite3_autovacuum_pages        | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_backup_finish           | @refmylib{backup}
 | ::sqlite3_backup_init             | @refmylib{backup::init}
@@ -87,7 +87,7 @@ status page of what is or isn't available in this library.
 
 | Function                          |  Mapped To                                                     |
 |-----------------------------------|----------------------------------------------------------------|
-| ::sqlite3_cancel_auto_extension   | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_cancel_auto_extension   | @refmylib{database::cancel_auto_extension}
 | ::sqlite3_changes                 | @refmylib{database::changes}
 | ::sqlite3_changes64               | @refmylib{database::changes}
 | ::sqlite3_clear_bindings          | @refmylib{statement::clear_bindings}
@@ -245,7 +245,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_realloc64               | **out of scope**
 | ::sqlite3_release_memory          | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_reset                   | @refmylib{statement::reset}
-| ::sqlite3_reset_auto_extension    | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_reset_auto_extension    | @refmylib{database::reset_auto_extension}
 | ::sqlite3_result_blob             | @refmylib{context::result}, @refmylib{context::result_reference}
 | ::sqlite3_result_blob64           | @refmylib{context::result}, @refmylib{context::result_reference}
 | ::sqlite3_result_double           | @refmylib{context::result}

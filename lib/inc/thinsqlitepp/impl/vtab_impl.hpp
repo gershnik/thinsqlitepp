@@ -98,44 +98,24 @@ namespace thinsqlitepp
                                                                                                         int, 
                                                                                                         const char * const *>;
 
-    #define SQLITEPP_DETECTOR_IMPL(name, call, rettype, ...) \
-    private: \
-        template<class T> static std::true_type has_##name##_impl(decltype(call(__VA_ARGS__)) *); \
-        template<class T> static std::false_type has_##name##_impl(...); \
-    public: \
-        template<class T> static constexpr bool has_##name = decltype(has_##name##_impl<T>((rettype*)nullptr))::value; \
-        template<class T> static constexpr bool has_noexcept_##name = []() constexpr { \
-            if constexpr (has_##name<T>) \
-                return noexcept(call(__VA_ARGS__)); \
-            else \
-                return false; \
-        }()
+        SQLITEPP_STATIC_METHOD_DETECTOR(void, disconnect, std::unique_ptr<T>{});
+        SQLITEPP_STATIC_METHOD_DETECTOR(void, destroy, std::unique_ptr<T>{});
 
-    #define SQLITEPP_STATIC_DETECTOR(name, rettype, ...) SQLITEPP_DETECTOR_IMPL(name, T::name, rettype, __VA_ARGS__)
-    #define SQLITEPP_DETECTOR(name, rettype, ...) SQLITEPP_DETECTOR_IMPL(name, ((T*)nullptr)->name, rettype, __VA_ARGS__)
-    
-    SQLITEPP_STATIC_DETECTOR(disconnect, void, std::unique_ptr<T>{});
-    SQLITEPP_STATIC_DETECTOR(destroy, void, std::unique_ptr<T>{});
-
-    SQLITEPP_DETECTOR(update, int64_t, int{}, (value **)nullptr);
-    SQLITEPP_DETECTOR(find_function, int, int{}, 
-                                          (const char *)nullptr, 
-                                          (void (**)(context*,int,value**) noexcept)nullptr,
-                                          (void **)nullptr);
-    SQLITEPP_DETECTOR(begin, void, );
-    SQLITEPP_DETECTOR(sync, void, );
-    SQLITEPP_DETECTOR(commit, void, );
-    SQLITEPP_DETECTOR(rollback, void, );
-    SQLITEPP_DETECTOR(rename, void, (const char *)nullptr);
-    SQLITEPP_DETECTOR(savepoint, void, int{});
-    SQLITEPP_DETECTOR(release, void, int{});
-    SQLITEPP_DETECTOR(rollback_to, void, int{});
-    SQLITEPP_STATIC_DETECTOR(shadow_name, bool, (const char *)nullptr);
-    SQLITEPP_DETECTOR(integrity, allocated_string, (const char *)nullptr, (const char *)nullptr, int{});
-
-    #undef SQLITEPP_STATIC_DETECTOR
-    #undef SQLITEPP_DETECTOR
-    #undef SQLITEPP_DETECTOR_IMPL
+        SQLITEPP_METHOD_DETECTOR(int64_t, update, int{}, (value **)nullptr);
+        SQLITEPP_METHOD_DETECTOR(int, find_function, int{}, 
+                                                     (const char *)nullptr, 
+                                                     (void (**)(context*,int,value**) noexcept)nullptr,
+                                                     (void **)nullptr);
+        SQLITEPP_METHOD_DETECTOR_0(void, begin);
+        SQLITEPP_METHOD_DETECTOR_0(void, sync);
+        SQLITEPP_METHOD_DETECTOR_0(void, commit);
+        SQLITEPP_METHOD_DETECTOR_0(void, rollback);
+        SQLITEPP_METHOD_DETECTOR(void, rename, (const char *)nullptr);
+        SQLITEPP_METHOD_DETECTOR(void, savepoint, int{});
+        SQLITEPP_METHOD_DETECTOR(void, release, int{});
+        SQLITEPP_METHOD_DETECTOR(void, rollback_to, int{});
+        SQLITEPP_STATIC_METHOD_DETECTOR(bool, shadow_name, (const char *)nullptr);
+        SQLITEPP_METHOD_DETECTOR(allocated_string, integrity, (const char *)nullptr, (const char *)nullptr, int{});
     };
 
     #if __cpp_concepts >= 201907L && __cpp_lib_concepts >= 202002L

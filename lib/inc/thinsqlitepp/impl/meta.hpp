@@ -20,6 +20,42 @@
     #include <bit>
 #endif
 
+#define SQLITEPP_CALL_DETECTOR_0(name, rettype, call) \
+    private: \
+        template<class T> static constexpr bool has_##name##_impl(decltype(call()) *) \
+            { return std::is_same_v<decltype(call()), rettype>; } \
+        template<class T> static constexpr bool has_##name##_impl(...) \
+            { return false; } \
+    public: \
+        template<class T> static constexpr bool has_##name = has_##name##_impl<T>(nullptr); \
+        template<class T> static constexpr bool has_noexcept_##name = []() constexpr { \
+            if constexpr (has_##name<T>) \
+                return noexcept(call()); \
+            else \
+                return false; \
+        }()
+
+#define SQLITEPP_CALL_DETECTOR(name, rettype, call, ...) \
+    private: \
+        template<class T> static constexpr bool has_##name##_impl(decltype(call(__VA_ARGS__)) *) \
+            { return std::is_same_v<decltype(call(__VA_ARGS__)), rettype>; } \
+        template<class T> static constexpr bool has_##name##_impl(...) \
+            { return false; } \
+    public: \
+        template<class T> static constexpr bool has_##name = has_##name##_impl<T>(nullptr); \
+        template<class T> static constexpr bool has_noexcept_##name = []() constexpr { \
+            if constexpr (has_##name<T>) \
+                return noexcept(call(__VA_ARGS__)); \
+            else \
+                return false; \
+        }()
+
+#define SQLITEPP_STATIC_METHOD_DETECTOR_0(rettype, name) SQLITEPP_CALL_DETECTOR_0(name, rettype, T::name)
+#define SQLITEPP_STATIC_METHOD_DETECTOR(rettype, name, ...) SQLITEPP_CALL_DETECTOR(name, rettype, T::name, __VA_ARGS__)
+#define SQLITEPP_METHOD_DETECTOR_0(rettype, name) SQLITEPP_CALL_DETECTOR_0(name, rettype, ((T*)nullptr)->name)
+#define SQLITEPP_METHOD_DETECTOR(rettype, name, ...) SQLITEPP_CALL_DETECTOR(name, rettype, ((T*)nullptr)->name, __VA_ARGS__)
+    
+
 
 namespace thinsqlitepp
 {
@@ -48,52 +84,7 @@ namespace thinsqlitepp
     template<class T>
     constexpr bool dependent_true = dependent_bool<T, true>;
 
-    //MARK: - is_pointer_to_callback
-
-    template<class R, class T, class... ArgTypes>
-    constexpr bool is_pointer_to_callback =  std::is_null_pointer_v<T> ||
-        (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<R, std::remove_pointer_t<T>, ArgTypes...>);
-
-    class context;
-    class value;
-
-    //MARK: - is_aggregate_function
-    template<class T>
-    constexpr bool is_aggregate_helper(decltype(std::declval<T>().step((context *)nullptr, int(), (value **)nullptr)) * a,
-                                       decltype(std::declval<T>().last((context *)nullptr)) * b)
-    {
-        return std::is_same_v<std::remove_pointer_t<decltype(a)>, void> &&
-               std::is_same_v<std::remove_pointer_t<decltype(b)>, void> &&
-               noexcept(std::declval<T>().step((context *)nullptr, int(), (value **)nullptr)) &&
-               noexcept(std::declval<T>().last((context *)nullptr));
-    }
     
-    template<class T>
-    constexpr bool is_aggregate_helper(...)
-        { return false; }
-
-    template<class T>
-    constexpr bool is_aggregate_function = is_aggregate_helper<T>(nullptr, nullptr);
-
-    //MARK: - is_aggregate_window_function
-    template<class T>
-    constexpr bool is_aggregate_window_helper(decltype(std::declval<T>().inverse((context *)nullptr, int(), (value **)nullptr)) * a,
-                                              decltype(std::declval<T>().current((context *)nullptr)) * b)
-    {
-        return std::is_same_v<std::remove_pointer_t<decltype(a)>, void> &&
-               std::is_same_v<std::remove_pointer_t<decltype(b)>, void> &&
-               noexcept(std::declval<T>().inverse((context *)nullptr, int(), (value **)nullptr)) &&
-               noexcept(std::declval<T>().current((context *)nullptr));
-    }
-
-    template<class T>
-    constexpr bool is_aggregate_window_helper(...)
-        { return false; }
-
-    template<class T>
-    constexpr bool is_aggregate_window_function = is_aggregate_function<T> && is_aggregate_window_helper<T>(nullptr, nullptr);
-
-
     //MARK: - strong_ordering_from_int
     
     template<class T>

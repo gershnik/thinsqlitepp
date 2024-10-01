@@ -59,7 +59,7 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T, int>),
+    SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<bool, T, int>),
     void) database::busy_handler(T handler)
     {
         if constexpr (!std::is_null_pointer_v<T>)
@@ -76,7 +76,7 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, database *, int, const char *>),
+    SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, database *, int, const char *>),
     void) database::collation_needed(T handler)
     {
         if constexpr (!std::is_null_pointer_v<T>)
@@ -94,7 +94,7 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T>),
+    SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<bool, T>),
     void) database::commit_hook(T handler) noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
@@ -111,7 +111,7 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T>),
+    SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T>),
     void) database::rollback_hook(T handler) noexcept
     {
         if constexpr (!std::is_null_pointer_v<T>)
@@ -146,7 +146,7 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    SQLITEPP_ENABLE_IF((is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),
+    SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),
     void) database::create_collation(const string_param & name, int encoding, T collator,
                                      void (*deleter)(type_identity_t<T> obj) noexcept)
     {
@@ -184,13 +184,7 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
-        (std::is_pointer_v<T> &&
-            (
-               std::is_nothrow_invocable_r_v<void, std::remove_pointer_t<T>, context *, int, value **> ||
-               is_aggregate_function<std::remove_pointer_t<T>>
-            )
-        )),
+    SQLITEPP_ENABLE_IF(database_detector::is_pointer_to_function<T>,
     void) database::create_function(const char * name, int arg_count, int flags, T impl,
                                     void (*deleter)(type_identity_t<T> obj) noexcept)
     {
@@ -206,7 +200,7 @@ namespace thinsqlitepp
             {
                 destroy = deleter;
                 
-                if constexpr (!is_aggregate_function<std::remove_pointer_t<T>>)
+                if constexpr (!database_detector::is_aggregate_function<std::remove_pointer_t<T>>)
                 {
                     func = [] (context * ctxt, int count, value ** values) noexcept {
                         auto & impl = *ctxt->user_data<handler_t>();
@@ -248,8 +242,7 @@ namespace thinsqlitepp
     }
 
     template<class T>
-    SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
-        (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>)),
+    SQLITEPP_ENABLE_IF(database_detector::is_pointer_to_window_function<T>,
     void) database::create_window_function(const char * name, int arg_count, int flags, T impl, void (*deleter)(type_identity_t<T> obj) noexcept)
     {
         void (*step)(context *, int, value **) noexcept = nullptr;
