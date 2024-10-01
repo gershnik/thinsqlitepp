@@ -242,7 +242,7 @@ namespace thinsqlitepp
 
     inline sqlite3_int64 int64_size(size_t size)
     {
-        if (size > std::numeric_limits<sqlite3_int64>::max())
+        if (size > size_t(std::numeric_limits<sqlite3_int64>::max()))
             throw exception(SQLITE_TOOBIG);
         return sqlite3_int64(size);
     }
