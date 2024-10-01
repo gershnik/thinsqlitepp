@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `snapshot` type to wrap `sqlite3_snapshot` and related methods
 - Wrappers for `xxx_auto_extension` methods
 - Wrapper for `sqlite3_db_name`
+- Wrappers for `sqlite3_serialize` and `sqlite3_deserialize`
 
 ### Changed
 - `database::exec` now supports multiple simplified callback variants.

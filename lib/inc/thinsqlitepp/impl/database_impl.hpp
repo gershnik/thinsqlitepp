@@ -382,6 +382,45 @@ namespace thinsqlitepp
         return ret;
     }
 #endif
+
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 39, 0)
+    inline std::pair<allocated_bytes, size_t>  database::serialize(const string_param & schema_name)
+    {
+        sqlite3_int64 size;
+        auto ptr = (std::byte *)sqlite3_serialize(c_ptr(), schema_name.c_str(), &size, 0);
+        if (!ptr)
+            throw exception(SQLITE_NOMEM);
+        return {std::unique_ptr<std::byte, sqlite_deleter<std::byte>>{ptr}, size_t(size)};
+    }
+
+
+    inline span<std::byte> database::serialize_reference(const string_param & schema_name) noexcept
+    {
+        sqlite3_int64 size;
+        auto ptr = (std::byte *)sqlite3_serialize(c_ptr(), schema_name.c_str(), &size, SQLITE_SERIALIZE_NOCOPY);
+        if (!ptr)
+            size = 0;
+        return {ptr, size_t(size)};
+    }
+
+    inline void database::deserialize(const string_param & schema_name, 
+                                      allocated_bytes buf, 
+                                      size_t size, 
+                                      size_t buf_size,
+                                      unsigned flags)
+    {
+        int res = sqlite3_deserialize(c_ptr(), 
+                                      schema_name.c_str(), 
+                                      (unsigned char *)buf.get(), 
+                                      int64_size(size), 
+                                      int64_size(buf_size), 
+                                      flags | SQLITE_DESERIALIZE_FREEONCLOSE);
+        buf.release();
+        check_error(res);
+    }
+
+#endif
 }
 
 #ifdef __GNUC__

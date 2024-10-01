@@ -46,6 +46,13 @@ namespace thinsqlitepp
      */
     using allocated_string = std::unique_ptr<char, sqlite_deleter<char>>;
 
+    /**
+     * A byte buffer allocated by SQLite
+     * 
+     * `#include <thinsqlitepp/memory.hpp>`
+     */
+    using allocated_bytes = std::unique_ptr<std::byte, sqlite_deleter<std::byte>>;
+
 
     /// @cond PRIVATE
     inline void * sqlite_allocate_nothrow(std::size_t size) noexcept

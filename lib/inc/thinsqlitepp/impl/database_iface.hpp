@@ -14,6 +14,7 @@
 #include "mutex_iface.hpp"
 #include "blob_iface.hpp"
 #include "snapshot_iface.hpp"
+#include "memory_iface.hpp"
 #include "string_param.hpp"
 #include "span.hpp"
 #include "meta.hpp"
@@ -1094,6 +1095,83 @@ namespace thinsqlitepp
                                         const string_param & column,
                                         int64_t rowid,
                                         bool writable);
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 39, 0)
+
+        /** @{
+         * @name Serialization
+         */
+
+        /**
+         * Serialize a database 
+         * 
+         * Equivalent to ::sqlite3_serialize with flags set 0
+         * 
+         * @since SQLite 3.39
+         */
+        std::pair<allocated_bytes, size_t> serialize(const string_param & schema_name);
+
+        /**
+         * Serialize a database 
+         * 
+         * Equivalent to ::sqlite3_serialize with flags set SQLITE_SERIALIZE_NOCOPY
+         * 
+         * @since SQLite 3.39
+         */
+        span<std::byte> serialize_reference(const string_param & schema_name) noexcept;
+
+
+        /**
+         * Deserialize a database
+         * 
+         * Equivalent to ::sqlite3_deserialize
+         * 
+         * @since SQLite 3.39
+         */
+        void deserialize(const string_param & schema_name, 
+                         std::byte * buf, 
+                         size_t size, 
+                         size_t buf_size,
+                         unsigned flags = 0)
+            { check_error(sqlite3_deserialize(c_ptr(), schema_name.c_str(), (unsigned char *)buf, int64_size(size), int64_size(buf_size), flags)); }
+        
+        
+        /**
+         * Deserialize a database
+         * 
+         * A convenience overload for immutable data
+         * 
+         * Equivalent to ::sqlite3_deserialize with SQLITE_DESERIALIZE_READONLY flag always added
+         * 
+         * @since SQLite 3.39
+         */
+        void deserialize(const string_param & schema_name, 
+                         const std::byte * buf, 
+                         size_t size, 
+                         size_t buf_size,
+                         unsigned flags = 0)
+            { deserialize(schema_name, (std::byte *)buf, size, buf_size, flags | SQLITE_DESERIALIZE_READONLY); }
+
+
+        /**
+         * Deserialize a database
+         * 
+         * A convenience overload that takes ownership over passed pointer
+         * 
+         * Equivalent to ::sqlite3_deserialize with SQLITE_DESERIALIZE_FREEONCLOSE flag always added
+         * 
+         * @since SQLite 3.39
+         */
+        void deserialize(const string_param & schema_name, 
+                         allocated_bytes buf, 
+                         size_t size, 
+                         size_t buf_size,
+                         unsigned flags = 0);
+        
+
+
+        /** @} */
+#endif
 
         /** @{
          * @name Snapshots

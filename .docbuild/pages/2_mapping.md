@@ -150,10 +150,10 @@ status page of what is or isn't available in this library.
 | ::sqlite3_db_release_memory       | @refmylib{database::release_memory}
 | ::sqlite3_db_status               | @refmylib{database::status()}
 | ::sqlite3_declare_vtab            | @refmylib{database::declare_vtab}
-| ::sqlite3_deserialize             | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_deserialize             | @refmylib{database::deserialize}
 | ::sqlite3_drop_modules            | @refmylib{database::drop_modules}
 | ::sqlite3_enable_load_extension   | @refmylib{database::enable_load_extension}
-| ::sqlite3_enable_shared_cache     | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_enable_shared_cache     | **out of scope**
 | ::sqlite3_errcode                 | @refmylib{exception::primary_error_code}, @refmylib{error::primary}
 | ::sqlite3_errmsg                  | @refmylib{exception::what}, @refmylib{error::message}
 | ::sqlite3_errmsg16                | **out of scope**
@@ -274,7 +274,7 @@ status page of what is or isn't available in this library.
 
 | Function                          |  Mapped To                                                     |
 |-----------------------------------|----------------------------------------------------------------|
-| ::sqlite3_serialize               | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_serialize               | @refmylib{database::serialize}, @refmylib{database::serialize_reference}
 | ::sqlite3_set_authorizer          | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_set_auxdata             | @refmylib{context::set_auxdata}
 | ::sqlite3_set_clientdata          | <span style="color:orange"> **not implemented** </span>

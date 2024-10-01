@@ -633,4 +633,24 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "progress handler") {
     
 }
 
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 39, 0)
+
+TEST_CASE( "serialization" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    auto [buf, size] = db->serialize("main");
+
+    db->deserialize("main", buf.get(), size, size, SQLITE_DESERIALIZE_READONLY);
+    db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->deserialize("main", (const std::byte *)buf.get(), size, size);
+    db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->deserialize("main", std::move(buf), size, size);
+    
+    auto ref = db->serialize_reference("main");
+    CHECK(ref.data());
+    CHECK(ref.size() == size);
+}
+
+#endif
+
 TEST_SUITE_END();
