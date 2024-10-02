@@ -345,7 +345,144 @@ namespace thinsqlitepp
         SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, int, const char *, const char *, int64_t>),
         void) update_hook(T handler_ptr) noexcept;
 
+        //MARK: - preupdate_hook
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0) && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+        /**
+         * Register a callback to be called prior to each INSERT, UPDATE, and DELETE operation on a database table.
+         * 
+         * Equivalent to ::sqlite3_preupdate_hook
+         * 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
+         *  nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
+         * 
+         * @since SQLite 3.16
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) preupdate_hook(void (* handler)(type_identity_t<T> data_ptr, 
+                                              database * db, 
+                                              int op, 
+                                              const char * db_name, 
+                                              const char * table, 
+                                              sqlite3_int64 rowid_old,
+                                              sqlite3_int64 rowid_new) noexcept, 
+                             T data_ptr) noexcept
+        { 
+            sqlite3_preupdate_hook(this->c_ptr(), (void(*)(void*,sqlite3 *,int,char const *,char const *,sqlite3_int64,sqlite3_int64))(handler), 
+                                    data_ptr); 
+        }
+
+        /**
+         * Register a callback to be called prior to each INSERT, UPDATE, and DELETE operation on a database table.
+         * 
+         * Equivalent to ::sqlite3_preupdate_hook
+         * 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * (*handler_ptr)(database * db, int op, const char * db_name, const char * table, int64_t rowid_old, int64_t rowid_new);
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         * 
+         * @since SQLite 3.16
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, database *, int, const char *, const char *, int64_t, int64_t>),
+        void) preupdate_hook(T handler_ptr) noexcept;
+
+    #endif
+
         /// @}
+
+        //MARK: -
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0) && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+
+        /** @{
+         * @name Preupdate hook helpers
+         */
+
+        /**
+         * Returns value of a column of the table row before it is updated.
+         * 
+         * Equivalent to ::sqlite3_preupdate_old
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @since SQLite 3.16
+         */
+        value * preupdate_old(int column_idx);
+
+        /**
+         * Returns value of a column of the table row after it is updated.
+         * 
+         * Equivalent to ::sqlite3_preupdate_new
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @since SQLite 3.16
+         */
+        value * preupdate_new(int column_idx);
+
+        /**
+         * Returns the number of columns in the row that is being inserted, updated, or deleted.
+         * 
+         * Equivalent to ::sqlite3_preupdate_count
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @since SQLite 3.16
+         */
+        int preupdate_count() const noexcept
+            { return sqlite3_preupdate_count(c_ptr()); }
+
+        /**
+         * Returns the "depth" of an update from the top level SQL
+         * 
+         * Equivalent to ::sqlite3_preupdate_depth
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @returns 0 if the preupdate callback was invoked as a result of a direct 
+         * insert, update, or delete operation; or 1 for inserts, updates, or deletes 
+         * invoked by top-level triggers; or 2 for changes resulting from triggers 
+         * called by top-level triggers; and so forth.
+         * 
+         * @since SQLite 3.16
+         */
+        int preupdate_depth() const noexcept
+            { return sqlite3_preupdate_depth(c_ptr()); }
+
+
+        /**
+         * Returns the index of the column being written on DELETE.
+         * 
+         * Equivalent to ::sqlite3_preupdate_blobwrite
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @since SQLite 3.16
+         */    
+        int preupdate_blobwrite() const noexcept
+            { return sqlite3_preupdate_blobwrite(c_ptr()); }
+
+
+    #endif
+        
+
+        /** @} */
         
         //MARK: - create_collation
 

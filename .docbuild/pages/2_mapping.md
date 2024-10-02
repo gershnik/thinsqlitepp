@@ -233,12 +233,12 @@ status page of what is or isn't available in this library.
 | ::sqlite3_prepare16_v3            | **out of scope**
 | ::sqlite3_prepare_v2              | @refmylib{statement::create}
 | ::sqlite3_prepare_v3              | @refmylib{statement::create}
-| ::sqlite3_preupdate_blobwrite     | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_preupdate_count         | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_preupdate_depth         | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_preupdate_hook          | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_preupdate_new           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_preupdate_old           | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_preupdate_blobwrite     | @refmylib{database::preupdate_blobwrite}
+| ::sqlite3_preupdate_count         | @refmylib{database::preupdate_count}
+| ::sqlite3_preupdate_depth         | @refmylib{database::preupdate_depth}
+| ::sqlite3_preupdate_hook          | @refmylib{database::preupdate_hook}
+| ::sqlite3_preupdate_new           | @refmylib{database::preupdate_new}
+| ::sqlite3_preupdate_old           | @refmylib{database::preupdate_old}
 | ::sqlite3_progress_handler        | @refmylib{database::progress_handler}
 | ::sqlite3_randomness              | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_realloc                 | **out of scope**

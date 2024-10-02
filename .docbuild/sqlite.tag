@@ -51,6 +51,7 @@
     <member kind="define"><name>SQLITE_BUSY</name><anchorfile>rescode.html</anchorfile><anchor>busy</anchor></member>
     <member kind="define"><name>SQLITE_CONSTRAINT</name><anchorfile>rescode.html</anchorfile><anchor>constraint</anchor></member>
     <member kind="define"><name>SQLITE_DONE</name><anchorfile>rescode.html</anchorfile><anchor>done</anchor></member>
+    <member kind="define"><name>SQLITE_ENABLE_PREUPDATE_HOOK</name><anchorfile>compile.html</anchorfile><anchor>enable_preupdate_hook</anchor></member>
     <member kind="define"><name>SQLITE_ERROR</name><anchorfile>rescode.html</anchorfile><anchor>error</anchor></member>
     <member kind="define"><name>SQLITE_LOCKED</name><anchorfile>rescode.html</anchorfile><anchor>locked</anchor></member>
     <member kind="define"><name>SQLITE_OK</name><anchorfile>rescode.html</anchorfile><anchor>ok</anchor></member>

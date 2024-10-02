@@ -167,6 +167,29 @@ namespace thinsqlitepp
         }
     }
 
+#if defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+    template<class T>
+    SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, database *, int, const char *, const char *, int64_t, int64_t>),
+    void) database::preupdate_hook(T handler_ptr) noexcept
+    {
+        if constexpr (!std::is_null_pointer_v<T>)
+        {
+            if (handler_ptr)
+                this->preupdate_hook([] (T data, database * db, int op,
+                                         const char * db_name, const char * table, 
+                                         sqlite3_int64 rowid_old, sqlite3_int64 rowid_new) noexcept -> void { 
+                    (*data)(db, op, db_name, table, rowid_old, rowid_new);
+                }, handler_ptr);
+            else
+                this->preupdate_hook(nullptr, nullptr);
+        }
+        else
+        {
+            this->preupdate_hook(nullptr, nullptr);
+        }
+    }
+#endif
+
     template<class T>
     SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
     void) database::create_collation(const string_param & name, int encoding,
@@ -441,6 +464,22 @@ namespace thinsqlitepp
         check_error(res);
     }
 
+#endif
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0) && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+    inline value * database::preupdate_old(int column_idx)
+    {
+        sqlite3_value * ptr;
+        check_error(sqlite3_preupdate_old(c_ptr(), column_idx, &ptr));
+        return value::from(ptr);
+    }
+
+    inline value * database::preupdate_new(int column_idx)
+    {
+        sqlite3_value * ptr;
+        check_error(sqlite3_preupdate_new(c_ptr(), column_idx, &ptr));
+        return value::from(ptr);
+    }
 #endif
 }
 

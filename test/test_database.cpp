@@ -282,7 +282,7 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "update hook") {
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
     
     bool called = false;
-    auto hook = [&] (int op, const char * db_name, const char * table, int64_t rowid) noexcept -> void {
+    auto hook = [&] (int /*op*/, const char * /*db_name*/, const char * /*table*/, int64_t /*rowid*/) noexcept -> void {
         
         called = true;
     };
@@ -302,7 +302,58 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "update hook") {
         REQUIRE(data == nullptr);
         return real_sqlite3_update_hook(dbx, handler, data);
     });
-    db->rollback_hook(nullptr);
+    db->update_hook(nullptr);
+}
+
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "preupdate hook") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
+    
+    database * called_db = nullptr;
+    std::optional<std::string> old_val, new_val;
+    int column_count = -1;
+    int depth = -1;
+    int blobwrite = 0;
+    auto hook = [&] (database * db1, int op, const char * /*db_name*/, const char * /*table*/, int64_t /*rowid_old*/, sqlite3_int64 /*rowid_new*/) noexcept -> void {
+        
+        called_db = db1;
+        if (op != SQLITE_INSERT)
+        {
+            if (auto val = db1->preupdate_old(0))
+                old_val = val->get<std::string_view>();
+        }
+        if (op != SQLITE_DELETE)
+        {
+            if (auto val = db1->preupdate_new(0))
+                new_val = val->get<std::string_view>();
+        }
+        column_count = db1->preupdate_count();
+        depth = db1->preupdate_depth();
+        blobwrite = db1->preupdate_depth();
+    };
+    set_mock_sqlite3_preupdate_hook([&] (sqlite3 *dbx, void(*handler)(void*,sqlite3 *,int,const char *,const char *,sqlite3_int64,sqlite3_int64), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(data == &hook);
+        return real_sqlite3_preupdate_hook(dbx, handler, data);
+    });
+    db->preupdate_hook(&hook);
+    db->exec("INSERT INTO foo VALUES('haha')");
+    CHECK(called_db == db.get());
+    CHECK(!old_val);
+    CHECK(new_val.value() == "haha");
+    CHECK(column_count == 1);
+    CHECK(depth == 0);
+    CHECK(blobwrite == -1);
+    set_mock_sqlite3_preupdate_hook([&] (sqlite3 *dbx, void(*handler)(void*,sqlite3 *,int,const char *,const char *,sqlite3_int64,sqlite3_int64), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(handler == nullptr);
+        REQUIRE(data == nullptr);
+        return real_sqlite3_preupdate_hook(dbx, handler, data);
+    });
+    db->preupdate_hook(nullptr);
 }
 
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create collation") {

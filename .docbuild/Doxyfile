@@ -2494,6 +2494,7 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = DOXYGEN=1 \
                          SQLITE_VERSION_NUMBER=0xFFFFFFFF \
                          THINSQLITEPP_ENABLE_EXPIREMENTAL=1 \
+                         SQLITE_ENABLE_PREUPDATE_HOOK=1 \
                          __cplusplus=0xFFFFFFFF \
                          __cpp_char8_t=0xFFFFFFFF \
                          __cpp_lib_ranges=0xFFFFFFFF

@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Wrapper for `sqlite3_db_name`
 - Wrappers for `sqlite3_serialize` and `sqlite3_deserialize`
 - Wrapper for `sqlite3_update_hook`
+- Wrappers for `sqlite3_preupdate_xxx` API
 
 ### Changed
 - `database::exec` now supports multiple simplified callback variants.
