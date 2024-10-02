@@ -167,7 +167,7 @@ namespace thinsqlitepp
         }
     }
 
-#if defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0) && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
     template<class T>
     SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, database *, int, const char *, const char *, int64_t, int64_t>),
     void) database::preupdate_hook(T handler_ptr) noexcept

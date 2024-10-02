@@ -305,6 +305,8 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "update hook") {
     db->update_hook(nullptr);
 }
 
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0) && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "preupdate hook") {
 
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
@@ -314,7 +316,9 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "preupdate hook") {
     std::optional<std::string> old_val, new_val;
     int column_count = -1;
     int depth = -1;
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 0)
     int blobwrite = 0;
+#endif
     auto hook = [&] (database * db1, int op, const char * /*db_name*/, const char * /*table*/, int64_t /*rowid_old*/, sqlite3_int64 /*rowid_new*/) noexcept -> void {
         
         called_db = db1;
@@ -330,7 +334,9 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "preupdate hook") {
         }
         column_count = db1->preupdate_count();
         depth = db1->preupdate_depth();
-        blobwrite = db1->preupdate_depth();
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 0)
+        blobwrite = db1->preupdate_blobwrite();
+#endif
     };
     set_mock_sqlite3_preupdate_hook([&] (sqlite3 *dbx, void(*handler)(void*,sqlite3 *,int,const char *,const char *,sqlite3_int64,sqlite3_int64), void *data) {
         
@@ -345,7 +351,9 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "preupdate hook") {
     CHECK(new_val.value() == "haha");
     CHECK(column_count == 1);
     CHECK(depth == 0);
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 0)
     CHECK(blobwrite == -1);
+#endif
     set_mock_sqlite3_preupdate_hook([&] (sqlite3 *dbx, void(*handler)(void*,sqlite3 *,int,const char *,const char *,sqlite3_int64,sqlite3_int64), void *data) {
         
         REQUIRE(dbx == db->c_ptr());
@@ -355,6 +363,8 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "preupdate hook") {
     });
     db->preupdate_hook(nullptr);
 }
+
+#endif
 
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create collation") {
     

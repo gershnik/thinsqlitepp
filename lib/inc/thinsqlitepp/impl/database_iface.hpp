@@ -403,7 +403,8 @@ namespace thinsqlitepp
 
         //MARK: -
 
-    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0) && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+    #if defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0)
 
         /** @{
          * @name Preupdate hook helpers
@@ -465,20 +466,23 @@ namespace thinsqlitepp
             { return sqlite3_preupdate_depth(c_ptr()); }
 
 
+    #endif
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 0)
         /**
-         * Returns the index of the column being written on DELETE.
+         * Returns the index of the column being written via ::sqlite3_blob_write.
          * 
          * Equivalent to ::sqlite3_preupdate_blobwrite
          * 
          * This can only be called from a pre-update hook. 
          * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
          * 
-         * @since SQLite 3.16
+         * @since SQLite 3.36
          */    
         int preupdate_blobwrite() const noexcept
             { return sqlite3_preupdate_blobwrite(c_ptr()); }
 
 
+    #endif
     #endif
         
 

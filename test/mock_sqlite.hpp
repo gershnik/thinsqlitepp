@@ -73,10 +73,12 @@ MAKE_MOCK(sqlite3_update_hook, (sqlite3 *db,
                                 void * data), (db, handler, data));
 #define sqlite3_update_hook mock_sqlite3_update_hook
 
+#if SQLITE_VERSION_NUMBER >= 3016000 && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
 MAKE_MOCK(sqlite3_preupdate_hook, (sqlite3 *db,
                                 void(*handler)(void *,sqlite3 *,int,char const *,char const *,sqlite3_int64,sqlite3_int64),
                                 void * data), (db, handler, data));
 #define sqlite3_preupdate_hook mock_sqlite3_preupdate_hook
+#endif
 
 MAKE_MOCK(sqlite3_create_collation_v2, (sqlite3 *db, const char * name, int flags,
                                         void * arg,
