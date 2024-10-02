@@ -33,9 +33,14 @@ TEST_SUITE_BEGIN("version");
 
 TEST_CASE("runtime")
 {
+#if ! SQLITEPP_TEST_IMPRECISE_VERSION
     CHECK(sqlite_version::compile_time() == sqlite_version::runtime());
     CHECK(strcmp(sqlite_version::compile_time_str(), sqlite_version::runtime_str()) == 0);
     CHECK(strcmp(sqlite_version::compile_time_sourceid(), sqlite_version::runtime_sourceid()) == 0);
+#else
+    CHECK(sqlite_version::compile_time() <= sqlite_version::runtime());
+#endif
+    
 }
 
 TEST_SUITE_END();
