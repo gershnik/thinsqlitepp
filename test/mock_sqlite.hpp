@@ -68,6 +68,18 @@ MAKE_MOCK(sqlite3_commit_hook, (sqlite3 *db, int(*handler)(void*), void *data), 
 MAKE_MOCK(sqlite3_rollback_hook, (sqlite3 *db, void(*handler)(void*), void *data), (db, handler, data));
 #define sqlite3_rollback_hook mock_sqlite3_rollback_hook
 
+MAKE_MOCK(sqlite3_update_hook, (sqlite3 *db,
+                                void(*handler)(void *,int,char const *,char const *,sqlite3_int64),
+                                void * data), (db, handler, data));
+#define sqlite3_update_hook mock_sqlite3_update_hook
+
+#if SQLITE_VERSION_NUMBER >= 3016000 && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+MAKE_MOCK(sqlite3_preupdate_hook, (sqlite3 *db,
+                                void(*handler)(void *,sqlite3 *,int,char const *,char const *,sqlite3_int64,sqlite3_int64),
+                                void * data), (db, handler, data));
+#define sqlite3_preupdate_hook mock_sqlite3_preupdate_hook
+#endif
+
 MAKE_MOCK(sqlite3_create_collation_v2, (sqlite3 *db, const char * name, int flags,
                                         void * arg,
                                         int(*compare)(void*,int,const void*,int,const void*),
@@ -102,7 +114,7 @@ MAKE_MOCK(sqlite3_drop_modules, (sqlite3 *db, const char ** keep), (db, keep));
 
 #endif
 
-#if ! SQLITE_OMIT_LOAD_EXTENSION
+#if ! THINSQLITEPP_OMIT_LOAD_EXTENSION
 
 MAKE_MOCK(sqlite3_load_extension, (sqlite3 *db, const char * file, const char * proc, char ** err), (db, file, proc, err));
 #define sqlite3_load_extension mock_sqlite3_load_extension

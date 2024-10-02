@@ -51,10 +51,16 @@
     <member kind="define"><name>SQLITE_BUSY</name><anchorfile>rescode.html</anchorfile><anchor>busy</anchor></member>
     <member kind="define"><name>SQLITE_CONSTRAINT</name><anchorfile>rescode.html</anchorfile><anchor>constraint</anchor></member>
     <member kind="define"><name>SQLITE_DONE</name><anchorfile>rescode.html</anchorfile><anchor>done</anchor></member>
+    <member kind="define"><name>SQLITE_ENABLE_PREUPDATE_HOOK</name><anchorfile>compile.html</anchorfile><anchor>enable_preupdate_hook</anchor></member>
     <member kind="define"><name>SQLITE_ERROR</name><anchorfile>rescode.html</anchorfile><anchor>error</anchor></member>
+    <member kind="define"><name>SQLITE_LOCKED</name><anchorfile>rescode.html</anchorfile><anchor>locked</anchor></member>
+    <member kind="define"><name>SQLITE_OK</name><anchorfile>rescode.html</anchorfile><anchor>ok</anchor></member>
     <member kind="define"><name>SQLITE_ROW</name><anchorfile>rescode.html</anchorfile><anchor>row</anchor></member>
+    <member kind="define"><name>SQLITE_SOURCE_ID</name><anchorfile>c3ref/c_source_id.html</anchorfile></member>
     <member kind="define"><name>SQLITE_STATIC</name><anchorfile>c3ref/c_static.html</anchorfile></member>
     <member kind="define"><name>SQLITE_TRANSIENT</name><anchorfile>c3ref/c_static.html</anchorfile></member>
+    <member kind="define"><name>SQLITE_VERSION</name><anchorfile>c3ref/c_source_id.html</anchorfile></member>
+    <member kind="define"><name>SQLITE_VERSION_NUMBER</name><anchorfile>c3ref/c_source_id.html</anchorfile></member>
 
     <member kind="function"><name>sqlite3_aggregate_context</name><anchorfile>c3ref/aggregate_context.html</anchorfile></member>
     <member kind="function"><name>sqlite3_auto_extension</name><anchorfile>c3ref/auto_extension.html</anchorfile></member>

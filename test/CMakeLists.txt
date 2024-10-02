@@ -32,7 +32,7 @@ function(configure_test_target target)
 
     target_compile_options(${target}
     PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8;/W4;/WX>
+        $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8>
         $<$<CXX_COMPILER_ID:Clang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
         $<$<CXX_COMPILER_ID:AppleClang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
         $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-pedantic>
@@ -58,11 +58,15 @@ function(configure_test_target target)
     PRIVATE
         mock_sqlite.hpp
         mock_sqlite.cpp
+        test_backup.cpp
+        test_blob.cpp
         test_database.cpp
         test_main.cpp
+        test_snapshot.cpp
         test_statement.cpp
         test_general.cpp
         test_context.cpp
+        test_version.cpp
         test_vtab.cpp
     )
     
@@ -93,6 +97,9 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
         SQLITE_ENABLE_MEMORY_MANAGEMENT=1
         SQLITE_MEMDEBUG=1
         SQLITE_ENABLE_COLUMN_METADATA=1
+        SQLITE_ENABLE_SNAPSHOT=1
+    PUBLIC
+        SQLITE_ENABLE_PREUPDATE_HOOK=1
     )
 
     target_sources(sqlite3-${SQLITE_VERSION} PRIVATE
@@ -158,7 +165,9 @@ if (SQLite3_FOUND)
 
         target_compile_definitions(test-${CXX_STANDARD}-native  
         PRIVATE
-            $<$<PLATFORM_ID:Darwin>:SQLITE_OMIT_LOAD_EXTENSION=1>
+            $<$<PLATFORM_ID:Darwin>:THINSQLITEPP_OMIT_LOAD_EXTENSION=1>
+            THINSQLITEPP_OMIT_SNAPSHOT=1
+            SQLITEPP_TEST_IMPRECISE_VERSION=1
         )
 
         list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite: native)

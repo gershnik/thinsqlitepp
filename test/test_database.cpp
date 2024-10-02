@@ -276,6 +276,96 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "rollback hook") {
     db->rollback_hook(nullptr);
 }
 
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "update hook") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
+    
+    bool called = false;
+    auto hook = [&] (int /*op*/, const char * /*db_name*/, const char * /*table*/, int64_t /*rowid*/) noexcept -> void {
+        
+        called = true;
+    };
+    set_mock_sqlite3_update_hook([&] (sqlite3 *dbx, void(*handler)(void*,int,const char *,const char *,sqlite3_int64), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(data == &hook);
+        return real_sqlite3_update_hook(dbx, handler, data);
+    });
+    db->update_hook(&hook);
+    db->exec("INSERT INTO foo VALUES('haha')");
+    CHECK(called);
+    set_mock_sqlite3_update_hook([&] (sqlite3 *dbx, void(*handler)(void*,int,const char *,const char *,sqlite3_int64), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(handler == nullptr);
+        REQUIRE(data == nullptr);
+        return real_sqlite3_update_hook(dbx, handler, data);
+    });
+    db->update_hook(nullptr);
+}
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0) && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "preupdate hook") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
+    
+    database * called_db = nullptr;
+    std::optional<std::string> old_val, new_val;
+    int column_count = -1;
+    int depth = -1;
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 0)
+    int blobwrite = 0;
+#endif
+    auto hook = [&] (database * db1, int op, const char * /*db_name*/, const char * /*table*/, int64_t /*rowid_old*/, sqlite3_int64 /*rowid_new*/) noexcept -> void {
+        
+        called_db = db1;
+        if (op != SQLITE_INSERT)
+        {
+            if (auto val = db1->preupdate_old(0))
+                old_val = val->get<std::string_view>();
+        }
+        if (op != SQLITE_DELETE)
+        {
+            if (auto val = db1->preupdate_new(0))
+                new_val = val->get<std::string_view>();
+        }
+        column_count = db1->preupdate_count();
+        depth = db1->preupdate_depth();
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 0)
+        blobwrite = db1->preupdate_blobwrite();
+#endif
+    };
+    set_mock_sqlite3_preupdate_hook([&] (sqlite3 *dbx, void(*handler)(void*,sqlite3 *,int,const char *,const char *,sqlite3_int64,sqlite3_int64), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(data == &hook);
+        return real_sqlite3_preupdate_hook(dbx, handler, data);
+    });
+    db->preupdate_hook(&hook);
+    db->exec("INSERT INTO foo VALUES('haha')");
+    CHECK(called_db == db.get());
+    CHECK(!old_val);
+    CHECK(new_val.value() == "haha");
+    CHECK(column_count == 1);
+    CHECK(depth == 0);
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 0)
+    CHECK(blobwrite == -1);
+#endif
+    set_mock_sqlite3_preupdate_hook([&] (sqlite3 *dbx, void(*handler)(void*,sqlite3 *,int,const char *,const char *,sqlite3_int64,sqlite3_int64), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(handler == nullptr);
+        REQUIRE(data == nullptr);
+        return real_sqlite3_preupdate_hook(dbx, handler, data);
+    });
+    db->preupdate_hook(nullptr);
+}
+
+#endif
+
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create collation") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
@@ -555,7 +645,7 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "drop modules") {
 
 #endif
 
-#if ! SQLITE_OMIT_LOAD_EXTENSION
+#if ! THINSQLITEPP_OMIT_LOAD_EXTENSION
 
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "load extension") {
 
@@ -632,5 +722,25 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "progress handler") {
     db->progress_handler(16, func1, nullptr);
     
 }
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 39, 0)
+
+TEST_CASE( "serialization" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    auto [buf, size] = db->serialize("main");
+
+    db->deserialize("main", buf.get(), size, size, SQLITE_DESERIALIZE_READONLY);
+    db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->deserialize("main", (const std::byte *)buf.get(), size, size);
+    db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->deserialize("main", std::move(buf), size, size);
+    
+    auto ref = db->serialize_reference("main");
+    CHECK(ref.data());
+    CHECK(ref.size() == size);
+}
+
+#endif
 
 TEST_SUITE_END();

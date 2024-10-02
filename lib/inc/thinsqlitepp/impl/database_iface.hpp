@@ -12,6 +12,9 @@
 #include "handle.hpp"
 #include "exception_iface.hpp"
 #include "mutex_iface.hpp"
+#include "blob_iface.hpp"
+#include "snapshot_iface.hpp"
+#include "memory_iface.hpp"
 #include "string_param.hpp"
 #include "span.hpp"
 #include "meta.hpp"
@@ -26,6 +29,7 @@
     
     #if defined(__APPLE__) && defined(__clang__) && defined(SQLITE_AVAILABLE)
         #pragma GCC diagnostic ignored "-Wunguarded-availability-new"
+        #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     #endif
 #endif
 
@@ -35,34 +39,50 @@ namespace thinsqlitepp
 {
     class context;
     class row;
+    class value;
 
     /** @cond PRIVATE */
 
-    template<typename T>
-    std::true_type load_extension_detector(decltype(sqlite3_enable_load_extension((T *)nullptr, 0)));
-    template<typename T>
-    std::false_type load_extension_detector(...);
-
-    template<typename T>
-    constexpr bool load_extension_present = decltype(load_extension_detector<T>(0))::value;
-
-    template<class T>
-    int call_sqlite3_enable_load_extension(T * db, int onoff)
+    struct database_detector
     {
-        if constexpr (load_extension_present<T>)
-            return sqlite3_enable_load_extension(db, onoff);
-        else
-            return SQLITE_ERROR;
-    }
+        SQLITEPP_CALL_DETECTOR(enable_load_extension, int, sqlite3_enable_load_extension, (T *)nullptr, int{});
+        SQLITEPP_CALL_DETECTOR(load_extension, int, sqlite3_load_extension, (T *)nullptr, 
+                                                                            (const char *)nullptr,
+                                                                            (const char *)nullptr,
+                                                                            (char **)nullptr);
 
-    template<class T>
-    int call_sqlite3_load_extension(T * db, const char * file, const char * proc, char ** err)
-    {
-        if constexpr (load_extension_present<T>)
-            return sqlite3_load_extension(db, file, proc, err);
-        else
-            return SQLITE_ERROR;
-    }
+        SQLITEPP_METHOD_DETECTOR(void, step, (context *)nullptr, int{}, (value **)nullptr);
+        SQLITEPP_METHOD_DETECTOR(void, last, (context *)nullptr);
+        SQLITEPP_METHOD_DETECTOR(void, inverse, (context *)nullptr, int{}, (value **)nullptr);
+        SQLITEPP_METHOD_DETECTOR(void, current, (context *)nullptr);
+
+    public:
+        template<class T>
+        static constexpr bool is_function = std::is_nothrow_invocable_r_v<void, T, context *, int, value **>;
+
+        template<class T>
+        static constexpr bool is_aggregate_function = has_noexcept_step<T> && has_noexcept_last<T>;
+
+        template<class T>
+        static constexpr bool is_aggregate_window_function = is_aggregate_function<T> && has_noexcept_inverse<T> && has_noexcept_current<T>;
+        
+        template<class R, class T, class... ArgTypes>
+        static constexpr bool is_pointer_to_callback =  std::is_null_pointer_v<T> ||
+            (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<R, std::remove_pointer_t<T>, ArgTypes...>);
+
+        template<class T>
+        static constexpr bool is_pointer_to_function = std::is_null_pointer_v<T> ||
+            (std::is_pointer_v<T> &&
+                (
+                   is_function<std::remove_pointer_t<T>> ||
+                   is_aggregate_function<std::remove_pointer_t<T>>
+                )
+            );
+
+        template<class T>
+        static constexpr bool is_pointer_to_window_function = std::is_null_pointer_v<T> ||
+                (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>);
+    };
 
     /** @endcond */
 
@@ -120,7 +140,7 @@ namespace thinsqlitepp
             { sqlite3_close_v2(c_ptr()); }
         
         
-        //MARK:-
+        //MARK: -
 
         /**
          * Set a busy timeout
@@ -130,7 +150,7 @@ namespace thinsqlitepp
         void busy_timeout(int ms)
             { check_error(sqlite3_busy_timeout(c_ptr(), ms)); }
         
-        //MARK:-
+        //MARK: -
 
         /**
          * Count of the number of rows modified
@@ -151,7 +171,7 @@ namespace thinsqlitepp
          * @name Callbacks and notifications
          */
 
-        //MARK:- busy_handler
+        //MARK: - busy_handler
 
         /**
          * Register a callback to handle #SQLITE_BUSY errors
@@ -182,11 +202,11 @@ namespace thinsqlitepp
          * The handler object must exist as long as it is set.
          */
         template<class T>
-        SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T, int>),
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<bool, T, int>),
         void) busy_handler(T handler_ptr);
         
         
-        //MARK:- collation_needed
+        //MARK: - collation_needed
 
         /**
          * Register a callback to be called when undefined collation sequence is required
@@ -219,10 +239,10 @@ namespace thinsqlitepp
          * The handler object must exist as long as it is set.
          */
         template<class T>
-        SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T, database *, int, const char *>),
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, database *, int, const char *>),
         void) collation_needed(T handler_ptr);
         
-        //MARK:- commit_hook
+        //MARK: - commit_hook
 
         /**
          * Register a callback to be called on commit
@@ -252,11 +272,11 @@ namespace thinsqlitepp
          * The handler object must exist as long as it is set.
          */
         template<class T>
-        SQLITEPP_ENABLE_IF((is_pointer_to_callback<bool, T>),
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<bool, T>),
         void) commit_hook(T handler_ptr) noexcept;
         
         
-        //MARK:- rollback_hook
+        //MARK: - rollback_hook
 
         /**
          * Register a callback to be called on rollback
@@ -279,19 +299,196 @@ namespace thinsqlitepp
          * 
          * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
          * ```
-         * bool result = (*handler_ptr)();
+         * (*handler_ptr)();
          * ```
          * This invocation must be `noexcept`. 
          * This parameter can also be nullptr to reset the handler.
          * The handler object must exist as long as it is set.
          */
         template<class T>
-        SQLITEPP_ENABLE_IF((is_pointer_to_callback<void, T>),
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T>),
         void) rollback_hook(T handler_ptr) noexcept;
 
+
+        //MARK: - update_hook
+
+        /**
+         * Register a callback to be called whenever a row is updated, inserted or deleted in a rowid table.
+         * 
+         * Equivalent to ::sqlite3_update_hook
+         * 
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
+         *  nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) update_hook(void (* handler)(type_identity_t<T> data_ptr, int op, const char * db_name, const char * table, sqlite3_int64 rowid) noexcept, 
+                          T data_ptr) noexcept
+            { sqlite3_update_hook(this->c_ptr(), (void(*)(void*,int,char const *,char const *,sqlite3_int64))(handler), data_ptr); }
+
+
+        /**
+         * Register a callback to be called whenever a row is updated, inserted or deleted in a rowid table.
+         * 
+         * Equivalent to ::sqlite3_update_hook
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * (*handler_ptr)(int op, const char * db_name, const char * table, int64_t rowid);
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, int, const char *, const char *, int64_t>),
+        void) update_hook(T handler_ptr) noexcept;
+
+        //MARK: - preupdate_hook
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0) && defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+        /**
+         * Register a callback to be called prior to each INSERT, UPDATE, and DELETE operation on a database table.
+         * 
+         * Equivalent to ::sqlite3_preupdate_hook
+         * 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
+         *  nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
+         * 
+         * @since SQLite 3.16
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) preupdate_hook(void (* handler)(type_identity_t<T> data_ptr, 
+                                              database * db, 
+                                              int op, 
+                                              const char * db_name, 
+                                              const char * table, 
+                                              sqlite3_int64 rowid_old,
+                                              sqlite3_int64 rowid_new) noexcept, 
+                             T data_ptr) noexcept
+        { 
+            sqlite3_preupdate_hook(this->c_ptr(), (void(*)(void*,sqlite3 *,int,char const *,char const *,sqlite3_int64,sqlite3_int64))(handler), 
+                                    data_ptr); 
+        }
+
+        /**
+         * Register a callback to be called prior to each INSERT, UPDATE, and DELETE operation on a database table.
+         * 
+         * Equivalent to ::sqlite3_preupdate_hook
+         * 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * (*handler_ptr)(database * db, int op, const char * db_name, const char * table, int64_t rowid_old, int64_t rowid_new);
+         * ```
+         * This invocation must be `noexcept`. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         * 
+         * @since SQLite 3.16
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<void, T, database *, int, const char *, const char *, int64_t, int64_t>),
+        void) preupdate_hook(T handler_ptr) noexcept;
+
+    #endif
+
         /// @}
+
+        //MARK: -
+
+    #if defined(SQLITE_ENABLE_PREUPDATE_HOOK)
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 16, 0)
+
+        /** @{
+         * @name Preupdate hook helpers
+         */
+
+        /**
+         * Returns value of a column of the table row before it is updated.
+         * 
+         * Equivalent to ::sqlite3_preupdate_old
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @since SQLite 3.16
+         */
+        value * preupdate_old(int column_idx);
+
+        /**
+         * Returns value of a column of the table row after it is updated.
+         * 
+         * Equivalent to ::sqlite3_preupdate_new
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @since SQLite 3.16
+         */
+        value * preupdate_new(int column_idx);
+
+        /**
+         * Returns the number of columns in the row that is being inserted, updated, or deleted.
+         * 
+         * Equivalent to ::sqlite3_preupdate_count
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @since SQLite 3.16
+         */
+        int preupdate_count() const noexcept
+            { return sqlite3_preupdate_count(c_ptr()); }
+
+        /**
+         * Returns the "depth" of an update from the top level SQL
+         * 
+         * Equivalent to ::sqlite3_preupdate_depth
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @returns 0 if the preupdate callback was invoked as a result of a direct 
+         * insert, update, or delete operation; or 1 for inserts, updates, or deletes 
+         * invoked by top-level triggers; or 2 for changes resulting from triggers 
+         * called by top-level triggers; and so forth.
+         * 
+         * @since SQLite 3.16
+         */
+        int preupdate_depth() const noexcept
+            { return sqlite3_preupdate_depth(c_ptr()); }
+
+
+    #endif
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 36, 0)
+        /**
+         * Returns the index of the column being written via ::sqlite3_blob_write.
+         * 
+         * Equivalent to ::sqlite3_preupdate_blobwrite
+         * 
+         * This can only be called from a pre-update hook. 
+         * Available only if #SQLITE_ENABLE_PREUPDATE_HOOK is defined during compilation
+         * 
+         * @since SQLite 3.36
+         */    
+        int preupdate_blobwrite() const noexcept
+            { return sqlite3_preupdate_blobwrite(c_ptr()); }
+
+
+    #endif
+    #endif
         
-        //MARK:- create_collation
+
+        /** @} */
+        
+        //MARK: - create_collation
 
         /** @{
          * @anchor database_create_collation
@@ -339,13 +536,13 @@ namespace thinsqlitepp
          * even if this function throws an exception.
          */
         template<class T>
-        SQLITEPP_ENABLE_IF((is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),
-        void) create_collation(const string_param & name, int encoding, T collator_ptr, 
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_callback<int, T, span<const std::byte>, span<const std::byte>>),
+        void) create_collation(const string_param & name, int encoding, T collator_ptr,
                               void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
 
         /// @}
         
-        //MARK:- create_function
+        //MARK: - create_function
 
         /** @{
          * @anchor database_create_function
@@ -408,17 +605,11 @@ namespace thinsqlitepp
          * @param destructor A "destructor" function for @p impl_ptr. Can be nullptr.
          */
         template<class T>
-        SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
-            (std::is_pointer_v<T> &&
-                (
-                   std::is_nothrow_invocable_r_v<void, std::remove_pointer_t<T>, context *, int, value **> ||
-                   is_aggregate_function<std::remove_pointer_t<T>>
-                )
-            )),
+        SQLITEPP_ENABLE_IF(database_detector::is_pointer_to_function<T>,
         void) create_function(const char * name, int arg_count, int flags, 
                               T impl_ptr, void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
         
-        //MARK:- create_window_function
+        //MARK: - create_window_function
 
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 25, 0)
 
@@ -480,15 +671,14 @@ namespace thinsqlitepp
          * @since SQLite 3.25
          */
         template<class T>
-        SQLITEPP_ENABLE_IF((std::is_null_pointer_v<T> ||
-                (std::is_pointer_v<T> && is_aggregate_window_function<std::remove_pointer_t<T>>)),
+        SQLITEPP_ENABLE_IF(database_detector::is_pointer_to_window_function<T>,
         void) create_window_function(const char * name, int arg_count, int flags, 
                                      T impl_ptr, void (*destructor)(type_identity_t<T> obj) noexcept = nullptr);
 #endif
 
         ///@}
         
-        //MARK:-
+        //MARK: -
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) 
         /**
          * Flush caches to disk mid-transaction
@@ -530,7 +720,7 @@ namespace thinsqlitepp
             { config_mapping<Code>::type::apply(*this, std::forward<Args>(args)...); }
         
 
-        //MARK:-
+        //MARK: - create_module
 
         /** @{
          * @anchor modules
@@ -563,6 +753,8 @@ namespace thinsqlitepp
                            T * data, void(*destructor)(T *) = nullptr)
             { check_error(sqlite3_create_module_v2(c_ptr(), name.c_str(), mod, (void*)data, (void (*)(void *))destructor)); }
 
+        
+        //MARK: -
         
         /**
          * Declare the schema of a virtual table
@@ -611,7 +803,7 @@ namespace thinsqlitepp
         int vtab_on_conflict() const noexcept 
             { return sqlite3_vtab_on_conflict(c_ptr()); }
 
-        //MARK:- drop_modules
+        //MARK: - drop_modules
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 30, 0)
         /**
          * Remove all virtual table modules from database connection
@@ -670,17 +862,7 @@ namespace thinsqlitepp
 
         /// @}
         
-        //MARK:-
-
-        /**
-         * Enable or disable extension loading
-         * 
-         * Equivalent to ::sqlite3_enable_load_extension
-         */
-        void enable_load_extension(bool val)
-            { check_error(call_sqlite3_enable_load_extension(this->c_ptr(), val)); }
-        
-        //MARK:-
+        //MARK: -
 
         /**
          * Enable or disable extended result codes
@@ -690,7 +872,7 @@ namespace thinsqlitepp
         void extended_result_codes(bool onoff)
             { check_error(sqlite3_extended_result_codes(c_ptr(), onoff)); }
         
-        //MARK:- exec
+        //MARK: - exec
 
         /** @{
          * @anchor database_exec
@@ -729,14 +911,25 @@ namespace thinsqlitepp
          * It runs zero or more UTF-8 encoded, semicolon-separate SQL statements passed
          * as the `sql` argument. The `callback` callable is passed by value and
          * is invoked for each result row coming out of the evaluated SQL statements. 
-         * The callable must support being invoked as:
+         * The callable can have one of the 4 possible variants:
+         * ```cpp
+         * 1. bool callback(int statement_idx, row current_row)
+         * 2. void callback(int statement_idx, row current_row)
+         * 3. bool callback(row current_row)
+         * 4. void callback(row current_row)
          * ```
-         * bool res = callback(int statement_idx, thinsqlitepp::row current_row);
-         * ```
-         * If an invocation of callback returns `false` then execution of the current 
-         * statement stops and subsequent statements are skipped.
          * 
-         * The `callback` argument is returned back from the function which allows it to 
+         * If more than one way of calling the callback is possible the way it will
+         * be invoked is chosen in the order given above.
+         * 
+         * For variants 1 and 3 if an invocation of callback returns `false` then 
+         * the execution of the current statement stops and subsequent statements are skipped.
+         * 
+         * For variants 1 and 2 the `statement_idx` is the index of the SQL statement 
+         * being executed. If you only pass a single statement to `exec()` you 
+         * generally don't need these variants.
+         * 
+         * The @p callback argument is returned back from the function which allows it to 
          * accumulate state.
          * 
          * If an error occurs while evaluating the SQL statements
@@ -750,7 +943,10 @@ namespace thinsqlitepp
          */
         template<class T>
         SQLITEPP_ENABLE_IF((
-            std::is_invocable_r_v<bool, T, int, row>),
+            std::is_invocable_r_v<bool, T, int, row> ||
+            std::is_invocable_r_v<void, T, int, row> ||
+            std::is_invocable_r_v<bool, T, row> ||
+            std::is_invocable_r_v<void, T, row>),
         T) exec(std::string_view sql, T callback);
 
     #if __cpp_char8_t >= 201811
@@ -762,7 +958,7 @@ namespace thinsqlitepp
 
         /// @}
         
-        //MARK:-
+        //MARK: -
         
         /**
          * Low-level control of database file
@@ -843,6 +1039,20 @@ namespace thinsqlitepp
          */
         int limit(int id, int new_val) noexcept
             { return sqlite3_limit(c_ptr(), id, new_val); }
+
+
+
+        /** @{
+         * @name Extension management
+         */
+
+        /**
+         * Enable or disable extension loading
+         * 
+         * Equivalent to ::sqlite3_enable_load_extension
+         */
+        void enable_load_extension(bool val)
+            { check_error(call_sqlite3_enable_load_extension(this->c_ptr(), val)); }
         
         
         /**
@@ -851,6 +1061,44 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_load_extension
          */
         void load_extension(const string_param & file, const string_param & proc = nullptr);
+
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 8, 7)
+
+        /**
+         * Automatically load statically linked extension
+         * 
+         * Equivalent to ::sqlite3_auto_extension
+         * 
+         * @since SQLite 3.8.7
+         */
+        void auto_extension(void(*entry_point)(database *, const char **, const struct sqlite3_api_routines *))
+            { check_error(sqlite3_auto_extension((void(*)(void))entry_point)); }
+
+    
+        /**
+         * Cancel automatic extension Loading
+         * 
+         * Equivalent to ::sqlite3_cancel_auto_extension
+         * 
+         * @since SQLite 3.8.7
+         */
+        void cancel_auto_extension(void(*entry_point)(database *, const char **, const struct sqlite3_api_routines *))
+            { check_error(sqlite3_cancel_auto_extension((void(*)(void))entry_point)); }
+
+    
+        /**
+         * Reset automatic extension loading
+         * 
+         * Equivalent to ::sqlite3_reset_auto_extension
+         * 
+         * @since SQLite 3.8.7
+         */
+        void reset_auto_extension() noexcept
+            { sqlite3_reset_auto_extension(); }
+
+    #endif
+
+        /** @} */
         
         /**
          * Retrieve the mutex for the database connection
@@ -859,6 +1107,8 @@ namespace thinsqlitepp
          */
         class mutex * mutex() const noexcept
             { return (class mutex *)sqlite3_db_mutex(c_ptr()); }
+        
+        //MARK: - next_statement
         
         /**
          * Find the next prepared statement
@@ -872,6 +1122,8 @@ namespace thinsqlitepp
         class statement * next_statement(const class statement * prev) noexcept
             { return (class statement *)sqlite3_next_stmt(c_ptr(), (sqlite3_stmt *)prev); }
         
+        //MARK: -
+        
         /**
          * Overload a function for a virtual table
          * 
@@ -880,7 +1132,7 @@ namespace thinsqlitepp
         void overload_function(const string_param & name, int arg_count) noexcept
             { check_error(sqlite3_overload_function(c_ptr(), name.c_str(), arg_count)); }
         
-        //MARK:- progress_handler
+        //MARK: - progress_handler
 
         /**
          * Register a callback to be called on query progress
@@ -944,7 +1196,7 @@ namespace thinsqlitepp
         void release_memory() const
             { check_error(sqlite3_db_release_memory(c_ptr())); }
         
-        //MARK:- status
+        //MARK: - status
 
         /// Return type for @ref status()
         struct status
@@ -960,7 +1212,7 @@ namespace thinsqlitepp
          */
         struct status status(int op, bool reset = false) const;
         
-        //MARK:- table_column_metadata
+        //MARK: - table_column_metadata
         
         /// Return type for table_column_metadata()
         struct column_metadata
@@ -981,7 +1233,7 @@ namespace thinsqlitepp
                                               const string_param & table_name, 
                                               const string_param & column_name) const;
         
-        //MARK:-
+        //MARK: -
         
         /**
          * Returns total number of rows modified
@@ -1009,14 +1261,184 @@ namespace thinsqlitepp
         int txn_state(const string_param & schema) const noexcept
             { return sqlite3_txn_state(c_ptr(), schema.c_str()); }
 #endif
+
+        /**
+         * Open a blob
+         * 
+         * Equivalent to ::sqlite3_blob_open
+         */
+        std::unique_ptr<blob> open_blob(const string_param & dbname, 
+                                        const string_param & table,
+                                        const string_param & column,
+                                        int64_t rowid,
+                                        bool writable);
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 39, 0)
+
+        /** @{
+         * @name Serialization
+         */
+
+        /**
+         * Serialize a database 
+         * 
+         * Equivalent to ::sqlite3_serialize with flags set 0
+         * 
+         * @since SQLite 3.39
+         */
+        std::pair<allocated_bytes, size_t> serialize(const string_param & schema_name);
+
+        /**
+         * Serialize a database 
+         * 
+         * Equivalent to ::sqlite3_serialize with flags set SQLITE_SERIALIZE_NOCOPY
+         * 
+         * @since SQLite 3.39
+         */
+        span<std::byte> serialize_reference(const string_param & schema_name) noexcept;
+
+
+        /**
+         * Deserialize a database
+         * 
+         * Equivalent to ::sqlite3_deserialize
+         * 
+         * @since SQLite 3.39
+         */
+        void deserialize(const string_param & schema_name, 
+                         std::byte * buf, 
+                         size_t size, 
+                         size_t buf_size,
+                         unsigned flags = 0)
+            { check_error(sqlite3_deserialize(c_ptr(), schema_name.c_str(), (unsigned char *)buf, int64_size(size), int64_size(buf_size), flags)); }
         
-        //MARK:-
+        
+        /**
+         * Deserialize a database
+         * 
+         * A convenience overload for immutable data
+         * 
+         * Equivalent to ::sqlite3_deserialize with SQLITE_DESERIALIZE_READONLY flag always added
+         * 
+         * @since SQLite 3.39
+         */
+        void deserialize(const string_param & schema_name, 
+                         const std::byte * buf, 
+                         size_t size, 
+                         size_t buf_size,
+                         unsigned flags = 0)
+            { deserialize(schema_name, (std::byte *)buf, size, buf_size, flags | SQLITE_DESERIALIZE_READONLY); }
+
+
+        /**
+         * Deserialize a database
+         * 
+         * A convenience overload that takes ownership over passed pointer
+         * 
+         * Equivalent to ::sqlite3_deserialize with SQLITE_DESERIALIZE_FREEONCLOSE flag always added
+         * 
+         * @since SQLite 3.39
+         */
+        void deserialize(const string_param & schema_name, 
+                         allocated_bytes buf, 
+                         size_t size, 
+                         size_t buf_size,
+                         unsigned flags = 0);
+        
+
+
+        /** @} */
+#endif
+
+        /** @{
+         * @name Snapshots
+         */
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && THINSQLITEPP_ENABLE_EXPIREMENTAL
+        /**
+         * Record a database snapshot
+         * 
+         * Equivalent to ::sqlite3_snapshot_get
+         * 
+         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * feature is experimental.
+         * 
+         * @since SQLite 3.10
+         */
+        std::unique_ptr<snapshot> get_snapshot(const string_param & schema);
+
+        /**
+         * Start a read transaction on an historical snapshot
+         * 
+         * Equivalent to ::sqlite3_snapshot_open
+         * 
+         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * feature is experimental.
+         * 
+         * @since SQLite 3.10
+         */
+        void open_snapshot(const string_param & schema, const snapshot & snap)
+            { check_error(sqlite3_snapshot_open(c_ptr(), schema.c_str(), snap.c_ptr())); }
+
+        /**
+         * Recover snapshots from a wal file
+         * 
+         * Equivalent to ::sqlite3_snapshot_recover
+         * 
+         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * feature is experimental.
+         * 
+         * @since SQLite 3.10
+         */
+        void recover_snapshot(const string_param & db)
+            { check_error(sqlite3_snapshot_recover(c_ptr(), db.c_str())); }
+
+#endif
+
+        /** @} */
+        
+        
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 39, 0)
+        /**
+         * Return schema names
+         *
+         * Equivalent to ::sqlite3_db_name
+         * 
+         * @param idx Schema index. 0 means the main database file and 1 is 
+         * the "temp" schema. Larger values correspond to various ATTACH-ed databases.
+         * 
+         * @since SQLite 3.39
+         */
+        const char * db_name(int idx) noexcept
+            { return sqlite3_db_name(c_ptr(), idx); }
+
+    #endif
+
+        //MARK: - Private methods
         
     private:
         void check_error(int res) const
         {
             if (res != SQLITE_OK)
                 throw exception(res, this);
+        }
+
+        template<class T>
+        static int call_sqlite3_enable_load_extension(T * db, int onoff)
+        {
+            if constexpr (database_detector::has_enable_load_extension<T>)
+                return sqlite3_enable_load_extension(db, onoff);
+            else
+                return SQLITE_ERROR;
+        }
+
+        template<class T>
+        static int call_sqlite3_load_extension(T * db, const char * file, const char * proc, char ** err)
+        {
+            if constexpr (database_detector::has_load_extension<T>)
+                return sqlite3_load_extension(db, file, proc, err);
+            else
+                return SQLITE_ERROR;
         }
     };
 

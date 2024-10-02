@@ -5,6 +5,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+- `blob` type to wrap `sqlite3_blob` and related methods
+- `backup` type to wrap `sqlite3_backup` and related methods
+- `snapshot` type to wrap `sqlite3_snapshot` and related methods
+- Wrappers for `xxx_auto_extension` methods
+- Wrapper for `sqlite3_db_name`
+- Wrappers for `sqlite3_serialize` and `sqlite3_deserialize`
+- Wrapper for `sqlite3_update_hook`
+- Wrappers for `sqlite3_preupdate_xxx` API
+- `sqlite_version` type to wrap versioning calls and macros
+
+### Changed
+- `database::exec` now supports multiple simplified callback variants.
+
+### Fixed
+- Bogus warnings with GCC in C++17 mode
+- Incorrect exception raised in some cases where an SQLite API returns an error but no error is set on database
+  connection.
+
 ## [1.3] - 2024-09-27
 
 ### Added

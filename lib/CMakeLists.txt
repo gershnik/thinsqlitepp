@@ -41,20 +41,26 @@ INTERFACE
 )
 
 set(PUBLIC_HEADERS
+    inc/thinsqlitepp/backup.hpp
+    inc/thinsqlitepp/blob.hpp
     inc/thinsqlitepp/context.hpp
     inc/thinsqlitepp/database.hpp
     inc/thinsqlitepp/exception.hpp
     inc/thinsqlitepp/global.hpp
     inc/thinsqlitepp/memory.hpp
     inc/thinsqlitepp/mutex.hpp
+    inc/thinsqlitepp/snapshot.hpp
     inc/thinsqlitepp/statement.hpp
     inc/thinsqlitepp/value.hpp
+    inc/thinsqlitepp/version.hpp
     inc/thinsqlitepp/vtab.hpp
     inc/thinsqlitepp/thinsqlitepp.hpp
 )
 source_group("Public Headers" FILES ${PUBLIC_HEADERS})
 
 set(IMPL_HEADERS
+    inc/thinsqlitepp/impl/backup_iface.hpp
+    inc/thinsqlitepp/impl/blob_iface.hpp
     inc/thinsqlitepp/impl/config.hpp
     inc/thinsqlitepp/impl/context_iface.hpp
     inc/thinsqlitepp/impl/database_iface.hpp
@@ -67,11 +73,13 @@ set(IMPL_HEADERS
     inc/thinsqlitepp/impl/meta.hpp
     inc/thinsqlitepp/impl/mutex_iface.hpp
     inc/thinsqlitepp/impl/row_iterator.hpp
+    inc/thinsqlitepp/impl/snapshot_iface.hpp
     inc/thinsqlitepp/impl/statement_iface.hpp
     inc/thinsqlitepp/impl/statement_impl.hpp
     inc/thinsqlitepp/impl/span.hpp
     inc/thinsqlitepp/impl/string_param.hpp
     inc/thinsqlitepp/impl/value_iface.hpp
+    inc/thinsqlitepp/impl/version_iface.hpp
     inc/thinsqlitepp/impl/vtab_iface.hpp
     inc/thinsqlitepp/impl/vtab_impl.hpp
 )

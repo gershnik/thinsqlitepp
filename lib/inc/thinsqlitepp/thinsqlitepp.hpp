@@ -9,13 +9,17 @@
 #ifndef HEADER_SQLITEPP_SQLITEPP_INCLUDED
 #define HEADER_SQLITEPP_SQLITEPP_INCLUDED
 
+#include <thinsqlitepp/backup.hpp>
+#include <thinsqlitepp/blob.hpp>
 #include <thinsqlitepp/context.hpp>
 #include <thinsqlitepp/database.hpp>
 #include <thinsqlitepp/exception.hpp>
 #include <thinsqlitepp/global.hpp>
 #include <thinsqlitepp/mutex.hpp>
+#include <thinsqlitepp/snapshot.hpp>
 #include <thinsqlitepp/statement.hpp>
 #include <thinsqlitepp/value.hpp>
+#include <thinsqlitepp/version.hpp>
 #include <thinsqlitepp/vtab.hpp>
 
 #endif 
