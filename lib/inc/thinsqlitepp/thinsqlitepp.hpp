@@ -19,6 +19,7 @@
 #include <thinsqlitepp/snapshot.hpp>
 #include <thinsqlitepp/statement.hpp>
 #include <thinsqlitepp/value.hpp>
+#include <thinsqlitepp/version.hpp>
 #include <thinsqlitepp/vtab.hpp>
 
 #endif 

@@ -52,6 +52,7 @@ set(PUBLIC_HEADERS
     inc/thinsqlitepp/snapshot.hpp
     inc/thinsqlitepp/statement.hpp
     inc/thinsqlitepp/value.hpp
+    inc/thinsqlitepp/version.hpp
     inc/thinsqlitepp/vtab.hpp
     inc/thinsqlitepp/thinsqlitepp.hpp
 )
@@ -78,6 +79,7 @@ set(IMPL_HEADERS
     inc/thinsqlitepp/impl/span.hpp
     inc/thinsqlitepp/impl/string_param.hpp
     inc/thinsqlitepp/impl/value_iface.hpp
+    inc/thinsqlitepp/impl/version_iface.hpp
     inc/thinsqlitepp/impl/vtab_iface.hpp
     inc/thinsqlitepp/impl/vtab_impl.hpp
 )

@@ -66,6 +66,7 @@ function(configure_test_target target)
         test_statement.cpp
         test_general.cpp
         test_context.cpp
+        test_version.cpp
         test_vtab.cpp
     )
     

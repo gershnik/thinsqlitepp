@@ -189,8 +189,8 @@ status page of what is or isn't available in this library.
 | ::sqlite3_keyword_count           | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_keyword_name            | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_last_insert_rowid       | @refmylib{database::last_insert_rowid}
-| ::sqlite3_libversion              | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_libversion_number       | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_libversion              | @refmylib{sqlite_version::runtime_str}
+| ::sqlite3_libversion_number       | @refmylib{sqlite_version::runtime}
 | ::sqlite3_limit                   | @refmylib{database::limit}
 | ::sqlite3_load_extension          | @refmylib{database::load_extension}
 | ::sqlite3_log                     | <span style="color:orange"> **not implemented** </span>
@@ -288,7 +288,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_snapshot_recover        | @refmylib{database::recover_snapshot}
 | ::sqlite3_snprintf                | **out of scope**
 | ::sqlite3_soft_heap_limit64       | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_sourceid                | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_sourceid                | @refmylib{sqlite_version::runtime_sourceid}
 | ::sqlite3_sql                     | @refmylib{statement::sql}
 | ::sqlite3_status                  | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_status64                | <span style="color:orange"> **not implemented** </span>
@@ -356,7 +356,6 @@ status page of what is or isn't available in this library.
 | ::sqlite3_value_text16be          | **out of scope**
 | ::sqlite3_value_text16le          | **out of scope**
 | ::sqlite3_value_type              | @refmylib{value::type}
-| ::sqlite3_version                 | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_vfs_find                | **out of scope**
 | ::sqlite3_vfs_register            | **out of scope**
 | ::sqlite3_vfs_unregister          | **out of scope**
