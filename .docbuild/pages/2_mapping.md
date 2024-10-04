@@ -370,10 +370,10 @@ status page of what is or isn't available in this library.
 | ::sqlite3_vtab_nochange           | @refmylib{context::vtab_nochange}
 | ::sqlite3_vtab_on_conflict        | @refmylib{database::vtab_on_conflict}
 | ::sqlite3_vtab_rhs_value          | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_wal_autocheckpoint      | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_wal_checkpoint          | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_wal_checkpoint_v2       | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_wal_hook                | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_wal_autocheckpoint      | @refmylib{database::autocheckpoint}
+| ::sqlite3_wal_checkpoint          | @refmylib{database::checkpoint}
+| ::sqlite3_wal_checkpoint_v2       | @refmylib{database::checkpoint}
+| ::sqlite3_wal_hook                | @refmylib{database::wal_hook}
 | ::sqlite3_win32_set_directory     | **out of scope**
 | ::sqlite3_win32_set_directory16   | **out of scope**
 | ::sqlite3_win32_set_directory8    | **out of scope**

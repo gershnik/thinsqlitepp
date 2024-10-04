@@ -366,6 +366,43 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "preupdate hook") {
 
 #endif
 
+TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "wal hook") {
+    auto db = database::open("walfoo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    db->exec("PRAGMA journal_mode=WAL");
+    db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(name TEXT PRIMARY key)");
+
+    database * called_db = nullptr;
+    auto hook = [&] (database * db1, const char * /*db_name*/, int /*num_pages*/) noexcept -> void {
+        
+        called_db = db1;
+        auto [nlog, nckpt] = db1->checkpoint(nullptr);
+        CHECK(nlog != -1);
+        CHECK(nckpt != -1);
+    };
+    set_mock_sqlite3_wal_hook([&] (sqlite3 *dbx, int(*handler)(void*,sqlite3 *,const char *,int), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(data == &hook);
+        return real_sqlite3_wal_hook(dbx, handler, data);
+    });
+    db->wal_hook(&hook);
+    db->exec("INSERT INTO foo VALUES('haha')");
+    CHECK(called_db == db.get());
+    set_mock_sqlite3_wal_hook([&] (sqlite3 *dbx, int(*handler)(void*,sqlite3 *,const char *,int), void *data) {
+        
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(handler == nullptr);
+        REQUIRE(data == nullptr);
+        return real_sqlite3_wal_hook(dbx, handler, data);
+    });
+    db->wal_hook(nullptr);
+
+    db->autocheckpoint(1);
+    called_db = nullptr;
+    db->exec("INSERT INTO foo VALUES('hoho')");
+    CHECK(called_db == nullptr);
+}
+
 TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "create collation") {
     
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);

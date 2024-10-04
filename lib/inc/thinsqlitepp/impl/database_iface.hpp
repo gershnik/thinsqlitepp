@@ -70,6 +70,10 @@ namespace thinsqlitepp
         static constexpr bool is_pointer_to_callback =  std::is_null_pointer_v<T> ||
             (std::is_pointer_v<T> && std::is_nothrow_invocable_r_v<R, std::remove_pointer_t<T>, ArgTypes...>);
 
+        template<class R, class T, class... ArgTypes>
+        static constexpr bool is_pointer_to_throwing_callback =  std::is_null_pointer_v<T> ||
+            (std::is_pointer_v<T> && std::is_invocable_r_v<R, std::remove_pointer_t<T>, ArgTypes...>);
+
         template<class T>
         static constexpr bool is_pointer_to_function = std::is_null_pointer_v<T> ||
             (std::is_pointer_v<T> &&
@@ -165,6 +169,92 @@ namespace thinsqlitepp
             return sqlite3_changes(c_ptr()); 
         #endif
         }
+
+        //MARK: - exec
+
+        /** @{
+         * @anchor database_exec
+         * @name Executing queries
+         */
+
+        /**
+         * Run multiple statements of SQL
+         * 
+         * Unlike other functions in this library this one **DOES NOT** delegate to
+         * ::sqlite3_exec but instead implements equivalent functionality directly.
+         * 
+         * It runs zero or more UTF-8 encoded, semicolon-separate SQL statements passed
+         * as the `sql` argument. If an error occurs while evaluating the SQL statements
+         * then execution of the current statement stops and subsequent statements are skipped.
+         * 
+         * As usual the error will be reported via an @ref exception
+         * 
+         * @param sql Statements to execute
+         */
+        void exec(std::string_view sql);
+
+    #if __cpp_char8_t >= 201811
+        /// @overload
+        template<class T>
+        T exec(std::u8string_view sql)
+            {  return exec(std::string_view((const char *)sql.data(), sql.size())); }
+    #endif
+        
+        /**
+         * Run multiple statements of SQL with a callback
+         * 
+         * Unlike other functions in this library this one **DOES NOT** delegate to
+         * ::sqlite3_exec but instead implements equivalent functionality directly.
+         * 
+         * It runs zero or more UTF-8 encoded, semicolon-separate SQL statements passed
+         * as the `sql` argument. The `callback` callable is passed by value and
+         * is invoked for each result row coming out of the evaluated SQL statements. 
+         * The callable can have one of the 4 possible variants:
+         * ```cpp
+         * 1. bool callback(int statement_idx, row current_row)
+         * 2. void callback(int statement_idx, row current_row)
+         * 3. bool callback(row current_row)
+         * 4. void callback(row current_row)
+         * ```
+         * 
+         * If more than one way of calling the callback is possible the way it will
+         * be invoked is chosen in the order given above.
+         * 
+         * For variants 1 and 3 if an invocation of callback returns `false` then 
+         * the execution of the current statement stops and subsequent statements are skipped.
+         * 
+         * For variants 1 and 2 the `statement_idx` is the index of the SQL statement 
+         * being executed. If you only pass a single statement to `exec()` you 
+         * generally don't need these variants.
+         * 
+         * The @p callback argument is returned back from the function which allows it to 
+         * accumulate state.
+         * 
+         * If an error occurs while evaluating the SQL statements
+         * then execution of the current statement stops and subsequent statements are skipped.
+         * 
+         * As usual the error will be reported via an @ref exception
+         * 
+         * @param sql Statements to execute
+         * @param callback Callback to execute for each row of the results
+         * @returns the `callback` argument
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF((
+            std::is_invocable_r_v<bool, T, int, row> ||
+            std::is_invocable_r_v<void, T, int, row> ||
+            std::is_invocable_r_v<bool, T, row> ||
+            std::is_invocable_r_v<void, T, row>),
+        T) exec(std::string_view sql, T callback);
+
+    #if __cpp_char8_t >= 201811
+        /// @overload
+        template<class T>
+        T exec(std::u8string_view sql, T callback)
+            {  return exec(std::string_view((const char *)sql.data(), sql.size()), callback); }
+    #endif
+
+        /// @}
 
         /** @{
          * @anchor database_callbacks
@@ -399,6 +489,39 @@ namespace thinsqlitepp
 
     #endif
 
+        /**
+         * Register a callback to be called each time data is committed to a database in wal mode.
+         * 
+         * Equivalent to ::sqlite3_wal_hook
+         * 
+         * @param handler A callback function that matches the type of @p data_ptr argument. Can be
+         *  nullptr.
+         * @param data_ptr A pointer to callback data or nullptr.
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
+        void) wal_hook(int (* handler)(type_identity_t<T> data_ptr, database * db, const char * db_name, int num_pages) noexcept, 
+                       T data_ptr) noexcept
+            { sqlite3_wal_hook(this->c_ptr(), (int(*)(void *,sqlite3*,const char*,int))(handler), data_ptr); }
+
+
+        /**
+         * Register a callback to be called each time data is committed to a database in wal mode.
+         * 
+         * Equivalent to ::sqlite3_wal_hook
+         * 
+         * @param handler_ptr A **pointer** to any C++ callable that can be invoked as
+         * ```
+         * (*handler_ptr)(const char * db_name, int num_pages);
+         * ```
+         * This invocation can throw exceptions. 
+         * This parameter can also be nullptr to reset the handler.
+         * The handler object must exist as long as it is set.
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_throwing_callback<void, T, database *, const char *, int>),
+        void) wal_hook(T handler_ptr) noexcept;
+
         /// @}
 
         //MARK: -
@@ -487,6 +610,36 @@ namespace thinsqlitepp
         
 
         /** @} */
+
+        //MARK: -
+
+        /** @{
+         * @name WAL checkpoint control
+         */
+
+        /**
+         * Checkpoint a database
+         * 
+         * Equivalent to ::sqlite3_wal_checkpoint_v2
+         * 
+         * @param db_name Name of attached database (or nullptr)
+         * @param mode One of SQLITE_CHECKPOINT_ values
+         * @returns A pair of {Size of WAL log in frames, Total number of frames checkpointed} or {-1, -1}
+         * if the database is not in WAL mode
+         */
+        std::pair<int, int> checkpoint(const string_param & db_name, int mode = SQLITE_CHECKPOINT_PASSIVE);
+
+        /**
+         * Configure an auto-checkpoint
+         * 
+         * Equivalent to ::sqlite3_wal_autocheckpoint
+         */
+        void autocheckpoint(int num_frames)
+            { check_error(sqlite3_wal_autocheckpoint(c_ptr(), num_frames)); }
+
+        /* @} */
+
+
         
         //MARK: - create_collation
 
@@ -872,93 +1025,6 @@ namespace thinsqlitepp
         void extended_result_codes(bool onoff)
             { check_error(sqlite3_extended_result_codes(c_ptr(), onoff)); }
         
-        //MARK: - exec
-
-        /** @{
-         * @anchor database_exec
-         * @name Executing queries
-         */
-
-        /**
-         * Run multiple statements of SQL
-         * 
-         * Unlike other functions in this library this one **DOES NOT** delegate to
-         * ::sqlite3_exec but instead implements equivalent functionality directly.
-         * 
-         * It runs zero or more UTF-8 encoded, semicolon-separate SQL statements passed
-         * as the `sql` argument. If an error occurs while evaluating the SQL statements
-         * then execution of the current statement stops and subsequent statements are skipped.
-         * 
-         * As usual the error will be reported via an @ref exception
-         * 
-         * @param sql Statements to execute
-         */
-        void exec(std::string_view sql);
-
-    #if __cpp_char8_t >= 201811
-        /// @overload
-        template<class T>
-        T exec(std::u8string_view sql)
-            {  return exec(std::string_view((const char *)sql.data(), sql.size())); }
-    #endif
-        
-        /**
-         * Run multiple statements of SQL with a callback
-         * 
-         * Unlike other functions in this library this one **DOES NOT** delegate to
-         * ::sqlite3_exec but instead implements equivalent functionality directly.
-         * 
-         * It runs zero or more UTF-8 encoded, semicolon-separate SQL statements passed
-         * as the `sql` argument. The `callback` callable is passed by value and
-         * is invoked for each result row coming out of the evaluated SQL statements. 
-         * The callable can have one of the 4 possible variants:
-         * ```cpp
-         * 1. bool callback(int statement_idx, row current_row)
-         * 2. void callback(int statement_idx, row current_row)
-         * 3. bool callback(row current_row)
-         * 4. void callback(row current_row)
-         * ```
-         * 
-         * If more than one way of calling the callback is possible the way it will
-         * be invoked is chosen in the order given above.
-         * 
-         * For variants 1 and 3 if an invocation of callback returns `false` then 
-         * the execution of the current statement stops and subsequent statements are skipped.
-         * 
-         * For variants 1 and 2 the `statement_idx` is the index of the SQL statement 
-         * being executed. If you only pass a single statement to `exec()` you 
-         * generally don't need these variants.
-         * 
-         * The @p callback argument is returned back from the function which allows it to 
-         * accumulate state.
-         * 
-         * If an error occurs while evaluating the SQL statements
-         * then execution of the current statement stops and subsequent statements are skipped.
-         * 
-         * As usual the error will be reported via an @ref exception
-         * 
-         * @param sql Statements to execute
-         * @param callback Callback to execute for each row of the results
-         * @returns the `callback` argument
-         */
-        template<class T>
-        SQLITEPP_ENABLE_IF((
-            std::is_invocable_r_v<bool, T, int, row> ||
-            std::is_invocable_r_v<void, T, int, row> ||
-            std::is_invocable_r_v<bool, T, row> ||
-            std::is_invocable_r_v<void, T, row>),
-        T) exec(std::string_view sql, T callback);
-
-    #if __cpp_char8_t >= 201811
-        /// @overload
-        template<class T>
-        T exec(std::u8string_view sql, T callback)
-            {  return exec(std::string_view((const char *)sql.data(), sql.size()), callback); }
-    #endif
-
-        /// @}
-        
-        //MARK: -
         
         /**
          * Low-level control of database file

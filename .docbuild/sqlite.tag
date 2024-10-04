@@ -32,6 +32,7 @@
   <compound kind="struct"><name>sqlite3_vtab_cursor</name><filename>c3ref/vtab_cursor.html</filename></compound>
 
   <!-- Macro Groups -->
+  <compound kind="enum"><name>SQLITE_CHECKPOINT_</name><filename>c3ref/c_checkpoint_full.html</filename></compound>
   <compound kind="enum"><name>SQLITE_CONFIG_</name><filename>c3ref/c_config_covering_index_scan.html</filename></compound>
   <compound kind="enum"><name>SQLITE_DBCONFIG_</name><filename>c3ref/c_dbconfig_defensive.html</filename></compound>
   <compound kind="enum"><name>SQLITE_INDEX_SCAN_</name><filename>c3ref/c_index_scan_unique.html</filename></compound>
