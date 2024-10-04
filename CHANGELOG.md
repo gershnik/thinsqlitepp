@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.4] - 2024-10-04
+
 ### Added
 - `blob` type to wrap `sqlite3_blob` and related methods
 - `backup` type to wrap `sqlite3_backup` and related methods
@@ -81,3 +83,4 @@ to compile this library is no longer needed.
 [1.1]: https://github.com/gershnik/thinsqlitepp/releases/v1.1
 [1.2]: https://github.com/gershnik/thinsqlitepp/releases/v1.2
 [1.3]: https://github.com/gershnik/thinsqlitepp/releases/v1.3
+[1.4]: https://github.com/gershnik/thinsqlitepp/releases/v1.4
