@@ -136,6 +136,7 @@ ThinSQLite++ includes interfaces that can be used to extend SQLite functionality
 
 * @refmylib{database::create_collation}
 * @ref database_create_function "database::create_function"
+* @refmylib{database::create_module}
 
 The @refmylib{database::create_collation} methods is used to create new collating sequences for sorting text.
 
@@ -144,6 +145,10 @@ The @refmylib{database::create_function} methods create new SQL functions - eith
 * @refmylib{context::aggregate_context}
 * @refmylib{context::result}
 * @refmylib{context::user_data}
+
+The @refmylib{database::create_module} can be used to create Virtual Table interfaces. More information can be found in @ref vtab-guide.
+
+Shared libraries or DLLs can be used as @ref extension "loadable extensions" to SQLite.
 
 ## Other Interfaces
 

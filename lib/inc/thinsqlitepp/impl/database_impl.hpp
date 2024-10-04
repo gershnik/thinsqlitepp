@@ -191,6 +191,37 @@ namespace thinsqlitepp
 #endif
 
     template<class T>
+    SQLITEPP_ENABLE_IF((database_detector::is_pointer_to_throwing_callback<void, T, database *, const char *, int>),
+    void) database::wal_hook(T handler_ptr) noexcept
+    {
+        if constexpr (!std::is_null_pointer_v<T>)
+        {
+            if (handler_ptr)
+                this->wal_hook([] (T data, database * db, const char * db_name, int num_pages) noexcept -> int { 
+                    try 
+                    {
+                        (*data)(db, db_name, num_pages);
+                        return SQLITE_OK;
+                    }
+                    catch(exception & ex) 
+                    {
+                        return ex.extended_error_code();
+                    }
+                    catch(std::exception &)
+                    {
+                        return SQLITE_ERROR;
+                    }
+                }, handler_ptr);
+            else
+                this->wal_hook(nullptr, nullptr);
+        }
+        else
+        {
+            this->wal_hook(nullptr, nullptr);
+        }
+    }
+
+    template<class T>
     SQLITEPP_ENABLE_IF(std::is_pointer_v<T> || std::is_null_pointer_v<T>,
     void) database::create_collation(const string_param & name, int encoding,
                                      T collator,
@@ -481,6 +512,13 @@ namespace thinsqlitepp
         return value::from(ptr);
     }
 #endif
+
+    inline std::pair<int, int> database::checkpoint(const string_param & db_name, int mode)
+    {
+        std::pair<int, int> ret;
+        check_error(sqlite3_wal_checkpoint_v2(c_ptr(), db_name.c_str(), mode, &ret.first, &ret.second));
+        return ret;
+    }
 }
 
 #ifdef __GNUC__

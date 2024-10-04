@@ -33,7 +33,7 @@ TEST_CASE( "snapshot type properties") {
 
 TEST_CASE( "basics" ) {
 
-    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+    auto db = database::open("walfoo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
     db->exec("PRAGMA journal_mode=WAL");
     db->exec("BEGIN");
     db->exec("DROP TABLE IF EXISTS foo; CREATE TABLE foo(value TEXT)  ");

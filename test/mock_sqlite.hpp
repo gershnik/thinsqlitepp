@@ -80,6 +80,10 @@ MAKE_MOCK(sqlite3_preupdate_hook, (sqlite3 *db,
 #define sqlite3_preupdate_hook mock_sqlite3_preupdate_hook
 #endif
 
+MAKE_MOCK(sqlite3_wal_hook, (sqlite3 *db,
+                             int(*handler)(void *,sqlite3 *,char const *,int),
+                             void * data), (db, handler, data));
+
 MAKE_MOCK(sqlite3_create_collation_v2, (sqlite3 *db, const char * name, int flags,
                                         void * arg,
                                         int(*compare)(void*,int,const void*,int,const void*),
