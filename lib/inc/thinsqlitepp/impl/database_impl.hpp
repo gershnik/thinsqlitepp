@@ -207,7 +207,7 @@ namespace thinsqlitepp
                     {
                         return ex.extended_error_code();
                     }
-                    catch(std::exception & ex)
+                    catch(std::exception &)
                     {
                         return SQLITE_ERROR;
                     }
