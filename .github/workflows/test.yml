@@ -29,10 +29,10 @@ jobs:
         - {os: ubuntu-latest, compiler: gcc, version: 12 }
         - {os: ubuntu-latest, compiler: gcc, version: 13 }
         - {os: ubuntu-24.04, compiler: gcc, version: 14 }
-        - {os: ubuntu-latest, compiler: clang, version: 13 }
-        - {os: ubuntu-latest, compiler: clang, version: 14 }
-        - {os: ubuntu-latest, compiler: clang, version: 15 }
-        - {os: ubuntu-latest, compiler: clang, version: 16 }
+        - {os: ubuntu-22.04, compiler: clang, version: 13 }
+        - {os: ubuntu-22.04, compiler: clang, version: 14 }
+        - {os: ubuntu-22.04, compiler: clang, version: 15 }
+        - {os: ubuntu-22.04, compiler: clang, version: 16 }
         - {os: ubuntu-latest, compiler: clang, version: 17 }
         - {os: ubuntu-latest, compiler: clang, version: 18 }
 
