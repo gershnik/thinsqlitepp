@@ -95,12 +95,12 @@ try {
 
     for (auto r: row_range(st)) {
         auto name = r[0].value<std::string_view>();
-        auto age = r[0].value<int>();
+        auto age = r[1].value<int>();
     }
 
     db->exec("SELECT name, age FROM mytable", [](int statement_idx, row r) noexcept {
         auto name = r[0].value<std::string_view>();
-        auto age = r[0].value<int>();
+        auto age = r[1].value<int>();
         return true;
     });
 
