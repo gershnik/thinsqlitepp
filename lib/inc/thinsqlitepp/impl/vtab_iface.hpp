@@ -18,6 +18,7 @@
 
 #include <type_traits>
 #include <string.h>
+#include <cstdint>
 
 namespace thinsqlitepp {
 
