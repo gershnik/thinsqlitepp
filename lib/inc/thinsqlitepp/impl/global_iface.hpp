@@ -11,6 +11,8 @@
 
 #include "exception_iface.hpp"
 
+#include <cstdint>
+
 /**
  * ThinSQLite++ namespace
  */

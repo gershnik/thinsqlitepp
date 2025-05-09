@@ -17,7 +17,7 @@ on:
 
 
 jobs:
-  build:
+  host:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -25,16 +25,20 @@ jobs:
         include:
         - os: macos-latest
         - os: windows-latest
+
         - {os: ubuntu-latest, compiler: gcc, version: 11 }
         - {os: ubuntu-latest, compiler: gcc, version: 12 }
         - {os: ubuntu-latest, compiler: gcc, version: 13 }
         - {os: ubuntu-24.04, compiler: gcc, version: 14 }
+
         - {os: ubuntu-22.04, compiler: clang, version: 13 }
         - {os: ubuntu-22.04, compiler: clang, version: 14 }
         - {os: ubuntu-22.04, compiler: clang, version: 15 }
         - {os: ubuntu-22.04, compiler: clang, version: 16 }
         - {os: ubuntu-latest, compiler: clang, version: 17 }
         - {os: ubuntu-latest, compiler: clang, version: 18 }
+        - {os: ubuntu-latest, compiler: clang, version: 19 }
+        - {os: ubuntu-latest, compiler: clang, version: 20 }
 
     steps:
     - uses: actions/checkout@v4
@@ -70,23 +74,59 @@ jobs:
       shell: bash
       run: cmake --build build --config Release --target run-test
 
+  container:
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      fail-fast: false
+      matrix: 
+        container: [gcc:15.1]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install pre-requisites
+      run: |
+        apt-get update
+        apt-get install -y ninja-build cmake
+
+    - name: Configure
+      shell: bash
+      run: |
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
+  
+    - name: Build and Test
+      shell: bash
+      run: cmake --build build --config Release --target run-test
+
   emscripten:
     runs-on: ubuntu-latest
+    container: emscripten/emsdk:3.1.26
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup EMSDK
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          version: 3.1.26
-          actions-cache-folder: 'emsdk-cache'
+      - name: Install pre-requisites
+        run: |
+          apt-get update
+          apt-get install -y ninja-build
+  
+          export CMAKE_VERSION=3.24.4
+          wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-Linux-x86_64.sh \
+            -q -O /tmp/cmake-install.sh
+          chmod u+x /tmp/cmake-install.sh
+          /tmp/cmake-install.sh --skip-license --prefix=/usr
+          rm -f /tmp/cmake-install.sh
 
-      - name: Build and Test
+      - name: Configure
+        shell: bash
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
-          cmake --build build --config Release --target run-test
+
+      - name: Build and Test
+        run: cmake --build build --config Release --target run-test
 
 
