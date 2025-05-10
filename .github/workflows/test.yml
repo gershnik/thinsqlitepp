@@ -17,28 +17,102 @@ on:
 
 
 jobs:
+  define-matrix:
+    runs-on: ubuntu-latest
+
+    outputs:
+      hosts: ${{ steps.matrix.outputs.hosts }}
+      containers: ${{ steps.matrix.outputs.containers }}
+      emscriptens: ${{ steps.matrix.outputs.emscriptens }}
+
+    steps:
+      - name: Define Hosts
+        id: matrix
+        shell: python
+        run: |
+          import json
+          import os
+
+          cxx_standards = [17, 20, 23]
+          gcc_map = {
+            11: 'ubuntu-latest', 
+            12: 'ubuntu-latest', 
+            13: 'ubuntu-latest',
+            14: 'ubuntu-24.04'
+          }
+          gcc_cont_map = {
+            15: 'gcc:15.1'
+          }
+          clang_map = {
+            13: 'ubuntu-22.04', 
+            14: 'ubuntu-22.04', 
+            15: 'ubuntu-22.04', 
+            16: 'ubuntu-22.04',
+            17: 'ubuntu-latest', 
+            18: 'ubuntu-latest', 
+            19: 'ubuntu-latest', 
+            20: 'ubuntu-latest'
+          }
+          emscripten_versions = [
+            '3.1.26'
+          ]
+
+          hosts = []
+          containers=[]
+          emscriptens=[]
+
+          #macOS
+          for cxx_standard in cxx_standards:
+            hosts.append({'os': 'macos-latest', 'cxx_standard': cxx_standard, 'jobname': f'macOS - C++{cxx_standard}'})
+          
+          #windows
+          for cxx_standard in cxx_standards:
+            hosts.append({'os': 'windows-latest', 'cxx_standard': cxx_standard, 'jobname': f'Windows - C++{cxx_standard}'})
+          
+          #gcc hosts
+          for gcc, runon in gcc_map.items():
+            for cxx_standard in cxx_standards:
+              if gcc < 13 and cxx_standard == 23:
+                continue
+              hosts.append({'os': runon, 'compiler': 'gcc', 'version': gcc, 'cxx_standard': cxx_standard,
+                            'jobname': f'Linux - GCC{gcc} - C++{cxx_standard}'})
+
+          #gcc containers
+          for gcc, container in gcc_cont_map.items():
+            for cxx_standard in cxx_standards:
+              if gcc < 13 and cxx_standard == 23:
+                continue
+              containers.append({'container': container, 'cxx_standard': cxx_standard,
+                                 'jobname': f'Linux - GCC{gcc} - C++{cxx_standard}'})
+
+
+          #clang
+          for clang, runon in clang_map.items():
+            for cxx_standard in cxx_standards:
+              if clang < 18 and cxx_standard == 23:
+                  continue
+              hosts.append({'os': runon, 'compiler': 'clang', 'version': clang, 'cxx_standard': cxx_standard,
+                            'jobname': f'Linux - Clang{clang} - C++{cxx_standard}'})
+
+          #emscripten
+          for emscripten in emscripten_versions:
+            for cxx_standard in cxx_standards:
+              emscriptens.append({'version': emscripten, 'cxx_standard': cxx_standard,
+                                  'jobname': f'Emscripten - {emscripten} - C++{cxx_standard}'})
+
+          with open(os.environ['GITHUB_OUTPUT'], 'w') as env:
+            print('hosts=' + json.dumps(hosts), file=env) 
+            print('containers=' + json.dumps(containers), file=env) 
+            print('emscriptens=' + json.dumps(emscriptens), file=env) 
+
   host:
+    needs: define-matrix
+    name: ${{ matrix.jobname }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-        - os: macos-latest
-        - os: windows-latest
-
-        - {os: ubuntu-latest, compiler: gcc, version: 11 }
-        - {os: ubuntu-latest, compiler: gcc, version: 12 }
-        - {os: ubuntu-latest, compiler: gcc, version: 13 }
-        - {os: ubuntu-24.04, compiler: gcc, version: 14 }
-
-        - {os: ubuntu-22.04, compiler: clang, version: 13 }
-        - {os: ubuntu-22.04, compiler: clang, version: 14 }
-        - {os: ubuntu-22.04, compiler: clang, version: 15 }
-        - {os: ubuntu-22.04, compiler: clang, version: 16 }
-        - {os: ubuntu-latest, compiler: clang, version: 17 }
-        - {os: ubuntu-latest, compiler: clang, version: 18 }
-        - {os: ubuntu-latest, compiler: clang, version: 19 }
-        - {os: ubuntu-latest, compiler: clang, version: 20 }
+        include: ${{ fromJSON(needs.define-matrix.outputs.hosts) }}
 
     steps:
     - uses: actions/checkout@v4
@@ -72,16 +146,18 @@ jobs:
 
     - name: Build and Test
       shell: bash
-      run: cmake --build build --config Release --target run-test
+      run: cmake --build build --config Release --target run-test-${{matrix.cxx_standard}}
 
   container:
+    needs: define-matrix
+    name: ${{ matrix.jobname }}
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     strategy:
       fail-fast: false
       matrix: 
-        container: [gcc:15.1]
-
+        include: ${{ fromJSON(needs.define-matrix.outputs.containers) }}
+        
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -98,11 +174,17 @@ jobs:
   
     - name: Build and Test
       shell: bash
-      run: cmake --build build --config Release --target run-test
+      run: cmake --build build --config Release --target run-test-${{matrix.cxx_standard}}
 
   emscripten:
+    needs: define-matrix
+    name: ${{ matrix.jobname }}
     runs-on: ubuntu-latest
-    container: emscripten/emsdk:3.1.26
+    container: emscripten/emsdk:${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix: 
+        include: ${{ fromJSON(needs.define-matrix.outputs.emscriptens) }}
 
     steps:
       - name: Checkout
@@ -127,6 +209,6 @@ jobs:
             -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 
       - name: Build and Test
-        run: cmake --build build --config Release --target run-test
+        run: cmake --build build --config Release --target run-test-${{matrix.cxx_standard}}
 
 

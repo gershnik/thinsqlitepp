@@ -8,6 +8,13 @@ FetchContent_Declare(doctest
 
 FetchContent_MakeAvailable(doctest)
 
+find_package(SQLite3)
+if (SQLite3_FOUND)
+    message("Found native sqlite3 ${SQLite3_VERSION}, configuring native tests")
+else()
+    message("Native sqlite3 not found, skipping native tests")
+endif()
+
 set (SQLITE_VERSIONS
     3.7.15.2
     3.34.0
@@ -18,6 +25,7 @@ set (SQLITE_VERSIONS
 set (CXX_STANDARDS
     17
     20
+    23
 )
 
 function(configure_test_target target)
@@ -73,10 +81,10 @@ function(configure_test_target target)
 
 endfunction()
 
-set(TEST_COMMAND "")
+set(TEST_TARGETS "")
 
 foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
-    add_library(sqlite3-${SQLITE_VERSION} STATIC)
+    add_library(sqlite3-${SQLITE_VERSION} STATIC EXCLUDE_FROM_ALL)
 
     set_target_properties(sqlite3-${SQLITE_VERSION} PROPERTIES
         CXX_VISIBILITY_PRESET hidden
@@ -105,10 +113,15 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
     target_sources(sqlite3-${SQLITE_VERSION} PRIVATE
         sqlite/${SQLITE_VERSION}/sqlite3.c
     )
+endforeach()
 
-    foreach(CXX_STANDARD ${CXX_STANDARDS})
 
-        add_executable(test-${CXX_STANDARD}-${SQLITE_VERSION})
+foreach(CXX_STANDARD ${CXX_STANDARDS})
+    set(TEST_COMMAND "")
+
+    foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
+
+        add_executable(test-${CXX_STANDARD}-${SQLITE_VERSION} EXCLUDE_FROM_ALL)
 
         configure_test_target(test-${CXX_STANDARD}-${SQLITE_VERSION})
 
@@ -135,21 +148,15 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
         list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite-${SQLITE_VERSION})
         list(APPEND TEST_COMMAND COMMAND)
         if (DEFINED EMSCRIPTEN)
-            list(APPEND TEST_COMMAND node --trace-uncaught $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}>)
+            list(APPEND TEST_COMMAND node --trace-uncaught $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}> -ni)
         else()
-            list(APPEND TEST_COMMAND $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}>)
+            list(APPEND TEST_COMMAND $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}> -ni -fc)
         endif()
-    
+
     endforeach()
-endforeach()
 
-find_package(SQLite3)
-if (SQLite3_FOUND)
-    message("Found native sqlite3 ${SQLite3_VERSION}, configuring native tests")
-
-    foreach(CXX_STANDARD ${CXX_STANDARDS})
-
-        add_executable(test-${CXX_STANDARD}-native)
+    if (SQLite3_FOUND)
+        add_executable(test-${CXX_STANDARD}-native EXCLUDE_FROM_ALL)
 
         configure_test_target(test-${CXX_STANDARD}-native)
 
@@ -172,13 +179,17 @@ if (SQLite3_FOUND)
 
         list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite: native)
         list(APPEND TEST_COMMAND COMMAND)
-        list(APPEND TEST_COMMAND test-${CXX_STANDARD}-native)
+        list(APPEND TEST_COMMAND $<TARGET_FILE:test-${CXX_STANDARD}-native> -ni -fc)
+    endif()
 
-    endforeach()
-else()
-    message("Native sqlite3 not found, skipping native tests")
-endif()
+    
+    add_custom_target(run-test-${CXX_STANDARD}
+        ${TEST_COMMAND}
+    )
+    list(APPEND TEST_TARGETS run-test-${CXX_STANDARD} )
+endforeach()
+
 
 add_custom_target(run-test 
-    ${TEST_COMMAND}
+    DEPENDS ${TEST_TARGETS}
 )

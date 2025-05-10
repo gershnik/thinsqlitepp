@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 ## Fixed
 - Missing headers on GCC 15
+## Changed
+- Test CMake targets are no longer included in default build
 
 ## [1.5] - 2025-02-12
 
