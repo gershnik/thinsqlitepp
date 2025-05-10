@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.6] - 2025-05-09
+
 ## Added
 - Support for database and global configuration options added in recent versions of SQLite
 ## Fixed
@@ -97,3 +99,4 @@ to compile this library is no longer needed.
 [1.3]: https://github.com/gershnik/thinsqlitepp/releases/v1.3
 [1.4]: https://github.com/gershnik/thinsqlitepp/releases/v1.4
 [1.5]: https://github.com/gershnik/thinsqlitepp/releases/v1.5
+[1.6]: https://github.com/gershnik/thinsqlitepp/releases/v1.6
