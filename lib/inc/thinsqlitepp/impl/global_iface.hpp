@@ -172,6 +172,9 @@ namespace thinsqlitepp
         #ifdef SQLITE_CONFIG_MEMDB_MAXSIZE
         SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_MEMDB_MAXSIZE,        int64_t);
         #endif
+        #ifdef SQLITE_CONFIG_ROWID_IN_VIEW
+        SQLITEPP_DEFINE_OPTION_N( SQLITE_CONFIG_ROWID_IN_VIEW,        int);
+        #endif
 
         //@ [Config Options]
 

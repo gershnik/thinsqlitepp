@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
+
+## Added
+- Support for database and global configuration options added in recent versions of SQLite
 ## Fixed
 - Missing headers on GCC 15
 ## Changed
