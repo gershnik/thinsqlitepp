@@ -11,7 +11,7 @@ jobs:
     permissions: write-all
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get Release Name
         shell: python
@@ -28,7 +28,7 @@ jobs:
         run: tar -czf thinsqlitepp-${{ env.RELEASE_NAME }}.tar.gz --transform s/lib/thinsqlitepp/ lib
 
       - name: Make release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           prerelease: false

@@ -51,7 +51,9 @@ jobs:
             17: 'ubuntu-latest', 
             18: 'ubuntu-latest', 
             19: 'ubuntu-latest', 
-            20: 'ubuntu-latest'
+            20: 'ubuntu-latest',
+            21: 'ubuntu-latest',
+            22: 'ubuntu-latest'
           }
           emscripten_versions = [
             '3.1.26'
@@ -115,7 +117,7 @@ jobs:
         include: ${{ fromJSON(needs.define-matrix.outputs.hosts) }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: System Setup
       shell: bash
@@ -160,7 +162,7 @@ jobs:
         
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Install pre-requisites
       run: |
@@ -188,7 +190,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install pre-requisites
         run: |
