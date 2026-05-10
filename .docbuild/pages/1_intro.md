@@ -1,7 +1,7 @@
 # An Introduction To ThinSQLite++ {#intro}
 
 @note
-This page closely follows [An Introduction To The SQLite C/C++ Interface](https://www.sqlite.org/cintro.html). Since ThinSQLite++ is a thin and exact wrapper of SQLite's C API all the conceptual parts are exactly the same. The difference is in safety and convenience.
+This page closely follows [An Introduction To The SQLite C/C++ Interface](https://www.sqlite.org/cintro.html). Since ThinSQLite++ is a thin and exact wrapper of SQLite's C API, all the conceptual parts are exactly the same. The difference is in safety and convenience.
 
 [TOC]
 
@@ -15,12 +15,12 @@ The following two objects and their methods comprise the essential elements of t
 * @refmylib{statement::create} → Compile SQL text into byte-code that will do the work of querying or updating the database. Creates @refmylib{statement} instances.
 * @ref statement_bind "statement::bind" → Store application data into [parameters](https://www.sqlite.org/lang_expr.html#varparam) of the original SQL.
 * @refmylib{statement::step} → Advance a @refmylib{statement} to the next result row or to completion.
-* @refmylib{statement::column_value} → Column values in the current result row for a @refmylib{statement}
-* @refmylib{row_range} → An STL forward range that wraps @refmylib{statement::step} loop to access statement results in a standard C++ range fashion.
-* @ref database_exec "database::exec" → A set of wrapper functions that does @refmylib{statement::create}, @refmylib{statement::step}, etc. for a string of one or more SQL statements.
-* @refmylib{row} → An STL random-access container of cells. Yielded by @refmylib{row_range} and @ref database_exec "database::exec"
+* @refmylib{statement::column_value} → Column values in the current result row for a @refmylib{statement}.
+* @refmylib{row_range} → An STL forward range that wraps the @refmylib{statement::step} loop to access statement results in a standard C++ range fashion.
+* @ref database_exec "database::exec" → A set of wrapper functions that do @refmylib{statement::create}, @refmylib{statement::step}, etc. for a string of one or more SQL statements.
+* @refmylib{row} → An STL random-access container of cells. Yielded by @refmylib{row_range} and @ref database_exec "database::exec".
 * @refmylib{cell} → A cell contained in a @refmylib{row} that wraps @ref statement_column_info "statement::column_" family of functions for a given column.
-* @refmylib{exception} → An exception thrown on any SQLite errors
+* @refmylib{exception} → An exception thrown on any SQLite errors.
 
 ## Introduction
 
@@ -28,12 +28,13 @@ ThinSQLite++ has many APIs. However, most of the APIs are optional and very spec
 
 ## Core Objects And Interfaces
 
-The principal task of an SQL database engine is to evaluate SQL statements of SQL. To accomplish this, the developer needs two objects:
+The principal task of an SQL database engine is to evaluate SQL statements. To accomplish this, the developer needs two objects:
 
 * The database connection object: @refmylib{database}
 * The prepared statement object: @refmylib{statement}
 
-Strictly speaking, the prepared statement object is not required since the convenience wrapper interface, @ref database_exec "database::exec", can be used and this convenience wrapper encapsulates and hides the prepared statement object. Nevertheless, an understanding of prepared statements is needed to make full use of ThinSQLite++.
+Strictly speaking, the prepared statement object is not required since the convenience wrapper interface, @ref database_exec "database::exec", can be used instead.
+This convenience wrapper encapsulates and hides the prepared statement object. Nevertheless, an understanding of prepared statements is needed to make full use of ThinSQLite++.
 
 The database connection and prepared statement objects are controlled by a small set of interfaces listed below.
 
@@ -56,7 +57,7 @@ Here is a summary of what the core interfaces do:
 
 * @refmylib{statement::step}
   
-  This method is used to evaluate a prepared statement that has been previously created by the @refmylib{statement::create} interface. The statement is evaluated up to the point where the first row of results are available. To advance to the second row of results, invoke @refmylib{statement::step} again. Continue invoking @refmylib{statement::step} until it returns `false` indicating that the statement is complete. Statements that do not return results (ex: INSERT, UPDATE, or DELETE statements) run to completion on a single call to @refmylib{statement::step}.
+  This method is used to evaluate a prepared statement that has been previously created by the @refmylib{statement::create} interface. The statement is evaluated up to the point where the first row of results is available. To advance to the second row of results, invoke @refmylib{statement::step} again. Continue invoking @refmylib{statement::step} until it returns `false`, indicating that the statement is complete. Statements that do not return results (ex: INSERT, UPDATE, or DELETE statements) run to completion on a single call to @refmylib{statement::step}.
 
 * @refmylib{statement::column_value}
   
@@ -71,7 +72,7 @@ Here is a summary of what the core interfaces do:
   * @refmylib{blob_view} (a span of bytes)
 
 
-## Typical Usage Of Core Objects and Methods
+## Typical Usage Of Core Objects And Methods
 
 An application will typically use @refmylib{database::open} to create a single database connection during initialization. Note that @refmylib{database::open} can be used to either open existing database files or to create and open new database files. While many applications use only a single database connection, there is no reason why an application cannot call @refmylib{database::open} multiple times in order to open multiple database connections - either to the same database or to different databases. Sometimes a multi-threaded application will create separate database connections for each thread. Note that a single database connection can access two or more databases using the ATTACH SQL command, so it is not necessary to have a separate database connection for each database file.
 
@@ -80,15 +81,15 @@ To run an SQL statement, the application follows these steps:
 1. Create a prepared statement using @refmylib{statement::create}.
 2. Evaluate the prepared statement by @refmylib{statement::step} one or more times.
 3. For queries, extract results by calling @refmylib{statement::column_value} in between two calls to @refmylib{statement::step}.
-4. Handle (or decide not to) any @refmylib{exception}s thrown while doing the above
+4. Handle (or decide not to) any @refmylib{exception}s thrown while doing the above.
 
 The foregoing is all one really needs to know in order to use SQLite effectively. All the rest is optimization and detail.
 
 ## Convenience Wrappers Around Core Methods
 
-A @refmylib{row_range} is a convenience wrapper that exposes @refmylib{statement::step} loop as STL forward range. It yields @refmylib{row} objects which, in turn, model a random access container of @refmylib{cell}s. Using these wrappers you can handle data extraction as STL iteration, using range-for loops and STL algorithms.
+A @refmylib{row_range} is a convenience wrapper that exposes the @refmylib{statement::step} loop as an STL forward range. It yields @refmylib{row} objects which, in turn, model a random access container of @refmylib{cell}s. Using these wrappers, you can handle data extraction as STL iteration, using range-for loops and STL algorithms.
 
-The @ref database_exec "database::exec" methods are convenience wrappers that parse **multiple** SQL statements and execute @refmylib{statement::create} and @refmylib{statement::step} loop with a single function call. An optional callback function passed into @ref database_exec "database::exec" is used to process each @refmylib{row} of the result set. 
+The @ref database_exec "database::exec" methods are convenience wrappers that parse **multiple** SQL statements and execute @refmylib{statement::create} and the @refmylib{statement::step} loop with a single function call. An optional callback function passed into @ref database_exec "database::exec" is used to process each @refmylib{row} of the result set. 
 
 It is important to realize that neither @refmylib{row_range} nor @ref database_exec "database::exec" do anything that cannot be accomplished using the core methods. In fact, these wrappers are implemented purely in terms of the core routines.
 
@@ -101,7 +102,7 @@ In prior discussion, it was assumed that each SQL statement is prepared once, ev
 
 After a prepared statement has been evaluated by one or more calls to @refmylib{statement::step}, it can be reset in order to be evaluated again by a call to @refmylib{statement::reset}. Think of @refmylib{statement::reset} as rewinding the prepared statement program back to the beginning. Using @refmylib{statement::reset} on an existing prepared statement rather than creating a new prepared statement avoids unnecessary calls to @refmylib{statement::create}. For many SQL statements, the time needed to run @refmylib{statement::create} equals or exceeds the time needed by @refmylib{statement::step}. So avoiding calls to @refmylib{statement::create} can give a significant performance improvement.
 
-As with any "destruction" action ensuring that @refmylib{statement::reset} is called on all code paths before reuse can be tricky and best dealt with RAII. The @refmylib{auto_reset} performs @refmylib{statement::reset} on destruction and can greatly simply managing statement reuse.
+As with any "destruction" action, ensuring that @refmylib{statement::reset} is called on all code paths before reuse can be tricky and best dealt with using RAII. The @refmylib{auto_reset} class performs @refmylib{statement::reset} on destruction and can greatly simplify managing statement reuse.
 
 It is not commonly useful to evaluate the exact same SQL statement more than once. More often, one wants to evaluate similar statements. For example, you might want to evaluate an INSERT statement multiple times with different values. Or you might want to evaluate the same query multiple times using a different key in the WHERE clause. To accommodate this, SQLite allows SQL statements to contain [parameters](https://www.sqlite.org/lang_expr.html#varparam) which are "bound" to values prior to being evaluated. These values can later be changed and the same prepared statement can be evaluated a second time using the new values.
 
@@ -138,19 +139,19 @@ ThinSQLite++ includes interfaces that can be used to extend SQLite functionality
 * @ref database_create_function "database::create_function"
 * @refmylib{database::create_module}
 
-The @refmylib{database::create_collation} methods is used to create new collating sequences for sorting text.
+The @refmylib{database::create_collation} methods are used to create new collating sequences for sorting text.
 
-The @refmylib{database::create_function} methods create new SQL functions - either scalar or aggregate. The new function implementation typically makes use of the @refmylib{context} and  @refmylib{value} objects and the following additional interfaces:
+The @refmylib{database::create_function} methods create new SQL functions - either scalar or aggregate. The new function implementation typically makes use of the @refmylib{context} and @refmylib{value} objects and the following additional interfaces:
 
 * @refmylib{context::aggregate_context}
 * @refmylib{context::result}
 * @refmylib{context::user_data}
 
-The @refmylib{database::create_module} can be used to create Virtual Table interfaces. More information can be found in @ref vtab-guide.
+The @refmylib{database::create_module} method can be used to create Virtual Table interfaces. More information can be found in @ref vtab-guide.
 
 Shared libraries or DLLs can be used as @ref extension "loadable extensions" to SQLite.
 
 ## Other Interfaces
 
-This article only mentions the most important and most commonly used ThinSQLite++ interfaces. The ThinSQLite++ library includes many other APIs implementing useful features that are not described here. Refer to the [list of topics](topics.html), content of the [thinsqlitepp namespace](namespacethinsqlitepp.html) or the [list of classes](annotated.html) for complete and authoritative information about all ThinSQLite++ interfaces.
+This article only mentions the most important and most commonly used ThinSQLite++ interfaces. The ThinSQLite++ library includes many other APIs implementing useful features that are not described here. Refer to the [list of topics](topics.html), the content of the [thinsqlitepp namespace](namespacethinsqlitepp.html) or the [list of classes](annotated.html) for complete and authoritative information about all ThinSQLite++ interfaces.
 

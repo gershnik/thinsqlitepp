@@ -1,9 +1,9 @@
 # Implementing Virtual Tables  {#vtab-guide}
 
 > [!note]
-> If you are not familiar with what SQLite virtual tables are and how they work 
-> the best place to start is [The Virtual Table Mechanism Of SQLite](https://www.sqlite.org/vtab.html)
-> page. 
+> If you are not familiar with what SQLite virtual tables are and how they work, 
+> the best place to start is [The Virtual Table Mechanism Of SQLite](https://www.sqlite.org/vtab.html).
+
 
 [TOC]
 
@@ -12,25 +12,25 @@
 There are two ways you can implement a virtual table using ThinSQLite++:
 - Manually, where you directly implement @ref sqlite3_module calls using ThinSQLite++ for the implementation.
 All the necessary supporting calls such as @refmylib{database::create_module}, @refmylib{database::declare_vtab},
-@refmylib{database::vtab_config}, etc. are provided by the library.
+@refmylib{database::vtab_config}, etc., are provided by the library.
 - Using the provided @refmylib{vtab} base class.
 
-There is nothing much to add about the manual approach. Simply follow [The Virtual Table Mechanism Of SQLite](https://www.sqlite.org/vtab.html)
-page, implement the necessary calls, taking care of properly handling any errors (note that you cannot emit C++ exceptions from SQLite callbacks),
+There is nothing much to add about the manual approach. Simply follow [The Virtual Table Mechanism Of SQLite](https://www.sqlite.org/vtab.html), 
+implement the necessary calls, taking care of properly handling any errors (note that you cannot emit C++ exceptions from SQLite callbacks),
 memory ownership and typing.
 
 This page describes the second approach.
 
 ## Basics
 
-In order to implement a virtual table the bare minimum you need to do is:
+In order to implement a virtual table, the bare minimum you need to do is:
 
-- Create a class derived from @refmylib{vtab} template
+- Create a class derived from the @refmylib{vtab} template
 - Provide one or more required constructors
 - Declare a nested cursor class that derives from @refmylib{vtab::cursor} and
   inherits its constructors
 
-Here is an example of a minimal virtual table class that doesn't do anything
+Here is an example of a minimal virtual table class that doesn't do anything:
 
 ```cpp
 #include <thinsqlitepp/vtab.hpp>
@@ -40,7 +40,7 @@ using namespace thinsqlitepp;
 class my_table : public vtab<my_table> {
 public:
     my_table(database * db, int argc, const char * const * argv) {
-        // tell SQLite what does the virtual table look like in SQL
+        // tell SQLite what the virtual table looks like in SQL
         db->declare_vtab("CREATE TABLE this_name_is_ignored (a_column TEXT)");
     }
 
@@ -65,37 +65,37 @@ db->exec("SELECT a_column FROM my_table_module", [] (int, row r) {
 });
 ```
 
-If you run this code nothing should be printed out since your table doesn't yet provide any data.
+If you run this code, nothing should be printed out since your table doesn't yet provide any data.
 
 ## Constructors
 
 What kind of constructors you give your virtual table class determines what kind of virtual table
-it produces. There are 3 possible constructors@footnote{1}
+it produces. There are 3 possible constructors@footnote{1}:
 
-- **Common** constructor. It has the following form
+- **Common** constructor. It has the following form:
   ```cpp
   my_table::my_table(database * db, [optional construction data pointer,] int argc, const char * const * argv)
   ```
-  If specified this must be the **only** recognized constructor - you cannot also have *create* or *connect* constructors
+  If specified, this must be the **only** recognized constructor - you cannot also have *create* or *connect* constructors
   together with it.
-- **Create** constructor. It has the following form
+- **Create** constructor. It has the following form:
   ```cpp
   my_table::my_table(create_t, database * db, [optional construction data pointer,] int argc, const char * const * argv)
   ```
-  You cannot have it together with *common* constructor. 
-- **Connect** constructor. It has the following form
+  You cannot have it together with the *common* constructor. 
+- **Connect** constructor. It has the following form:
   ```cpp
   my_table::my_table(connect_t, database * db, [optional construction data pointer,] int argc, const char * const * argv)
   ```
-  You must have either this constructor or *common* constructor but not both.
+  You must have either this constructor or the *common* constructor, but not both.
 
 @refmylib{vtab::create_t} and @refmylib{vtab::connect_t} are dummy marker types declared in @refmylib{vtab} that are used
 to differentiate between the create and connect constructors.
 
-The behavior expectations of these constructors is the same as from SQLite @ref xCreate and @ref xConnect functions.
+The behavior expectations of these constructors are the same as from SQLite @ref xCreate and @ref xConnect functions.
 A common constructor implements the same behavior for both.
 
-The type of virtual table you create is determined from the constructors you create as follows
+The type of virtual table you create is determined from the constructors you create as follows:
 
 | Constructors            |  Virtual Table Type | SQLite equivalent
 |-------------------------|---------------------|-------------------
@@ -105,8 +105,8 @@ The type of virtual table you create is determined from the constructors you cre
 
 ### Construction data
 
-Your constructors can accept optional _construction data_ passed from @refmylib{database::create_module}. By default it is disabled.
-In order to enable it you need to declare `constructor_data_type` type in your class as a pointer to whatever data you want to pass.
+Your constructors can accept optional _construction data_ passed from @refmylib{database::create_module}. By default, it is disabled.
+In order to enable it, you need to declare the `constructor_data_type` type in your class as a pointer to whatever data you want to pass.
 For example:
 
 ```cpp
@@ -127,14 +127,14 @@ my_table::create_module(*db, "my_table_module", &data);
 
 ```
 
-This will pass the pointer to `data` from the calling code your constructor. Refer to @refmylib{vtab::create_module}
+This will pass the pointer to `data` from the calling code to your constructor. Refer to @refmylib{vtab::create_module}
 for more details on how to pass data and control its lifetime.
 
 ## Destruction
 
-Normally you can rely on your virtual table class destructor to perform any necessary cleanup. However, if you have 
-a need for custom _create_ and/or _connect_ constructors you might want to differentiate between actions taken when
-the table is destroyed vs. a simple disconnect. To do so you can define one or both of the following functions:
+Normally, you can rely on your virtual table class destructor to perform any necessary cleanup. However, if you have 
+a need for custom _create_ and/or _connect_ constructors, you might want to differentiate between actions taken when
+the table is destroyed vs. a simple disconnect. To do so, you can define one or both of the following functions:
 
 ```cpp
 static void destroy(std::unique_ptr<your_class> obj) noexcept;
@@ -143,14 +143,14 @@ static void disconnect(std::unique_ptr<your_class> obj) noexcept;
 
 These correspond to SQLite @ref xDestroy and @ref xDisconnect methods.
 
-Note that both functions are static and they a given a unique pointer to your class instance. When they are invoked
-SQLite is done with your class instance and you now have the ownership of the object. Thus the instance will be 
+Note that both functions are static and they are given a unique pointer to your class instance. When they are invoked,
+SQLite is done with your class instance, and you now have the ownership of the object. Thus, the instance will be 
 destroyed@footnote{2} once these methods complete.
 
 
 ## Implementing cursor
 
-In order to actually expose your virtual table data you need to re-define the following base class methods
+In order to actually expose your virtual table data, you need to re-define the following base class methods
 in your `cursor` class. 
 
 * **filter()**
@@ -158,38 +158,38 @@ in your `cursor` class.
   void filter(int index_num, [optional index_data_type index_data,] int argc, value ** argv)
   ```
   The optional `data` argument is described [later](#filtering) on this page.
-  It "resets" the cursor to start a new iteration and it is always
-  called even for a single iteration. Do not make the mistake of only initializing cursor iteration
+  It "resets" the cursor to start a new iteration, and it is always
+  called even for a single iteration. Do not make the mistake of only initializing the cursor iteration
   sequence in the constructor. It needs to be re-initialized every time `filter` is called. This
-  method corresponds to @ref xFilter SQLite call. The base class implementation: 
-  @refmylib{vtab::cursor::filter} does essentially nothing.
+  method corresponds to the @ref xFilter SQLite call. The base class implementation,
+  @refmylib{vtab::cursor::filter}, does essentially nothing.
 * **eof() and next()**
   ```cpp
   bool eof() const noexcept;
   void next();
   ```
-  These correspond to @ref xEof and @ref xNext SQLite methods and perform the actual iteration.
+  These correspond to the @ref xEof and @ref xNext SQLite methods and perform the actual iteration.
   Note that `eof()` must be declared `noexcept`. The base class implementation of @refmylib{vtab::cursor::eof} 
-  always returns `true` and @refmylib{vtab::cursor::next} throws an exception.
+  always returns `true`, and @refmylib{vtab::cursor::next} throws an exception.
 * **column() and rowid()**
   ```cpp
   void column(context & ctxt, int idx) const;
   int64_t rowid() const;
   ```
   These retrieve values for the table row currently pointed to by the cursor. They are never called 
-  once `eof()` returns `false`. They correspond to `xColumn` and `xRowid` SQLite calls. The base
+  once `eof()` returns `true`. They correspond to the `xColumn` and `xRowid` SQLite calls. The base
   implementations of @refmylib{vtab::cursor::column} and @refmylib{vtab::cursor::rowid} throw exceptions.
 * Optionally define your own constructor if you have any one-time initialization to perform. 
   ```cpp
   cursor(your_table_type * owner): vtab::cursor(owner) 
   { ... }
   ```
-  Note that this is rarely necessary since inside your cursor implementation you can always access your 
-  enclosing virtual table class instance using @refmylib{vtab::cursor::owner} call to get any data the
+  Note that this is rarely necessary since, inside your cursor implementation, you can always access your 
+  enclosing virtual table class instance using the @refmylib{vtab::cursor::owner} call to get any data the
   owning table might contain. 
 
 To illustrate how these methods can be used, here is a very minimalistic and incomplete virtual table
-that exposes a vector of integers as an SQLite eponymous table
+that exposes a vector of integers as an SQLite eponymous table.
 
 ```cpp
 
@@ -265,12 +265,12 @@ The full purpose of the `filter()` call is to attempt to filter the returned dat
 query `WHERE` (and possibly `ORDER BY`) clauses _in your code_ rather than have SQLite obtain all the values 
 and do the filtering itself. The idea is that for some queries, at least, you can do it much more efficiently.
 
-For example in the vector table above the matching of `WHERE value = 42` can be done much more efficiently
+For example, in the vector table above, the matching of `WHERE value = 42` can be done much more efficiently
 in our implementation.
 
-To perform your own filtering you need to:
+To perform your own filtering, you need to:
 
-- re-define **best_index()** in your table class (note that this is a _table's_ method and not cursor's)
+- re-define **best_index()** in your table class (note that this is a _table's_ method and not the cursor's)
   ```cpp
   bool best_index(index_info<index_data_type> & info)	const
   ```
@@ -278,26 +278,26 @@ To perform your own filtering you need to:
 - use the data generated by `best_index()` in your `cursor::filter()` call
 
 
-`best_index()` is equivalent in functionality to @ref xBestIndex SQLite call. The base implementation in 
+`best_index()` is equivalent in functionality to the @ref xBestIndex SQLite call. The base implementation in 
 @refmylib{vtab::best_index} does essentially nothing.
 
 The @refmylib{index_info} class wraps @ref sqlite3_index_info and has the same functionality. It is an 
 input-output parameter used to convey information to `best_index` about what query conditions are in effect 
-and return information back to SQLite for query planner.
+and return information back to SQLite for the query planner.
 
 The `index_data_type` typedef determines what kind of custom data can be stored in @refmylib{index_info}.
-(This data is mapped to poorly typed `idxStr` member of @ref sqlite3_index_info). The data is conveyed unchanged
+(This data is mapped to the poorly typed `idxStr` member of @ref sqlite3_index_info). The data is conveyed unchanged
 to your `cursor::filter()` call.
 
-If `index_data_type` is `void` (which is the default in @refmylib{vtab::index_data_type}) the setters 
+If `index_data_type` is `void` (which is the default in @refmylib{vtab::index_data_type}), the setters 
 @refmylib{index_info::set_index_data} are disabled and the `cursor::filter()` call you need to implement looks like this:
 
 ```cpp
 void filter(int idx, int argc, value ** argv)
 ```
 
-In your table class you can redefine `index_data_type` to be a _pointer_ to some class. If you do that, 
-you will be able to use @refmylib{index_info::set_index_data} methods and your `cursor::filter()` call will 
+In your table class, you can redefine `index_data_type` to be a _pointer_ to some class. If you do that, 
+you will be able to use @refmylib{index_info::set_index_data} methods, and your `cursor::filter()` call will 
 have to look like this:
 
 ```cpp
@@ -384,7 +384,7 @@ public:
         auto usages = info.constraints_usage();
         auto orderbys = info.orderbys();
 
-        //first let's check if already provide the required order, if any
+        //first let's check if we already provide the required order, if any
         bool properly_ordered = true;
         for (auto order: orderbys) {
             if (order.iColumn != 0 && order.iColumn != -1)
@@ -407,7 +407,7 @@ public:
                     continue;
             
                 if (auto indexer = find_indexer(constraint.op)) {
-                    //if we can handle the operation using map lookup add the
+                    //if we can handle the operation using map lookup, add the
                     //indexer to the data
                     comparisons->indexer[comparisons->count] = indexer;
                     //set argvIndex so the value to compare to is given to filter()
@@ -417,7 +417,7 @@ public:
                 }
             }
             if (comparisons->count) {
-                //we don't use index_number but still let's set it to non-default value
+                //we don't use index_number, but still let's set it to a non-default value
                 info.set_index_number(1);
                 //move our collected indexers data into info
                 info.set_index_data(std::move(comparisons));
@@ -427,7 +427,7 @@ public:
             } 
         }
         
-        //if we have no indexers to use set a high but not infinite cost and let SQLite do the filtering
+        //if we have no indexers to use, set a high but not infinite cost and let SQLite do the filtering
         info.set_estimated_cost((double)2147483647);
         return true;
     }
@@ -505,7 +505,7 @@ This should print:
 
 ## Other optional methods
 
-Beyond the basic method described above you can also define many additional optional methods in your
+Beyond the basic methods described above, you can also define many additional optional methods in your
 virtual table class. Their signatures and SQLite equivalents are given below. Refer to SQLite functions'
 documentation for further details.
 
@@ -527,13 +527,13 @@ documentation for further details.
 
 ## Exceptions
 
-Unless explicitly required to be `noexcept` in the documentation all the virtual table and cursor functions you define 
+Unless explicitly required to be `noexcept` in the documentation, all the virtual table and cursor functions you define 
 can and should throw exceptions if they cannot fulfill their contract. The exceptions will be handled, converted to
-an error return from SQLite callback and properly set `zErrMsg` field. You can throw thinsqlitepp::exception to report
-a specific desired SQLite error code or anything derived from std::exception. In the latter case the return code will 
-be @ref SQLITE_ERROR and the error message whatever your exception's @ref std::exception::what() "what()" method returns.
+an error return from the SQLite callback, and will properly set the `zErrMsg` field. You can throw a `thinsqlitepp::exception` to report
+a specific desired SQLite error code or anything derived from `std::exception`. In the latter case, the return code will 
+be @ref SQLITE_ERROR, with the error message set to whatever your exception's @ref std::exception::what() "what()" method returns.
 
-Below is the list of all functions that must be `noexcept`
+Below is the list of all functions that must be `noexcept`:
 
 * **destroy**
 * **disconnect**
@@ -543,6 +543,6 @@ Below is the list of all functions that must be `noexcept`
 
 ## Footnotes
 
-@footnotedef{1} You can certainly add any other constructors to your class but these won't be recognized or used<br>
-@footnotedef{2} Unless of course if, for some reason, you decide to stash the unique pointer somewhere<br>
+@footnotedef{1} You can certainly add any other constructors to your class, but these won't be recognized or used.<br>
+@footnotedef{2} Unless, of course, for some reason, you decide to stash the unique pointer somewhere.<br>
 

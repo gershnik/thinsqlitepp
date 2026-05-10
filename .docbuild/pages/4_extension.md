@@ -1,11 +1,11 @@
 # Using ThinSQLite++ in an SQLite extension {#extension}
 
 
-ThinSQLite++ can be used in SQLite++ [extensions](https://www.sqlite.org/loadext.html). 
+ThinSQLite++ can be used in SQLite [extensions](https://www.sqlite.org/loadext.html). 
 
-To use it in an extension you need to **either**:
+To use it in an extension, you need to **either**:
 
-* Include `<sqlite3ext.h>` and specify `SQLITE_EXTENSION_INIT3` *before including any of ThinSQLite++ headers*.
+* Include `<sqlite3ext.h>` and specify `SQLITE_EXTENSION_INIT3` *before including any ThinSQLite++ headers*.
   For example:
   ```cpp
   #include <sqlite3ext.h>
@@ -27,7 +27,7 @@ The extension's entry point should look similar to the below:
 
 ```cpp
 
-//Use this macro in *one* source file usually where your entry point is
+//Use this macro in *one* source file, usually where your entry point is
 SQLITE_EXTENSION_INIT1
 
 using namespace thinsqlitepp;
@@ -64,7 +64,7 @@ int sqlite3_extension_init(database * db, char ** pzErrMsg, const sqlite3_api_ro
     catch(std::exception & ex) {
         auto what = ex.what();
         auto len = strlen(what) + 1;
-        if (auto message = (const char *)sqlite3_malloc(len)) {
+        if (*pzErrMsg = (char *)sqlite3_malloc(len)) {
             memcpy(*pzErrMsg, what, len);
         }
         return SQLITE_ERROR;
@@ -73,7 +73,7 @@ int sqlite3_extension_init(database * db, char ** pzErrMsg, const sqlite3_api_ro
 
 ```
 
-Note that the first parameter of the `sqlite3_extension_init` can safely be declared as
+Note that the first parameter of `sqlite3_extension_init` can safely be declared as
 `thinsqlitepp::database *` rather than `sqlite3 *`. This is due to the fact that ThinSQLite++
-classes are [fake wrappers](https://github.com/gershnik/thinsqlitepp#fake-classes)
+classes are [fake wrappers](https://github.com/gershnik/thinsqlitepp#fake-classes).
 

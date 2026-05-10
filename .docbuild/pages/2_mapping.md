@@ -10,7 +10,7 @@ status page of what is or isn't available in this library.
 ## Legend
 
 * **out of scope**: Functionality that is not implemented and never will be. Common 
-  examples are UTF-16 APIs or VFS related API.
+  examples are UTF-16 APIs or VFS-related APIs.
 
 * <span style="color:orange"> **not implemented** </span>: Functionality that is currently not 
   implemented but should be and might be added in a future version.
@@ -98,7 +98,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_column_blob             | @refmylib{statement::column_value}, @refmylib{cell::value}
 | ::sqlite3_column_bytes            | @refmylib{statement::column_value}, @refmylib{cell::value}
 | ::sqlite3_column_bytes16          | **out of scope**
-| ::sqlite3_column_count            | @refmylib{statement::column_count}, 
+| ::sqlite3_column_count            | @refmylib{statement::column_count}
 | ::sqlite3_column_database_name    | @refmylib{statement::column_database_name}, @refmylib{cell::database_name}
 | ::sqlite3_column_database_name16  | **out of scope**
 | ::sqlite3_column_decltype         | @refmylib{statement::column_declared_type}, @refmylib{cell::declared_type}
@@ -148,7 +148,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_db_name                 | @refmylib{database::db_name}
 | ::sqlite3_db_readonly             | @refmylib{database::readonly}
 | ::sqlite3_db_release_memory       | @refmylib{database::release_memory}
-| ::sqlite3_db_status               | @refmylib{database::status()}
+| ::sqlite3_db_status               | @refmylib{database::status}
 | ::sqlite3_declare_vtab            | @refmylib{database::declare_vtab}
 | ::sqlite3_deserialize             | @refmylib{database::deserialize}
 | ::sqlite3_drop_modules            | @refmylib{database::drop_modules}
@@ -174,7 +174,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_filename_journal        | **out of scope**
 | ::sqlite3_filename_wal            | **out of scope**
 | ::sqlite3_finalize                | @refmylib{statement}
-| ::sqlite3_free                    | @refmylib{sqlite_deleter}, @refmylib{sqlite_allocated},  @refmylib{sqlite_allocator}
+| ::sqlite3_free                    | @refmylib{sqlite_deleter}, @refmylib{sqlite_allocated}, @refmylib{sqlite_allocator}
 | ::sqlite3_free_filename           | **out of scope**
 | ::sqlite3_free_table              | **out of scope**
 | ::sqlite3_get_autocommit          | @refmylib{database::get_autocommit}
@@ -200,8 +200,8 @@ status page of what is or isn't available in this library.
 
 | Function                          |  Mapped To                                                     |
 |-----------------------------------|----------------------------------------------------------------|
-| ::sqlite3_malloc                  | @refmylib{sqlite_allocated},  @refmylib{sqlite_allocator}
-| ::sqlite3_malloc64                | @refmylib{sqlite_allocated},  @refmylib{sqlite_allocator}
+| ::sqlite3_malloc                  | @refmylib{sqlite_allocated}, @refmylib{sqlite_allocator}
+| ::sqlite3_malloc64                | @refmylib{sqlite_allocated}, @refmylib{sqlite_allocator}
 | ::sqlite3_memory_highwater        | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_memory_used             | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_mprintf                 | **out of scope**
