@@ -59,6 +59,9 @@ namespace thinsqlitepp
          * Cause the implemented SQL function to throw an SQL exception
          * 
          * Equivalent to ::sqlite3_result_error
+         * 
+         * Note that passing a string_view longer than std::numeric_limits<int>::max()
+         * will result in std::terminate().
          */
         void error(const std::string_view & value) noexcept
             { sqlite3_result_error(c_ptr(), value.size() ? &value[0] : "", int_size(value.size())); }
@@ -134,6 +137,9 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_result_text(..., SQLITE_TRANSIENT)
          * 
          * The string content is copied and does not need to persist.
+         * 
+         * Note that passing a string_view longer than std::numeric_limits<int>::max()
+         * will result in std::terminate().
          */
         void result(const std::string_view & value) noexcept
         {
@@ -161,6 +167,9 @@ namespace thinsqlitepp
          * 
          * The string content is used **by reference** and so must be present in memory
          * as long as SQLite library remain used.
+         * 
+         * Note that passing a string_view longer than std::numeric_limits<int>::max()
+         * will result in std::terminate().
          */
         void result_reference(const std::string_view & value) noexcept
         {
@@ -187,6 +196,9 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_result_text(..., unref)
          * 
          * The string content is used **by reference**. 
+         * 
+         * Note that passing a string_view longer than std::numeric_limits<int>::max()
+         * will result in std::terminate().
          * 
          * @param value reference to string to return
          * @param unref called when the reference is no longer needed.
@@ -229,6 +241,9 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_result_blob(..., SQLITE_TRANSIENT)
          * 
          * The blob content is copied and does not need to persist.
+         * 
+         * Note that passing a blob longer than std::numeric_limits<int>::max()
+         * will result in std::terminate().
          */
         void result(const blob_view & value) noexcept
         {
@@ -246,6 +261,9 @@ namespace thinsqlitepp
          * 
          * The blob content is used **by reference** and so must be present in memory
          * as long as SQLite library remain used.
+         * 
+         * Note that passing a blob longer than std::numeric_limits<int>::max()
+         * will result in std::terminate().
          */
         void result_reference(const blob_view & value) noexcept
         {
@@ -262,6 +280,9 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_result_blob(..., unref)
          * 
          * The blob content is used **by reference**. 
+         * 
+         * Note that passing a blob longer than std::numeric_limits<int>::max()
+         * will result in std::terminate().
          * 
          * @param value reference to blob to return
          * @param unref called when the reference is no longer needed. 
@@ -286,6 +307,9 @@ namespace thinsqlitepp
          * Return a blob of zeroes from the implemented SQL function.
          * 
          * Equivalent to ::sqlite3_result_zeroblob()
+         * 
+         * Note that passing a blob longer than std::numeric_limits<int>::max()
+         * will result in std::terminate().
          * 
          */
         void result(const zero_blob & value) noexcept
