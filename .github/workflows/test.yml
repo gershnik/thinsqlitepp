@@ -41,7 +41,8 @@ jobs:
             14: 'ubuntu-24.04'
           }
           gcc_cont_map = {
-            15: 'gcc:15.1'
+            15: 'gcc:15.1',
+            16: 'gcc:16.1'
           }
           clang_map = {
             13: 'ubuntu-22.04', 
