@@ -19,7 +19,7 @@ namespace thinsqlitepp
      * @{
      */
 
-#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && THINSQLITEPP_ENABLE_EXPIREMENTAL
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && (THINSQLITEPP_ENABLE_EXPERIMENTAL || THINSQLITEPP_ENABLE_EXPIREMENTAL)
 
 
     /**
@@ -32,7 +32,7 @@ namespace thinsqlitepp
      * 
      * @since SQLite 3.10
      * 
-     * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro to be defined to 1 as the underlying SQLite
+     * Requires THINSQLITEPP_ENABLE_EXPERIMENTAL macro to be defined to 1 as the underlying SQLite
      * feature is experimental.
      * 
      * `#include <thinsqlitepp/snapshot.hpp>`

@@ -1420,13 +1420,13 @@ namespace thinsqlitepp
          * @name Snapshots
          */
 
-#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && THINSQLITEPP_ENABLE_EXPIREMENTAL
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && (THINSQLITEPP_ENABLE_EXPERIMENTAL || THINSQLITEPP_ENABLE_EXPIREMENTAL)
         /**
          * Record a database snapshot
          * 
          * Equivalent to ::sqlite3_snapshot_get
          * 
-         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * Requires THINSQLITEPP_ENABLE_EXPERIMENTAL macro defined to 1 as the underlying SQLite
          * feature is experimental.
          * 
          * @since SQLite 3.10
@@ -1438,7 +1438,7 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_snapshot_open
          * 
-         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * Requires THINSQLITEPP_ENABLE_EXPERIMENTAL macro defined to 1 as the underlying SQLite
          * feature is experimental.
          * 
          * @since SQLite 3.10
@@ -1451,7 +1451,7 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_snapshot_recover
          * 
-         * Requires THINSQLITEPP_ENABLE_EXPIREMENTAL macro defined to 1 as the underlying SQLite
+         * Requires THINSQLITEPP_ENABLE_EXPERIMENTAL macro defined to 1 as the underlying SQLite
          * feature is experimental.
          * 
          * @since SQLite 3.10

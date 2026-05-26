@@ -445,7 +445,7 @@ namespace thinsqlitepp
         return ret;
     }
 
-#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && THINSQLITEPP_ENABLE_EXPIREMENTAL
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0) && (THINSQLITEPP_ENABLE_EXPERIMENTAL || THINSQLITEPP_ENABLE_EXPIREMENTAL)
 
     inline std::unique_ptr<snapshot> database::get_snapshot(const string_param & schema)
     {

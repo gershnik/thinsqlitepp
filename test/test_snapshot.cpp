@@ -3,7 +3,7 @@
 
 #if ! THINSQLITEPP_OMIT_SNAPSHOT
 
-#define THINSQLITEPP_ENABLE_EXPIREMENTAL 1
+#define THINSQLITEPP_ENABLE_EXPERIMENTAL 1
 
 #include <thinsqlitepp/snapshot.hpp>
 #include <thinsqlitepp/database.hpp>
