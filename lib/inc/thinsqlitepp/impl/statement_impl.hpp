@@ -210,7 +210,7 @@ namespace thinsqlitepp
                 continue;
             
             //trim whitespace after statement
-            while (!_sql.empty() && isspace(_sql[0]))
+            while (!_sql.empty() && isspace((unsigned char)_sql[0]))
                 _sql.remove_prefix(1);
             
             return stmt;

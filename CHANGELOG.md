@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   now accepted.
 - Removed bogus `noexcept` from `database::overload_function`
 - `sqlite_version::from_parts` now validates its input correctly
+- `statement_parser` now handles correctly input characters above 128. Previously these could 
+  be wrongly interpreted as whitespace under certain conditions.
 
 ## [1.6] - 2025-05-09
 
