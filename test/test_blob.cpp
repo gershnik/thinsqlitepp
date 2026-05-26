@@ -6,6 +6,7 @@
 #include <thinsqlitepp/statement.hpp>
 
 #include <vector>
+#include <cstdint>
 
 using namespace thinsqlitepp;
 
