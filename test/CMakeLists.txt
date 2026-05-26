@@ -70,6 +70,7 @@ function(configure_test_target target)
         test_blob.cpp
         test_database.cpp
         test_main.cpp
+        test_memory.cpp
         test_snapshot.cpp
         test_statement.cpp
         test_general.cpp

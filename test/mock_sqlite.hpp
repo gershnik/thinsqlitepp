@@ -128,5 +128,16 @@ MAKE_MOCK(sqlite3_load_extension, (sqlite3 *db, const char * file, const char * 
 MAKE_MOCK(sqlite3_progress_handler, (sqlite3 *db, int step_count, int(*handler)(void*), void*data), (db, step_count, handler, data));
 #define sqlite3_progress_handler mock_sqlite3_progress_handler
 
+MAKE_MOCK(sqlite3_free, (void * ptr), (ptr));
+#define sqlite3_free mock_sqlite3_free
+
+MAKE_MOCK(sqlite3_malloc, (int size), (size));
+#define sqlite3_malloc mock_sqlite3_malloc
+
+#if SQLITE_VERSION_NUMBER >= 3008007
+MAKE_MOCK(sqlite3_malloc64, (sqlite3_uint64 size), (size));
+#define sqlite3_malloc64 mock_sqlite3_malloc64
+#endif
+
 #endif
 

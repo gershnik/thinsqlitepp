@@ -5,18 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Fixed
+- `sqlite_allocator` now actually compiles when used.
+
 ## [1.6] - 2025-05-09
 
-## Added
+### Added
 - Support for database and global configuration options added in recent versions of SQLite
-## Fixed
+### Fixed
 - Missing headers on GCC 15
 ## Changed
 - Test CMake targets are no longer included in default build
 
 ## [1.5] - 2025-02-12
 
-## Fixed
+### Fixed
 - CMake install is no longer broken
 
 ## [1.4] - 2024-10-04

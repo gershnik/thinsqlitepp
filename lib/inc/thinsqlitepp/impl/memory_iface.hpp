@@ -136,7 +136,7 @@ namespace thinsqlitepp
         {
             if (std::numeric_limits<std::size_t>::max() / sizeof(T) < n)
                 throw std::bad_array_new_length();
-            return sqlite_allocate(n * sizeof(T));
+            return (T *)sqlite_allocate(n * sizeof(T));
         }
 
         void deallocate(T * ptr, std::size_t /*n*/) noexcept
