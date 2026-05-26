@@ -137,7 +137,7 @@ namespace thinsqlitepp
          */
         template<std::ranges::contiguous_range R>
         requires(std::is_trivially_copyable_v<std::ranges::range_value_t<R>>)
-        void write(size_t offset, R range) const
+        void write(size_t offset, const R & range)
         {
             using value_type = std::remove_reference_t<std::ranges::range_reference_t<R>>;
             auto data = std::data(range);
