@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `sqlite_allocator` now actually compiles when used.
 - Typo is `THINSQLITEPP_ENABLE_EXPERIMENTAL`. Both old (wrong) and new (correct) spellings are
   now accepted.
+- Removed bogus `noexcept` from `database::overload_function`
 
 ## [1.6] - 2025-05-09
 

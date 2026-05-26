@@ -1195,7 +1195,7 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_overload_function
          */
-        void overload_function(const string_param & name, int arg_count) noexcept
+        void overload_function(const string_param & name, int arg_count)
             { check_error(sqlite3_overload_function(c_ptr(), name.c_str(), arg_count)); }
         
         //MARK: - progress_handler
