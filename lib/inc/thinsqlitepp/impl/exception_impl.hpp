@@ -37,7 +37,7 @@ namespace thinsqlitepp
 #endif
         auto db_message = sqlite3_errmsg(c_ptr(db));
         if (db_message != _message.get())
-            _message = copy_message(sqlite3_errmsg(c_ptr(db)));
+            _message = copy_message(db_message);
     }
 
     inline error::message_ptr error::copy_message(const char * src) noexcept
