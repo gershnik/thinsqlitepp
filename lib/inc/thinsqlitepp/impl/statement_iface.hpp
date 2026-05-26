@@ -333,7 +333,7 @@ namespace thinsqlitepp
          * The `type` parameter should be a static string, preferably a string literal.
          */
         template<class T>
-        void bind(int idx, T * ptr, const char * type, void(*destroy)(T*))
+        void bind(int idx, T * ptr, const char * type, void(*destroy)(T*) noexcept)
             { check_error(sqlite3_bind_pointer(this->c_ptr(), idx, ptr, type, (void(*)(void*))destroy)); }
 
         /**
@@ -348,7 +348,7 @@ namespace thinsqlitepp
          */
         template<class T>
         void bind(int idx, std::unique_ptr<T> ptr)
-            { this->bind(idx, ptr.release(), typeid(T).name(), [](T * p) { delete p; }); }
+            { this->bind(idx, ptr.release(), typeid(T).name(), [](T * p) noexcept { delete p; }); }
 
         /**
          * Bind a dynamically typed value to a parameter of the statement

@@ -324,7 +324,7 @@ namespace thinsqlitepp
          * 
          */
         template<class T>
-        void result(T * ptr, const char * type, void(*destroy)(T*)) noexcept
+        void result(T * ptr, const char * type, void(*destroy)(T*) noexcept) noexcept
             { sqlite3_result_pointer(this->c_ptr(), ptr, type, (void(*)(void*))destroy); }
         
         /**
@@ -339,7 +339,7 @@ namespace thinsqlitepp
          */
         template<class T>
         void result(std::unique_ptr<T> ptr) noexcept
-            { this->result(ptr.release(), typeid(T).name(), [](T * p) { delete p;}); }
+            { this->result(ptr.release(), typeid(T).name(), [](T * p) noexcept { delete p;}); }
         
         /**
          * Return a copy of the passed @ref value from the implemented SQL function.
