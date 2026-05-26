@@ -41,10 +41,10 @@ namespace thinsqlitepp
         /// Construct an instance from major, minor, release parts
         static constexpr sqlite_version from_parts(unsigned major, unsigned minor, unsigned release)
         { 
-            if (release > 1000)
+            if (release >= 1000)
                 throw std::runtime_error("invalid release value");
             int val = release;
-            if (minor > 1000000)
+            if (minor >= 1000)
                 throw std::runtime_error("invalid minor value");
             val += minor*1000;
             if (major > unsigned((std::numeric_limits<int>::max() - val) / 1000000))
