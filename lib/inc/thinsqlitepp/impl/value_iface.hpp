@@ -34,7 +34,7 @@ namespace thinsqlitepp
     class value final : public handle<sqlite3_value, value>
     {
     public:
-#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 18, 11)
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 18, 0)
         /**
          * Creates a new value by copying an original one
          * 
@@ -48,7 +48,7 @@ namespace thinsqlitepp
          */
         static std::unique_ptr<value> dup(const value * src)
         {
-            auto ret = sqlite3_value_dup(src->c_ptr());
+            auto ret = sqlite3_value_dup(src ? src->c_ptr() : nullptr);
             if (!ret && src)
                 throw exception(SQLITE_NOMEM);
             return std::unique_ptr<value>((value *)ret);
