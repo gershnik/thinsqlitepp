@@ -56,7 +56,7 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_alloc
          * 
          * Note that the interface to this function deliberately disallows
-         * access to internal static SQLite mutexes. Accroding to 
+         * access to internal static SQLite mutexes. According to 
          * [SQLite docs](https://www.sqlite.org/c3ref/mutex_alloc.html)
          * "[s]tatic mutexes are for internal use by SQLite only". 
          * 

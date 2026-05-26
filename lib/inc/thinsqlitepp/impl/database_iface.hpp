@@ -838,7 +838,7 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_db_cacheflush
          * 
-         * @since SQLite 3.1
+         * @since SQLite 3.10
          */
         void cacheflush()
         {

@@ -644,7 +644,7 @@ namespace thinsqlitepp
         /**
          * Constructs an instance referring to a given statement
          * 
-         * The statement is being help by reference and must exist as long as
+         * The statement is being held by reference and must exist as long as
          * this object is existing.
          */
         auto_reset(const std::unique_ptr<statement> & st) noexcept:
