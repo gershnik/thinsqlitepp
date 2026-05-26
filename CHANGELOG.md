@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   be wrongly interpreted as whitespace under certain conditions.
 - Harmless UB in `value::dup`
 - Correct SQLite version availability for `value::dup`
+- `row_iterator` and `row_range` no longer incorrectly pretend to be _forward_ ones. They
+  are _input_ iterator and range, respectively.
 
 ## [1.6] - 2025-05-09
 

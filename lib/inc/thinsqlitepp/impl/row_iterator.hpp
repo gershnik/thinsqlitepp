@@ -258,7 +258,7 @@ namespace thinsqlitepp
     };
 
     /**
-     * A [forward iterator](https://en.cppreference.com/w/cpp/iterator/forward_iterator) 
+     * An [input iterator](https://en.cppreference.com/w/cpp/iterator/input_iterator) 
      * for @ref statement results.
      * 
      * This class stores the @ref statement *by reference*. Thus @ref statement must remain
@@ -274,7 +274,7 @@ namespace thinsqlitepp
         using difference_type = int;
         using reference = row;
         using pointer = void;
-        using iterator_category = std::forward_iterator_tag;
+        using iterator_category = std::input_iterator_tag;
 
     public:
         /**
@@ -311,8 +311,8 @@ namespace thinsqlitepp
         
         row_iterator & operator++()
             { increment(); return *this; }
-        row_iterator operator++(int)
-            { increment(); return *this; }
+        void operator++(int)
+            { increment(); }
         
         friend bool operator==(const row_iterator & lhs, const row_iterator & rhs) noexcept
             { return lhs._owner == rhs._owner; }
@@ -327,7 +327,7 @@ namespace thinsqlitepp
     };
 
     /**
-     * A [forward range](https://en.cppreference.com/w/cpp/ranges/forward_range) 
+     * An [input range](https://en.cppreference.com/w/cpp/ranges/input_range) 
      * for @ref statement results.
      * 
      * This class stores the @ref statement *by reference*. Thus @ref statement must remain
