@@ -180,6 +180,9 @@ namespace thinsqlitepp
 
         #undef SQLITEPP_DEFINE_OPTION_0
         #undef SQLITEPP_DEFINE_OPTION_N
+        #ifdef SQLITEPP_DEFINE_OPTION
+            #undef SQLITEPP_DEFINE_OPTION
+        #endif
 
         SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 
