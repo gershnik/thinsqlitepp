@@ -6,8 +6,8 @@
  https://github.com/gershnik/thinsqlitepp/blob/main/LICENSE
 */
 
-#ifndef HEADER_SQLITEPP_VACKUP_IFACE_INCLUDED
-#define HEADER_SQLITEPP_VACKUP_IFACE_INCLUDED
+#ifndef HEADER_SQLITEPP_BACKUP_IFACE_INCLUDED
+#define HEADER_SQLITEPP_BACKUP_IFACE_INCLUDED
 
 #include "handle.hpp"
 #include "database_iface.hpp"
