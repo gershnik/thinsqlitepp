@@ -204,7 +204,7 @@ namespace thinsqlitepp
          * @param unref called when the reference is no longer needed.
          * Its argument will be the pointer returned from `value.data()`
          */
-        void result_reference(const std::string_view & value, void (*unref)(const char *)) noexcept
+        void result_reference(const std::string_view & value, void (*unref)(const char *) noexcept) noexcept
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())
@@ -220,7 +220,7 @@ namespace thinsqlitepp
 
     #if __cpp_char8_t >= 201811
         /// @overload
-        void result_reference(const std::u8string_view & value, void (*unref)(const char8_t *)) noexcept
+        void result_reference(const std::u8string_view & value, void (*unref)(const char8_t *) noexcept) noexcept
         {
             //passing a null pointer to sqlite3_result_ returns NULL not zero length text
             if (auto data = value.data())

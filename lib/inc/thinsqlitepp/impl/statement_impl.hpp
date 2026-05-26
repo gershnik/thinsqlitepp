@@ -79,7 +79,7 @@ namespace thinsqlitepp
             check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
     }
 
-    inline void statement::bind_reference(int idx, const std::string_view & value, void (*unref)(const char *))
+    inline void statement::bind_reference(int idx, const std::string_view & value, void (*unref)(const char *) noexcept)
     {
         if (auto data = value.data())
         {
@@ -109,7 +109,7 @@ namespace thinsqlitepp
             check_error(sqlite3_bind_text(c_ptr(), idx, "", 0, SQLITE_STATIC));
     }
 
-    inline void statement::bind_reference(int idx, const std::u8string_view & value, void (*unref)(const char8_t *))
+    inline void statement::bind_reference(int idx, const std::u8string_view & value, void (*unref)(const char8_t *) noexcept)
     {
         if (auto data = value.data())
         {
@@ -139,7 +139,7 @@ namespace thinsqlitepp
             check_error(sqlite3_bind_zeroblob(c_ptr(), idx, 0));
     }
 
-    inline void statement::bind_reference(int idx, const blob_view & value, void (*unref)(const std::byte *))
+    inline void statement::bind_reference(int idx, const blob_view & value, void (*unref)(const std::byte *) noexcept)
     {
         if (auto data = value.data())
         {

@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   are _input_ iterator and range, respectively.
 - `blob::write(Range)` is no longer wrongly const and no longer takes the range by value.
 - `vtab::rollback` now properly passes exceptions to SQLite
+- Various "destructor" SQLite callbacks now consistently require `noexcept`
 
 ## [1.6] - 2025-05-09
 

@@ -500,7 +500,7 @@ namespace thinsqlitepp {
         void) create_module(database & db,
                             const string_param & name, 
                             typename D::constructor_data_type data, 
-                            void(*destructor)(typename D::constructor_data_type) = nullptr)
+                            void(*destructor)(typename D::constructor_data_type) noexcept = nullptr)
         {
             static_assert(std::is_same_v<D, Derived>, "please invoke this function only with default template parameter");
             db.create_module(name, vtab::get_module(), data, destructor);

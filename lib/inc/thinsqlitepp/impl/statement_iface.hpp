@@ -255,7 +255,7 @@ namespace thinsqlitepp
          * @param unref called when the reference is no longer needed. 
          * Its argument is the pointer returned from `value.data()`
          */
-        void bind_reference(int idx, const std::string_view & val, void (*unref)(const char *));
+        void bind_reference(int idx, const std::string_view & val, void (*unref)(const char *) noexcept);
 
     #if __cpp_char8_t >= 201811
         /**
@@ -277,7 +277,7 @@ namespace thinsqlitepp
          * 
          * char8_t overload for bind_reference(int, const std::string_view &, void (*)(const char *))
          */
-        void bind_reference(int idx, const std::u8string_view & val, void (*unref)(const char8_t *));
+        void bind_reference(int idx, const std::u8string_view & val, void (*unref)(const char8_t *) noexcept);
     #endif
 
         /**
@@ -314,7 +314,7 @@ namespace thinsqlitepp
          * @param unref called when the reference is no longer needed. 
          * Its argument is the pointer returned from `value.data()`
          */
-        void bind_reference(int idx, const blob_view & val, void (*unref)(const std::byte *));
+        void bind_reference(int idx, const blob_view & val, void (*unref)(const std::byte *) noexcept);
 
         /**
          * Bind a blob of zeroes to a parameter of the statement
