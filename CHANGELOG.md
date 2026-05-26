@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.7] - 2026-05-26
+
 ### Fixed
 - `sqlite_allocator` now actually compiles when used.
 - Typo is `THINSQLITEPP_ENABLE_EXPERIMENTAL`. Both old (wrong) and new (correct) spellings are
@@ -120,3 +122,4 @@ to compile this library is no longer needed.
 [1.4]: https://github.com/gershnik/thinsqlitepp/releases/v1.4
 [1.5]: https://github.com/gershnik/thinsqlitepp/releases/v1.5
 [1.6]: https://github.com/gershnik/thinsqlitepp/releases/v1.6
+[1.7]: https://github.com/gershnik/thinsqlitepp/releases/v1.7
