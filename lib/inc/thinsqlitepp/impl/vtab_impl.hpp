@@ -497,8 +497,12 @@ namespace thinsqlitepp
     int vtab<Derived>::rollback_impl(sqlite3_vtab * vtab)
     {
         auto me = static_cast<Derived *>(vtab);
-        me->rollback();
-        return SQLITE_OK;
+        SQLITEPP_BEGIN_CALLBACK
+        {
+            me->rollback();
+            return SQLITE_OK;
+        }
+        SQLITEPP_END_CALLBACK
     }
 
     template<class Derived>
