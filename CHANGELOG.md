@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 - `database::status64` wrapping `sqlite3_db_status64`
 - `database::setlk_timeout` wrapping `sqlite3_setlk_timeout`
+- `database::set_errmsg` wrapping `sqlite3_set_errmsg`
 
 ## [1.7] - 2026-05-26
 

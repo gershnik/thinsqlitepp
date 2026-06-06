@@ -185,6 +185,18 @@ namespace thinsqlitepp
         #endif
         }
 
+        //MARK: -
+
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+        /**
+         * Set error code and message
+         * 
+         * Equivalent to ::sqlite3_set_errmsg
+         */
+        void set_errmsg(int errcode, const string_param & message)
+            { check_error(sqlite3_set_errmsg(c_ptr(), errcode, message.c_str())); }
+    #endif
+
         //MARK: - exec
 
         /** @{

@@ -280,6 +280,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_set_authorizer          | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_set_auxdata             | @refmylib{context::set_auxdata}
 | ::sqlite3_set_clientdata          | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_set_errmsg              | @refmylib{database::set_errmsg}
 | ::sqlite3_set_last_insert_rowid   | @refmylib{database::set_last_insert_rowid}
 | ::sqlite3_shutdown                | @refmylib{shutdown}
 | ::sqlite3_sleep                   | **out of scope**
