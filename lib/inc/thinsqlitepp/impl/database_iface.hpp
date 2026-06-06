@@ -153,6 +153,21 @@ namespace thinsqlitepp
          */
         void busy_timeout(int ms)
             { check_error(sqlite3_busy_timeout(c_ptr(), ms)); }
+
+
+        //MARK: -
+
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 50, 0)
+
+        /**
+         * Set a setlk timeout
+         * 
+         * Equivalent to ::sqlite3_setlk_timeout
+         */
+        void setlk_timeout(int ms, int flags = 0)
+            { check_error(sqlite3_setlk_timeout(c_ptr(), ms, flags)); }
+
+    #endif
         
         //MARK: -
 

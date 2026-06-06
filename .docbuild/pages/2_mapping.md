@@ -89,7 +89,7 @@ status page of what is or isn't available in this library.
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3_cancel_auto_extension   | @refmylib{database::cancel_auto_extension}
 | ::sqlite3_changes                 | @refmylib{database::changes}
-| ::sqlite3_changes64               | @refmylib{database::changes}
+| ::sqlite3_changes64               | @refmylib{database::changes64}
 | ::sqlite3_clear_bindings          | @refmylib{statement::clear_bindings}
 | ::sqlite3_close                   | **out of scope**
 | ::sqlite3_close_v2                | @refmylib{database}
@@ -276,6 +276,7 @@ status page of what is or isn't available in this library.
 | Function                          |  Mapped To                                                     |
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3_serialize               | @refmylib{database::serialize}, @refmylib{database::serialize_reference}
+| ::sqlite3_setlk_timeout           | @refmylib{database::setlk_timeout}
 | ::sqlite3_set_authorizer          | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_set_auxdata             | @refmylib{context::set_auxdata}
 | ::sqlite3_set_clientdata          | <span style="color:orange"> **not implemented** </span>
