@@ -219,6 +219,18 @@ If you wish to use ThinSQLite++ in an [SQLite extension][sqlite-extensions], you
 set the `THINSQLITEPP_BUILDING_EXTENSION` macro to 1 in your build system. More details are available 
 [in the documentation][extension].
 
+Some parts of the SQLite C API are marked by SQLite itself as experimental — they may change in
+incompatible ways or be removed entirely in future SQLite releases. By default ThinSQLite++ does not
+expose its wrappers for any such interfaces, so that you don't accidentally build a dependency on
+something that is not yet stable. If you wish to enable these wrappers, set the
+`THINSQLITEPP_ENABLE_EXPERIMENTAL` macro to 1 in your build system. Doing so opts you in to the
+experimental SQLite features and the corresponding risk that the API you use may change.
+
+At present the only such interface is the SQLite [snapshot API][sqlite-snapshot] — the `snapshot` class
+together with `database::get_snapshot`, `database::open_snapshot` and `database::recover_snapshot` — which
+additionally requires SQLite 3.10.0 or greater. Other experimental wrappers may be added behind the same
+macro in the future.
+
 
 ## Implementation choices
 
@@ -262,5 +274,6 @@ Adding such locking is pure overhead for sane users who don't use Serialized mod
 [releases]: https://github.com/gershnik/thinsqlitepp/releases
 
 [sqlite-extensions]: https://www.sqlite.org/loadext.html
+[sqlite-snapshot]: https://www.sqlite.org/c3ref/snapshot.html
 
 <!-- End Links -->
