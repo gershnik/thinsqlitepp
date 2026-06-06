@@ -389,6 +389,15 @@ namespace thinsqlitepp
         check_error(sqlite3_db_status(c_ptr(), op, &ret.current, &ret.high, reset));
         return ret;
     }
+
+#if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+    inline struct database::status64 database::status64(int op, bool reset) const
+    {
+        struct status64 ret;
+        check_error(sqlite3_db_status64(c_ptr(), op, &ret.current, &ret.high, reset));
+        return ret;
+    }
+#endif
         
     inline void database::load_extension(const string_param & file, const string_param & proc)
     {

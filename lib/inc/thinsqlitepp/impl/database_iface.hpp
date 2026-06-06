@@ -1265,18 +1265,43 @@ namespace thinsqlitepp
         //MARK: - status
 
         /// Return type for @ref status()
-        struct status
+        struct 
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+            [[deprecated("use status64")]]
+    #endif
+        status
         {
             int current;
             int high;
         };
 
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+            [[deprecated("use status64")]]
+    #endif
         /**
          * Retrieve database connection status
          * 
          * Equivalent to ::sqlite3_db_status
          */
         struct status status(int op, bool reset = false) const;
+
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+
+        /// Return type for @ref status64()
+        struct status64
+        {
+            sqlite3_int64 current;
+            sqlite3_int64 high;
+        };
+
+        /**
+         * Retrieve database connection status
+         * 
+         * Equivalent to ::sqlite3_db_status64
+         */
+        struct status64 status64(int op, bool reset = false) const;
+
+    #endif
         
         //MARK: - table_column_metadata
         

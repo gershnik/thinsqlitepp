@@ -149,6 +149,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_db_readonly             | @refmylib{database::readonly}
 | ::sqlite3_db_release_memory       | @refmylib{database::release_memory}
 | ::sqlite3_db_status               | @refmylib{database::status}
+| ::sqlite3_db_status64             | @refmylib{database::status}
 | ::sqlite3_declare_vtab            | @refmylib{database::declare_vtab}
 | ::sqlite3_deserialize             | @refmylib{database::deserialize}
 | ::sqlite3_drop_modules            | @refmylib{database::drop_modules}
