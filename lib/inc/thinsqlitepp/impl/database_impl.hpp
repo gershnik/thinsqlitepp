@@ -383,9 +383,6 @@ namespace thinsqlitepp
         return bool(ret);
     }
 
-#if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
-    [[deprecated("use status64")]]
-#endif
     inline struct database::status database::status(int op, bool reset) const
     {
         struct status ret;

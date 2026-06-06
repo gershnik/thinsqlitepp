@@ -1280,18 +1280,14 @@ namespace thinsqlitepp
         //MARK: - status
 
         /// Return type for @ref status()
-        struct 
-    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
-            [[deprecated("use status64")]]
-    #endif
-        status
+        struct status
         {
             int current;
             int high;
         };
 
     #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
-            [[deprecated("use status64")]]
+        [[deprecated("use status64")]]
     #endif
         /**
          * Retrieve database connection status
