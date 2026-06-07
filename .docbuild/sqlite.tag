@@ -96,6 +96,8 @@
     <member kind="function"><name>sqlite3_busy_handler</name><anchorfile>c3ref/busy_handler.html</anchorfile></member>
     <member kind="function"><name>sqlite3_busy_timeout</name><anchorfile>c3ref/busy_timeout.html</anchorfile></member>
     <member kind="function"><name>sqlite3_cancel_auto_extension</name><anchorfile>c3ref/cancel_auto_extension.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_carray_bind</name><anchorfile>c3ref/carray_bind.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_carray_bind_v2</name><anchorfile>c3ref/carray_bind.html</anchorfile></member>
     <member kind="function"><name>sqlite3_changes</name><anchorfile>c3ref/changes.html</anchorfile></member>
     <member kind="function"><name>sqlite3_changes64</name><anchorfile>c3ref/changes.html</anchorfile></member>
     <member kind="function"><name>sqlite3_clear_bindings</name><anchorfile>c3ref/clear_bindings.html</anchorfile></member>

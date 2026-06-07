@@ -12,11 +12,18 @@
 #include "handle.hpp"
 #include "string_param.hpp"
 #include "span.hpp"
+#include "meta.hpp"
 #include "memory_iface.hpp"
 
 #include <utility>
 #include <string>
 #include <string_view>
+
+#if __has_include(<sys/uio.h>)
+    #include <sys/uio.h>
+#endif
+
+struct iovec;
 
 namespace thinsqlitepp
 {
@@ -27,6 +34,38 @@ namespace thinsqlitepp
      * @addtogroup SQL SQLite API Wrappers
      * @{
      */
+
+    /**
+     * A fallback version of struct iovec for platforms that lack it.
+     * 
+     * @see thinsqlitepp::iovec
+     */ 
+    struct iovec_fallback {
+        /// @brief Base address of a memory region for input or output. 
+        void *iov_base;
+        /// @brief The size of the memory pointed to by iov_base. 
+        size_t iov_len;
+    };
+
+    template<class T=struct ::iovec, size_t = sizeof(T)>
+    constexpr struct ::iovec detect_iovec(T *) { return{}; }
+    constexpr auto           detect_iovec(...) { return iovec_fallback{}; }
+
+    /**
+     * A portable version of struct iovec that SQLite uses for carray() functionality.
+     * 
+     * On Posix platforms this is a typedef to **struct iovec** from 
+     * [`<sys/uio.h>`](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_uio.h.html)
+     * On other platforms this is a typedef to the `thinsqlitepp::iovec_fallback`.
+     *  
+     * 
+     * Thus, for portability, you can use thinsqlitepp::iovec on any platform
+     */
+#if !DOXYGEN
+    using iovec = decltype(detect_iovec((struct ::iovec *)nullptr));
+#else
+    using iovec = <conditionally declared>;
+#endif
 
     /**
      * Prepared Statement Object
@@ -358,6 +397,125 @@ namespace thinsqlitepp
         void bind(int idx, const value & val);
 
         ///@}
+
+        /** @{
+         * @anchor statement_carray_bind
+         * @name Binding carray() values to parameters
+         * 
+         * This set of overloaded functions wraps @ref sqlite3_carray_bind and
+         * @ref sqlite3_carray_bind_v2 functions. 
+         */
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 52, 0)
+
+    private:
+        template<class T>
+        static constexpr bool supported_carray_type = 
+            std::is_same_v<std::remove_const_t<T>, int> ||
+            std::is_same_v<std::remove_const_t<T>, int64_t> ||
+            std::is_same_v<std::remove_const_t<T>, double> ||
+            std::is_same_v<std::remove_const_t<T>, char *> ||
+        #if __cpp_char8_t >= 201811
+            std::is_same_v<std::remove_const_t<T>, char8_t *> ||
+        #endif
+            std::is_same_v<std::remove_const_t<T>, iovec>;
+
+    
+        template<class T>
+        static constexpr int carray_type()
+        {
+            if constexpr (std::is_same_v<std::remove_const_t<T>, int>)
+                return SQLITE_CARRAY_INT32;
+            else if constexpr (std::is_same_v<std::remove_const_t<T>, int64_t>)
+                return SQLITE_CARRAY_INT64;
+            else if constexpr (std::is_same_v<std::remove_const_t<T>, double>)
+                return SQLITE_CARRAY_DOUBLE;
+            else if constexpr (std::is_same_v<std::remove_const_t<T>, char *>)
+                return SQLITE_CARRAY_TEXT;
+        #if __cpp_char8_t >= 201811
+            else if constexpr (std::is_same_v<std::remove_const_t<T>, char8_t *>)
+                return SQLITE_CARRAY_TEXT;
+        #endif
+            else if constexpr (std::is_same_v<std::remove_const_t<T>, iovec>)
+                return SQLITE_CARRAY_BLOB;
+            else
+                static_assert(dependent_false<T>, "unsupported carray type");
+        }
+
+    public:
+
+        /**
+         * Bind the content of an array for the CARRAY table-valued function in the statement
+         * 
+         * Equivalent to ::sqlite3_carray_bind_v2 with #SQLITE_TRANSIENT.
+         * 
+         * The span content is copied into the statement.
+         * Thus the lifetime of the data referred to by `array` parameter is 
+         * independent of the statement's
+         * 
+         * @tparam T Array content type. Can be one of:
+         * - int
+         * - int64_t
+         * - double
+         * - char *
+         * - char8_t * (if `char8_t` is supported by your compiler/library)
+         * - iovec
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(supported_carray_type<T>,
+        void) carray_bind(int idx, span<T> array)
+            { this->carray_bind(idx, array, SQLITE_TRANSIENT, nullptr); }
+
+        /**
+         * Bind a reference to an array for the CARRAY table-valued function in the statement
+         * 
+         * Equivalent to ::sqlite3_carray_bind_v2 with #SQLITE_STATIC.
+         * 
+         * The span content is used **by reference**.
+         * Thus the data referred to by `array` parameter must
+         * remain valid during this statement's lifetime.
+         * 
+         * @tparam T Array content type. Can be one of:
+         * - int
+         * - int64_t
+         * - double
+         * - char *
+         * - char8_t * (if `char8_t` is supported by your compiler/library)
+         * - iovec
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(supported_carray_type<T>,
+        void) carray_bind_reference(int idx, span<T> array)
+            { this->carray_bind(idx, array, SQLITE_STATIC, nullptr); }
+
+        /**
+         * Bind a reference to an array for the CARRAY table-valued function in the statement
+         * 
+         * Equivalent to ::sqlite3_carray_bind_v2
+         * 
+         * The span content is used **by reference**.
+         * The `destroy` function will be invoked by SQLite when it is safe to dispose of the
+         * array data (on both success and failure).
+         * 
+         * @tparam T Array content type. Can be one of:
+         * - int
+         * - int64_t
+         * - double
+         * - char *
+         * - char8_t * (if `char8_t` is supported by your compiler/library)
+         * - iovec
+         */
+        template<class T>
+        SQLITEPP_ENABLE_IF(supported_carray_type<T>,
+        void) carray_bind(int idx, span<T> array, void(*destroy)(T*) noexcept, void * desroy_arg = nullptr)
+        {
+            check_error(sqlite3_carray_bind_v2(this->c_ptr(), idx, (void*)array.data(), int(array.size()), 
+                                               carray_type<T>(), destroy, desroy_arg));
+        }
+
+    #endif
+
+        ///@} 
         
         /** @{
          * @anchor statement_managing_binding
@@ -428,7 +586,7 @@ namespace thinsqlitepp
             { return sqlite3_data_count(c_ptr()); }
 
     private:
-        template<typename T>
+        template<class T>
         static constexpr bool supported_column_type = 
             std::is_same_v<T, int> ||
             std::is_same_v<T, int64_t> ||

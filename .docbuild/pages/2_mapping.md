@@ -88,8 +88,10 @@ status page of what is or isn't available in this library.
 | Function                          |  Mapped To                                                     |
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3_cancel_auto_extension   | @refmylib{database::cancel_auto_extension}
+| ::sqlite3_carray_bind             | @refmylib{statement::carray_bind}
+| ::sqlite3_carray_bind_v2          | @refmylib{statement::carray_bind}
 | ::sqlite3_changes                 | @refmylib{database::changes}
-| ::sqlite3_changes64               | @refmylib{database::changes64}
+| ::sqlite3_changes64               | @refmylib{database::changes}
 | ::sqlite3_clear_bindings          | @refmylib{statement::clear_bindings}
 | ::sqlite3_close                   | **out of scope**
 | ::sqlite3_close_v2                | @refmylib{database}
