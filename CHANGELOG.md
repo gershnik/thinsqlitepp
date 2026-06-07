@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - `database::setlk_timeout` wrapping `sqlite3_setlk_timeout`
 - `database::set_errmsg` wrapping `sqlite3_set_errmsg`
 - `keywords` class providing safe, STL-like interface to `sqlite3_keyword_count`, `sqlite3_keyword_name` and `sqlite3_keyword_check`
+- `error::offset` wrapping `sqlite3_error_offset`
 - clang-cl is now supported on Windows
 
 ### Fixed

@@ -35,6 +35,9 @@ namespace thinsqlitepp
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 12, 0)
         _system_error_code = sqlite3_system_errno(c_ptr(db));
 #endif
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 38, 0)
+        _offset = sqlite3_error_offset(c_ptr(db));
+    #endif
         auto db_message = sqlite3_errmsg(c_ptr(db));
         if (db_message != _message.get())
             _message = copy_message(db_message);

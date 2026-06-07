@@ -160,7 +160,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_errcode                 | @refmylib{exception::primary_error_code}, @refmylib{error::primary}
 | ::sqlite3_errmsg                  | @refmylib{exception::what}, @refmylib{error::message}
 | ::sqlite3_errmsg16                | **out of scope**
-| ::sqlite3_error_offset            | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_error_offset            | @refmylib{error::offset}
 | ::sqlite3_errstr                  | @refmylib{exception::what}, @refmylib{error::message}
 | ::sqlite3_exec                    | @refmylib{database::exec}
 | ::sqlite3_expanded_sql            | @refmylib{statement::expanded_sql}
