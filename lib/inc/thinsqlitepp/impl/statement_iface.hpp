@@ -62,7 +62,7 @@ namespace thinsqlitepp
      * Thus, for portability, you can use thinsqlitepp::iovec on any platform
      */
 #if !DOXYGEN
-    using iovec = decltype(*detect_iovec((::iovec *)nullptr));
+    using iovec = std::remove_reference_t<decltype(*detect_iovec((::iovec *)nullptr))>;
 #else
     using iovec = <conditionally declared>;
 #endif
@@ -464,7 +464,7 @@ namespace thinsqlitepp
         template<class T>
         SQLITEPP_ENABLE_IF(supported_carray_type<T>,
         void) carray_bind(int idx, span<T> array)
-            { this->carray_bind(idx, array, SQLITE_TRANSIENT, nullptr); }
+            { this->carray_bind(idx, array, (void (*)(void *) noexcept)SQLITE_TRANSIENT, nullptr); }
 
         /**
          * Bind a reference to an array for the CARRAY table-valued function in the statement
@@ -486,7 +486,7 @@ namespace thinsqlitepp
         template<class T>
         SQLITEPP_ENABLE_IF(supported_carray_type<T>,
         void) carray_bind_reference(int idx, span<T> array)
-            { this->carray_bind(idx, array, SQLITE_STATIC, nullptr); }
+            { this->carray_bind(idx, array, (void (*)(void *) noexcept)SQLITE_STATIC, nullptr); }
 
         /**
          * Bind a reference to an array for the CARRAY table-valued function in the statement
@@ -507,10 +507,10 @@ namespace thinsqlitepp
          */
         template<class T>
         SQLITEPP_ENABLE_IF(supported_carray_type<T>,
-        void) carray_bind(int idx, span<T> array, void(*destroy)(T*) noexcept, void * desroy_arg = nullptr)
+        void) carray_bind(int idx, span<T> array, void(*destroy)(void*) noexcept, void * destroy_arg = nullptr)
         {
             check_error(sqlite3_carray_bind_v2(this->c_ptr(), idx, (void*)array.data(), int(array.size()), 
-                                               carray_type<T>(), destroy, desroy_arg));
+                                               carray_type<T>(), destroy, destroy_arg));
         }
 
     #endif
