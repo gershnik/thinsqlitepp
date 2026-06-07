@@ -164,5 +164,36 @@ TEST_CASE( "basics unique_ptr" ) {
     #endif
 }
 
+TEST_CASE( "create_module omitted destructor" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    std::vector<vector_table::entry> entries = {
+        { 1, "haha"},
+        { 2, "hoho"}
+    };
+
+    //Register directly through database::create_module with the destructor argument omitted.
+    //The caller retains ownership of `entries`; SQLite must not attempt to free it.
+    db->create_module("blah", vector_table::get_module(), &entries);
+
+    #if SQLITE_VERSION_NUMBER < SQLITEPP_SQLITE_VERSION(3, 9, 0)  
+    db->exec("CREATE VIRTUAL TABLE blah USING blah");
+    #endif
+
+    std::vector<vector_table::entry> selected;
+    db->exec("SELECT rowid, * FROM blah", [&selected] (row r) {
+        selected.push_back(vector_table::entry{r[0].value<int64_t>(), std::string(r[1].value<std::string_view>())});
+        return true;
+    });
+    CHECK(equalRanges(selected, entries));
+
+    #if SQLITE_VERSION_NUMBER < SQLITEPP_SQLITE_VERSION(3, 9, 0)  
+    db->exec("DROP TABLE blah");
+    #endif
+
+    //`entries` is still owned by us here and is destroyed normally at scope exit.
+}
+
 
 TEST_SUITE_END();

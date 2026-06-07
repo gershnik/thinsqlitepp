@@ -972,7 +972,7 @@ namespace thinsqlitepp
          * @param destructor `void(*)(T *) noexcept` function (or anything convertible to such a pointer)
          *   to call when data is no longer needed. Can be omitted
          */
-        template<typename T, typename D>
+        template<typename T, typename D = void(*)(T *) noexcept>
         SQLITEPP_ENABLE_IF((std::is_convertible_v<D, void(*)(T *) noexcept>),
         void) create_module(const string_param & name, const sqlite3_module * mod, 
                            T * data, D destructor = nullptr)
