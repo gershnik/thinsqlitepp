@@ -123,5 +123,46 @@ TEST_CASE( "basics" ) {
     #endif
 }
 
+TEST_CASE( "basics unique_ptr" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    std::vector<vector_table::entry> entries{
+        { 1, "haha"},
+        { 2, "hoho"}
+    };
+    auto pentries = std::make_unique<std::vector<vector_table::entry>>(entries);
+    vector_table::create_module(*db, "blah", std::move(pentries));
+
+    #if SQLITE_VERSION_NUMBER < SQLITEPP_SQLITE_VERSION(3, 9, 0)  
+    db->exec("CREATE VIRTUAL TABLE blah USING blah");
+    #endif
+
+    std::vector<vector_table::entry> selected;
+    db->exec("SELECT rowid, * FROM blah", [&selected] (row r) {
+        selected.push_back(vector_table::entry{r[0].value<int64_t>(), std::string(r[1].value<std::string_view>())});
+        return true;
+    });
+    CHECK(equalRanges(selected, entries));
+
+    selected.clear();
+    db->exec("SELECT rowid, * FROM blah WHERE rowid = 2", [&selected] (row r) {
+        selected.push_back(vector_table::entry{r[0].value<int64_t>(), std::string(r[1].value<std::string_view>())});
+        return true;
+    });
+    CHECK(equalRanges(selected, std::vector<vector_table::entry>{{2, "hoho"}}));
+    
+    selected.clear();
+    db->exec("SELECT rowid, * FROM blah WHERE name = 'hoho'", [&selected] (row r) {
+        selected.push_back(vector_table::entry{r[0].value<int64_t>(), std::string(r[1].value<std::string_view>())});
+        return true;
+    });
+    CHECK(equalRanges(selected, std::vector<vector_table::entry>{{2, "hoho"}}));
+
+    #if SQLITE_VERSION_NUMBER < SQLITEPP_SQLITE_VERSION(3, 9, 0)  
+    db->exec("DROP TABLE blah");
+    #endif
+}
+
 
 TEST_SUITE_END();

@@ -371,9 +371,10 @@ namespace thinsqlitepp
          * 
          * The `type` parameter should be a static string, preferably a string literal.
          */
-        template<class T>
-        void bind(int idx, T * ptr, const char * type, void(*destroy)(T*) noexcept)
-            { check_error(sqlite3_bind_pointer(this->c_ptr(), idx, ptr, type, (void(*)(void*))destroy)); }
+        template<class T, class D>
+        SQLITEPP_ENABLE_IF((std::is_convertible_v<D, void(*)(T *) noexcept>),
+        void) bind(int idx, T * ptr, const char * type, D destroy)
+            { check_error(sqlite3_bind_pointer(this->c_ptr(), idx, ptr, type, (void(*)(void*))(void(*)(T *) noexcept)destroy)); }
 
         /**
          * Bind a custom pointer to a parameter of the statement
@@ -387,7 +388,7 @@ namespace thinsqlitepp
          */
         template<class T>
         void bind(int idx, std::unique_ptr<T> ptr)
-            { this->bind(idx, ptr.release(), typeid(T).name(), +[](T * p) noexcept { delete p; }); }
+            { this->bind(idx, ptr.release(), typeid(T).name(), [](T * p) noexcept { delete p; }); }
 
         /**
          * Bind a dynamically typed value to a parameter of the statement
@@ -505,12 +506,12 @@ namespace thinsqlitepp
          * - char8_t * (if `char8_t` is supported by your compiler/library)
          * - iovec
          */
-        template<class T>
-        SQLITEPP_ENABLE_IF(supported_carray_type<T>,
-        void) carray_bind(int idx, span<T> array, void(*destroy)(void*) noexcept, void * destroy_arg = nullptr)
+        template<class T, class D>
+        SQLITEPP_ENABLE_IF((supported_carray_type<T> && std::is_convertible_v<D, void(*)(void *) noexcept>),
+        void) carray_bind(int idx, span<T> array, D destroy, void * destroy_arg = nullptr)
         {
             check_error(sqlite3_carray_bind_v2(this->c_ptr(), idx, (void*)array.data(), int(array.size()), 
-                                               carray_type<T>(), destroy, destroy_arg));
+                                               carray_type<T>(), (void(*)(void *))(void(*)(void *)noexcept)destroy, destroy_arg));
         }
 
     #endif

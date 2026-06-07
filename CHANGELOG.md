@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Fixed
 - `statement::bind(int, std::unique_ptr<T>)` now actually compiles
 - `value::get<T *>` now actually compiles
+- `context::result(std::unique_ptr<T>)` now actually compiles
+- `vtab::create_module(..., std::unique_ptr<>)` now actually compiles
 - The library headers are now compiling cleanly with `-Wconversion -Wsign-conversion` on clang
 
 ## [1.7] - 2026-05-26

@@ -969,12 +969,14 @@ namespace thinsqlitepp
          * @param name name of the module
          * @param mod pointer to ::sqlite3_module "vtable"
          * @param data data to be passed to virtual table xCreate function.
-         * @param destructor function to call when data is no longer needed. Can be omitted
+         * @param destructor `void(*)(T *) noexcept` function (or anything convertible to such a pointer)
+         *   to call when data is no longer needed. Can be omitted
          */
-        template<typename T>
-        void create_module(const string_param & name, const sqlite3_module * mod, 
-                           T * data, void(*destructor)(T *) noexcept = nullptr)
-            { check_error(sqlite3_create_module_v2(c_ptr(), name.c_str(), mod, (void*)data, (void (*)(void *))destructor)); }
+        template<typename T, typename D>
+        SQLITEPP_ENABLE_IF((std::is_convertible_v<D, void(*)(T *) noexcept>),
+        void) create_module(const string_param & name, const sqlite3_module * mod, 
+                           T * data, D destructor = nullptr)
+            { check_error(sqlite3_create_module_v2(c_ptr(), name.c_str(), mod, (void*)data, (void (*)(void *))(void(*)(T *) noexcept)destructor)); }
 
         
         //MARK: -
