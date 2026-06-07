@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 - `statement::carray_bind` overloads wrapping `sqlite3_carray_bind_v2`
+- `database::set_clientdata` overloads and `database::get_clientdata` wrapping `sqlite3_set_clientdata`/`sqlite3_get_clientdata`
 - `database::status64` wrapping `sqlite3_db_status64`
 - `database::setlk_timeout` wrapping `sqlite3_setlk_timeout`
 - `database::set_errmsg` wrapping `sqlite3_set_errmsg`

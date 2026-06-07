@@ -168,6 +168,49 @@ namespace thinsqlitepp
             { check_error(sqlite3_setlk_timeout(c_ptr(), ms, flags)); }
 
     #endif
+
+        //MARK: Client data
+
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 44, 0)
+        
+        /**
+         * Set arbitrary client data to this database connection
+         * 
+         * Equivalent to ::sqlite3_set_clientdata
+         */
+        void set_clientdata(const string_param & name, void * ptr, void(*destroy)(void*) = nullptr)
+            { check_error(sqlite3_set_clientdata(c_ptr(), name.c_str(), ptr, destroy)); }
+
+        /**
+         * Set arbitrary client data to this database connection
+         * 
+         * Equivalent to ::sqlite3_set_clientdata
+         * 
+         * This is a safer overload of @ref set_clientdata(const string_param &, void *, void(*)(void*))
+         * that takes a pointer via std::unique_ptr ownership transfer.
+         */
+        template<class T>
+        void set_clientdata(const string_param & name, std::unique_ptr<T> && data)
+        { 
+            set_clientdata(name, data.release(), [](void * d) {
+                delete static_cast<T *>(d);
+            });
+        }
+
+        /**
+         * Get arbitrary client data of this database connection
+         * 
+         * Equivalent to ::sqlite3_get_clientdata
+         * 
+         * Note that no type checks are performed to ensure that the data
+         * is, indeed, of the type T. It is  **your** responsibility to match T
+         * to the type passed to @ref set_clientdata
+         */
+        template<class T>
+        T * get_clientdata(const string_param & name) noexcept
+            { return static_cast<T *>(sqlite3_get_clientdata(c_ptr(), name.c_str())); }
+
+    #endif
         
         //MARK: -
 

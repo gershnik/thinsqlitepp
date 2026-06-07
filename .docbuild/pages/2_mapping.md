@@ -182,7 +182,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_free_table              | **out of scope**
 | ::sqlite3_get_autocommit          | @refmylib{database::get_autocommit}
 | ::sqlite3_get_auxdata             | @refmylib{context::get_auxdata}
-| ::sqlite3_get_clientdata          | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_get_clientdata          | @refmylib{database::get_clientdata}
 | ::sqlite3_get_table               | **out of scope**
 | ::sqlite3_hard_heap_limit64       | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_initialize              | @refmylib{initialize}
@@ -281,7 +281,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_setlk_timeout           | @refmylib{database::setlk_timeout}
 | ::sqlite3_set_authorizer          | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_set_auxdata             | @refmylib{context::set_auxdata}
-| ::sqlite3_set_clientdata          | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_set_clientdata          | @refmylib{database::set_clientdata}
 | ::sqlite3_set_errmsg              | @refmylib{database::set_errmsg}
 | ::sqlite3_set_last_insert_rowid   | @refmylib{database::set_last_insert_rowid}
 | ::sqlite3_shutdown                | @refmylib{shutdown}
