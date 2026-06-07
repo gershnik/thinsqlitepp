@@ -62,7 +62,7 @@ namespace thinsqlitepp
      * Thus, for portability, you can use thinsqlitepp::iovec on any platform
      */
 #if !DOXYGEN
-    using iovec = decltype(detect_iovec((struct ::iovec *)nullptr));
+    using iovec = decltype(detect_iovec((::iovec *)nullptr));
 #else
     using iovec = <conditionally declared>;
 #endif
