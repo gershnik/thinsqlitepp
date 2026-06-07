@@ -4,6 +4,7 @@
 #include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/database.hpp>
+#include <thinsqlitepp/statement.hpp>
 
 #include <type_traits>
 
@@ -848,5 +849,164 @@ TEST_CASE( "set_errmsg" ) {
 }
 
 #endif
+
+TEST_CASE_FIXTURE(sqlitepp_test_fixture, "extended_result_codes") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    set_mock_sqlite3_extended_result_codes([&](sqlite3 *dbx, int onoff){
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(onoff == 1);
+        return SQLITE_OK;
+    });
+    db->extended_result_codes(true);
+
+    set_mock_sqlite3_extended_result_codes([&](sqlite3 *dbx, int onoff){
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(onoff == 0);
+        return SQLITE_OK;
+    });
+    db->extended_result_codes(false);
+}
+
+TEST_CASE_FIXTURE(sqlitepp_test_fixture, "file_control") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    int arg = 0;
+    set_mock_sqlite3_file_control([&](sqlite3 *dbx, const char *zDbName, int op, void *pArg){
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(zDbName == "main"s);
+        REQUIRE(op == SQLITE_FCNTL_CHUNK_SIZE);
+        REQUIRE(pArg == &arg);
+        return SQLITE_OK;
+    });
+    db->file_control("main", SQLITE_FCNTL_CHUNK_SIZE, &arg);
+}
+
+TEST_CASE_FIXTURE(sqlitepp_test_fixture, "interrupt") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    bool called = false;
+    set_mock_sqlite3_interrupt([&](sqlite3 *dbx){
+        REQUIRE(dbx == db->c_ptr());
+        called = true;
+    });
+    db->interrupt();
+    CHECK(called);
+}
+
+TEST_CASE_FIXTURE(sqlitepp_test_fixture, "overload_function") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    set_mock_sqlite3_overload_function([&](sqlite3 *dbx, const char *zName, int nArg){
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(zName == "myfunc"s);
+        REQUIRE(nArg == 2);
+        return SQLITE_OK;
+    });
+    db->overload_function("myfunc", 2);
+}
+
+TEST_CASE_FIXTURE(sqlitepp_test_fixture, "release_memory") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    bool called = false;
+    set_mock_sqlite3_db_release_memory([&](sqlite3 *dbx){
+        REQUIRE(dbx == db->c_ptr());
+        called = true;
+        return SQLITE_OK;
+    });
+    db->release_memory();
+    CHECK(called);
+}
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0)
+TEST_CASE_FIXTURE(sqlitepp_test_fixture, "cacheflush") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    bool called = false;
+    set_mock_sqlite3_db_cacheflush([&](sqlite3 *dbx){
+        REQUIRE(dbx == db->c_ptr());
+        called = true;
+        return SQLITE_OK;
+    });
+    db->cacheflush();
+    CHECK(called);
+}
+#endif
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 50, 0)
+TEST_CASE_FIXTURE(sqlitepp_test_fixture, "setlk_timeout") {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    //default flags
+    set_mock_sqlite3_setlk_timeout([&](sqlite3 *dbx, int ms, int flags){
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(ms == 250);
+        REQUIRE(flags == 0);
+        return SQLITE_OK;
+    });
+    db->setlk_timeout(250);
+
+    //explicit flags
+    set_mock_sqlite3_setlk_timeout([&](sqlite3 *dbx, int ms, int flags){
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(ms == 100);
+        REQUIRE(flags == SQLITE_SETLK_BLOCK_ON_CONNECT);
+        return SQLITE_OK;
+    });
+    db->setlk_timeout(100, SQLITE_SETLK_BLOCK_ON_CONNECT);
+}
+#endif
+
+//Methods below have observable effects, so they are tested directly rather than via mocks.
+
+TEST_CASE( "limit" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    //setting returns the previous value
+    int original = db->limit(SQLITE_LIMIT_LENGTH, 1000);
+    CHECK(original > 0);
+
+    //querying with a negative value returns the current limit without changing it
+    CHECK(db->limit(SQLITE_LIMIT_LENGTH, -1) == 1000);
+
+    //setting again returns the previously set value
+    CHECK(db->limit(SQLITE_LIMIT_LENGTH, 500) == 1000);
+    CHECK(db->limit(SQLITE_LIMIT_LENGTH, -1) == 500);
+}
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 18, 0)
+TEST_CASE( "set_last_insert_rowid" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    db->set_last_insert_rowid(424242);
+    CHECK(db->last_insert_rowid() == 424242);
+    CHECK(sqlite3_last_insert_rowid(db->c_ptr()) == 424242);
+}
+#endif
+
+TEST_CASE( "next_statement" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    auto stmt = statement::create(*db, "SELECT 1");
+
+    //the only live statement is reported by next_statement(nullptr)
+    auto * first = db->next_statement(nullptr);
+    REQUIRE(first != nullptr);
+    CHECK(first->c_ptr() == stmt->c_ptr());
+
+    //and there is nothing after it
+    CHECK(db->next_statement(stmt.get()) == nullptr);
+}
 
 TEST_SUITE_END();

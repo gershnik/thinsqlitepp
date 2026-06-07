@@ -52,6 +52,25 @@ TEST_CASE( "basics" ) {
 
 }
 
+TEST_CASE( "recover_snapshot" ) {
+
+    //A real snapshot recovery requires specific WAL state, so verify the wrapper
+    //forwards the right arguments to sqlite3_snapshot_recover via a mock.
+    mock_cleanup cleanup;
+
+    auto db = database::open("walfoo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    bool called = false;
+    set_mock_sqlite3_snapshot_recover([&](sqlite3 *dbx, const char *zDb){
+        REQUIRE(dbx == db->c_ptr());
+        REQUIRE(std::string(zDb) == "main");
+        called = true;
+        return SQLITE_OK;
+    });
+    db->recover_snapshot("main");
+    CHECK(called);
+}
+
 
 TEST_SUITE_END();
 

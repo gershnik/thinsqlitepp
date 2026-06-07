@@ -139,5 +139,35 @@ MAKE_MOCK(sqlite3_malloc64, (sqlite3_uint64 size), (size));
 #define sqlite3_malloc64 mock_sqlite3_malloc64
 #endif
 
+MAKE_MOCK(sqlite3_extended_result_codes, (sqlite3 *db, int onoff), (db, onoff));
+#define sqlite3_extended_result_codes mock_sqlite3_extended_result_codes
+
+MAKE_MOCK(sqlite3_file_control, (sqlite3 *db, const char *zDbName, int op, void *pArg), (db, zDbName, op, pArg));
+#define sqlite3_file_control mock_sqlite3_file_control
+
+MAKE_MOCK(sqlite3_interrupt, (sqlite3 *db), (db));
+#define sqlite3_interrupt mock_sqlite3_interrupt
+
+MAKE_MOCK(sqlite3_overload_function, (sqlite3 *db, const char *zName, int nArg), (db, zName, nArg));
+#define sqlite3_overload_function mock_sqlite3_overload_function
+
+MAKE_MOCK(sqlite3_db_release_memory, (sqlite3 *db), (db));
+#define sqlite3_db_release_memory mock_sqlite3_db_release_memory
+
+#if SQLITE_VERSION_NUMBER >= 3010000
+MAKE_MOCK(sqlite3_db_cacheflush, (sqlite3 *db), (db));
+#define sqlite3_db_cacheflush mock_sqlite3_db_cacheflush
+#endif
+
+#if SQLITE_VERSION_NUMBER >= 3050000
+MAKE_MOCK(sqlite3_setlk_timeout, (sqlite3 *db, int ms, int flags), (db, ms, flags));
+#define sqlite3_setlk_timeout mock_sqlite3_setlk_timeout
+#endif
+
+#if !THINSQLITEPP_OMIT_SNAPSHOT && SQLITE_VERSION_NUMBER >= 3010000
+MAKE_MOCK(sqlite3_snapshot_recover, (sqlite3 *db, const char *zDb), (db, zDb));
+#define sqlite3_snapshot_recover mock_sqlite3_snapshot_recover
+#endif
+
 #endif
 
