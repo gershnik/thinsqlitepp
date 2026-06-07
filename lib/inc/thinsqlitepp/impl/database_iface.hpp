@@ -27,7 +27,7 @@
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-function-type"
     
-    #if defined(__APPLE__) && defined(__clang__) && defined(SQLITE_AVAILABLE)
+    #if defined(__APPLE__) && defined(__clang__)
         #pragma GCC diagnostic ignored "-Wunguarded-availability-new"
         #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     #endif
@@ -1202,11 +1202,6 @@ namespace thinsqlitepp
 
     #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 8, 7)
 
-        #if defined(__clang__) || defined(__GNUC__)
-            #pragma GCC diagnostic push
-            #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-        #endif
-
         /**
          * Automatically load statically linked extension
          * 
@@ -1237,11 +1232,7 @@ namespace thinsqlitepp
          */
         void reset_auto_extension() noexcept
             { sqlite3_reset_auto_extension(); }
-
-        #if defined(__clang__) || defined(__GNUC__)
-            #pragma GCC diagnostic pop
-        #endif
-
+    
     #endif
 
         /** @} */
