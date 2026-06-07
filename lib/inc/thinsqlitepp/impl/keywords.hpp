@@ -16,6 +16,7 @@
 
 namespace thinsqlitepp
 {
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 24, 0)
     /**
      * @addtogroup SQL SQLite API Wrappers
      * @{
@@ -149,6 +150,7 @@ namespace thinsqlitepp
     };
 
     /** @} */
+#endif
 }
 
 #endif
