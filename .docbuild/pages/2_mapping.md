@@ -295,8 +295,8 @@ status page of what is or isn't available in this library.
 | ::sqlite3_soft_heap_limit64       | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_sourceid                | @refmylib{sqlite_version::runtime_sourceid}
 | ::sqlite3_sql                     | @refmylib{statement::sql}
-| ::sqlite3_status                  | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_status64                | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_status                  | @refmylib{status}
+| ::sqlite3_status64                | @refmylib{status}
 | ::sqlite3_step                    | @refmylib{statement::step}
 | ::sqlite3_stmt_busy               | @refmylib{statement::busy}
 | ::sqlite3_stmt_explain            | <span style="color:orange"> **not implemented** </span>

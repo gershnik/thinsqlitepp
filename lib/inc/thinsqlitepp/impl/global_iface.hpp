@@ -49,6 +49,37 @@ namespace thinsqlitepp
         sqlite3_shutdown();
     }
 
+    /// Return type for @ref status()
+    struct status_value
+    {
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0)
+        using counter_type = sqlite3_int64;
+    #else
+        using counter_type = int;
+    #endif
+
+        counter_type current;
+        counter_type highwater;
+    };
+
+    /**
+     * Obtain SQLite runtime status
+     * 
+     * Equivalent to `::sqlite3_status64` or `::sqlite3_status`, if the former is not available
+     */
+    status_value status(int op, bool reset = false)
+    {
+        status_value ret;
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0)
+        int res = sqlite3_status64(op, &ret.current, &ret.highwater, reset);
+    #else
+        int res = sqlite3_status(op, &ret.current, &ret.highwater, reset);
+    #endif
+        if (res != SQLITE_OK)
+            throw exception(res);
+        return ret;
+    }
+
     /** @cond PRIVATE */
 
     namespace internal
