@@ -1,11 +1,13 @@
 #include <string_view>
 #include <ostream>
 #include <vector>
+#include <memory>
 #include <doctest.h>
 #include "mock_sqlite.hpp"
 
 #include <thinsqlitepp/statement.hpp>
 #include <thinsqlitepp/database.hpp>
+#include <thinsqlitepp/context.hpp>
 
 #if __cpp_lib_ranges >= 201911L
     #include <ranges>
@@ -92,6 +94,226 @@ TEST_CASE( "statement looping" ) {
         }
     }
     
+}
+
+namespace {
+
+    //Callback bookkeeping for the bind_reference(..., unref) and bind_pointer destructor overloads.
+    int          g_bind_cb_count = 0;
+    const void * g_bind_cb_arg   = nullptr;
+
+    void bind_text_unref(const char * p) noexcept       { ++g_bind_cb_count; g_bind_cb_arg = p; }
+    void bind_blob_unref(const std::byte * p) noexcept  { ++g_bind_cb_count; g_bind_cb_arg = p; }
+#if __cpp_char8_t >= 201811
+    void bind_u8text_unref(const char8_t * p) noexcept  { ++g_bind_cb_count; g_bind_cb_arg = p; }
+#endif
+
+    int g_ptr_destroy_count = 0;
+    void ptr_int_destroy(int * p) noexcept { ++g_ptr_destroy_count; g_bind_cb_arg = p; }
+
+    //A type whose live instance count we can observe, for the unique_ptr ownership overload.
+    struct counted { static int alive; counted() { ++alive; } ~counted() { --alive; } };
+    int counted::alive = 0;
+}
+
+TEST_CASE( "statement bind values" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    //Each block binds a value to "SELECT ?1" and reads it straight back.
+
+    {   //null
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, nullptr);
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_type(0) == SQLITE_NULL);
+    }
+    {   //int
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, 42);
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_type(0) == SQLITE_INTEGER);
+        CHECK(stmt->column_value<int>(0) == 42);
+    }
+    {   //int64_t
+        const int64_t big = int64_t(1) << 40;
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, big);
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_value<int64_t>(0) == big);
+    }
+    {   //double
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, 3.5);
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_type(0) == SQLITE_FLOAT);
+        CHECK(stmt->column_value<double>(0) == 3.5);
+    }
+    {   //std::string_view (text, by value)
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, std::string_view("hello"));
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_type(0) == SQLITE_TEXT);
+        CHECK(stmt->column_value<std::string_view>(0) == "hello");
+    }
+#if __cpp_char8_t >= 201811
+    {   //std::u8string_view (text, by value)
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, std::u8string_view(u8"world"));
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_type(0) == SQLITE_TEXT);
+        CHECK(stmt->column_value<std::u8string_view>(0) == u8"world");
+    }
+#endif
+    {   //blob_view (by value)
+        const std::byte data[] { std::byte(1), std::byte(2), std::byte(3) };
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, blob_view(data));
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_type(0) == SQLITE_BLOB);
+        auto out = stmt->column_value<blob_view>(0);
+        REQUIRE(out.size() == 3);
+        CHECK(out[0] == std::byte(1));
+        CHECK(out[2] == std::byte(3));
+    }
+    {   //zero_blob
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, zero_blob(4));
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_type(0) == SQLITE_BLOB);
+        auto out = stmt->column_value<blob_view>(0);
+        REQUIRE(out.size() == 4);
+        CHECK(out[0] == std::byte(0));
+        CHECK(out[3] == std::byte(0));
+    }
+    {   //const value & (read a value from one statement, bind into another)
+        auto src = statement::create(*db, "SELECT 123");
+        REQUIRE(src->step());
+        const value & v = src->raw_column_value(0);
+
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind(1, v);
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_value<int>(0) == 123);
+    }
+}
+
+TEST_CASE( "statement bind_reference" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    {   //std::string_view (text, by reference / SQLITE_STATIC)
+        std::string str = "reftext";
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind_reference(1, std::string_view(str));
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_value<std::string_view>(0) == "reftext");
+    }
+
+    {   //std::string_view with custom unref
+        g_bind_cb_count = 0;
+        g_bind_cb_arg = nullptr;
+        std::string str = "unreftext";
+        {
+            auto stmt = statement::create(*db, "SELECT ?1");
+            stmt->bind_reference(1, std::string_view(str), &bind_text_unref);
+            REQUIRE(stmt->step());
+            CHECK(stmt->column_value<std::string_view>(0) == "unreftext");
+            CHECK(g_bind_cb_count == 0);     //still referenced
+        }                                    //finalize releases the reference
+        CHECK(g_bind_cb_count == 1);
+        CHECK(g_bind_cb_arg == str.data());
+    }
+
+#if __cpp_char8_t >= 201811
+    {   //std::u8string_view (by reference)
+        std::u8string str = u8"refu8";
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind_reference(1, std::u8string_view(str));
+        REQUIRE(stmt->step());
+        CHECK(stmt->column_value<std::u8string_view>(0) == u8"refu8");
+    }
+
+    {   //std::u8string_view with custom unref
+        g_bind_cb_count = 0;
+        g_bind_cb_arg = nullptr;
+        std::u8string str = u8"unrefu8";
+        {
+            auto stmt = statement::create(*db, "SELECT ?1");
+            stmt->bind_reference(1, std::u8string_view(str), &bind_u8text_unref);
+            REQUIRE(stmt->step());
+            CHECK(stmt->column_value<std::u8string_view>(0) == u8"unrefu8");
+            CHECK(g_bind_cb_count == 0);
+        }
+        CHECK(g_bind_cb_count == 1);
+        CHECK(g_bind_cb_arg == str.data());
+    }
+#endif
+
+    {   //blob_view (by reference / SQLITE_STATIC)
+        const std::byte data[] { std::byte(4), std::byte(5) };
+        auto stmt = statement::create(*db, "SELECT ?1");
+        stmt->bind_reference(1, blob_view(data));
+        REQUIRE(stmt->step());
+        auto out = stmt->column_value<blob_view>(0);
+        REQUIRE(out.size() == 2);
+        CHECK(out[0] == std::byte(4));
+    }
+
+    {   //blob_view with custom unref
+        g_bind_cb_count = 0;
+        g_bind_cb_arg = nullptr;
+        const std::byte data[] { std::byte(6), std::byte(7) };
+        {
+            auto stmt = statement::create(*db, "SELECT ?1");
+            stmt->bind_reference(1, blob_view(data), &bind_blob_unref);
+            REQUIRE(stmt->step());
+            auto out = stmt->column_value<blob_view>(0);
+            REQUIRE(out.size() == 2);
+            CHECK(out[1] == std::byte(7));
+            CHECK(g_bind_cb_count == 0);
+        }
+        CHECK(g_bind_cb_count == 1);
+        CHECK(g_bind_cb_arg == data);
+    }
+}
+
+TEST_CASE( "statement bind pointer" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    //A scalar SQL function that dereferences a bound "int_ptr" pointer argument.
+    auto deref = [](context * ctxt, int, value ** vals) noexcept {
+        int * p = vals[0]->get<int *>("int_ptr");
+        ctxt->result(p ? *p : -1);
+    };
+    db->create_function("deref_int", 1, SQLITE_UTF8, &deref, nullptr);
+
+    {   //bind(int, T *, const char *, void(*)(T *)) - raw pointer with custom destructor
+        g_ptr_destroy_count = 0;
+        g_bind_cb_arg = nullptr;
+        int payload = 777;
+        {
+            auto stmt = statement::create(*db, "SELECT deref_int(?1)");
+            stmt->bind(1, &payload, "int_ptr", &ptr_int_destroy);
+            REQUIRE(stmt->step());
+            CHECK(stmt->column_value<int>(0) == 777);   //pointer round-trips through the function
+            CHECK(g_ptr_destroy_count == 0);            //destructor not called while bound
+        }                                               //finalize invokes the destructor
+        CHECK(g_ptr_destroy_count == 1);
+        CHECK(g_bind_cb_arg == &payload);
+    }
+
+    {   //bind(int, std::unique_ptr<T>) - ownership transfer; object freed on finalize
+        counted::alive = 0;
+        {
+            auto stmt = statement::create(*db, "SELECT ?1");
+            stmt->bind(1, std::make_unique<counted>());
+            CHECK(counted::alive == 1);                 //SQLite now owns it
+            REQUIRE(stmt->step());
+        }                                               //finalize deletes the managed object
+        CHECK(counted::alive == 0);
+    }
 }
 
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 52, 0) && defined(SQLITE_ENABLE_CARRAY)

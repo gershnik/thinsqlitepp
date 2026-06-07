@@ -387,7 +387,7 @@ namespace thinsqlitepp
          */
         template<class T>
         void bind(int idx, std::unique_ptr<T> ptr)
-            { this->bind(idx, ptr.release(), typeid(T).name(), [](T * p) noexcept { delete p; }); }
+            { this->bind(idx, ptr.release(), typeid(T).name(), +[](T * p) noexcept { delete p; }); }
 
         /**
          * Bind a dynamically typed value to a parameter of the statement
