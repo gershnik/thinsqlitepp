@@ -5,6 +5,7 @@
 
 #include <type_traits>
 #include <ostream>
+#include <array>
 
 using namespace thinsqlitepp;
 using namespace std;

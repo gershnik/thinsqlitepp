@@ -15,6 +15,16 @@ else()
     message("Native sqlite3 not found, skipping native tests")
 endif()
 
+if ("${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "MSVC")
+    set(FRONT_MSVC True)
+else()
+    set(FRONT_MSVC False)
+endif()
+
+set (CLANG_CL "$<AND:$<BOOL:${FRONT_MSVC}>,$<CXX_COMPILER_ID:Clang>>")
+set (CLANG_NORMAL "$<AND:$<NOT:$<BOOL:${FRONT_MSVC}>>,$<CXX_COMPILER_ID:Clang>>")
+
+
 set (SQLITE_VERSIONS
     3.7.15.2
     3.34.0
@@ -41,8 +51,9 @@ function(configure_test_target target)
     target_compile_options(${target}
     PRIVATE
         $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8;/wd5285>
-        $<$<CXX_COMPILER_ID:Clang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
-        $<$<CXX_COMPILER_ID:AppleClang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move>
+        $<${CLANG_NORMAL}:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move;-Wconversion;-Wsign-conversion>
+        $<$<CXX_COMPILER_ID:AppleClang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move;-Wconversion;-Wsign-conversion>
+        $<${CLANG_CL}:/W4 /WX -Wpedantic;-Wconversion;-Wsign-conversion;-Wno-cast-function-type-mismatch> 
         $<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra;-pedantic>
     )
 

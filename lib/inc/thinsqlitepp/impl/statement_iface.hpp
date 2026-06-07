@@ -48,8 +48,8 @@ namespace thinsqlitepp
     };
 
     template<class T=struct ::iovec, size_t = sizeof(T)>
-    constexpr struct ::iovec detect_iovec(T *) { return{}; }
-    constexpr auto           detect_iovec(...) { return iovec_fallback{}; }
+    constexpr struct ::iovec * detect_iovec(T *) { return{}; }
+    constexpr auto             detect_iovec(...) { return (iovec_fallback *)nullptr; }
 
     /**
      * A portable version of struct iovec that SQLite uses for carray() functionality.
@@ -62,7 +62,7 @@ namespace thinsqlitepp
      * Thus, for portability, you can use thinsqlitepp::iovec on any platform
      */
 #if !DOXYGEN
-    using iovec = decltype(detect_iovec((::iovec *)nullptr));
+    using iovec = decltype(*detect_iovec((::iovec *)nullptr));
 #else
     using iovec = <conditionally declared>;
 #endif

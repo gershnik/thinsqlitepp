@@ -43,7 +43,7 @@ namespace thinsqlitepp
         { 
             if (release >= 1000)
                 throw std::runtime_error("invalid release value");
-            int val = release;
+            auto val = int(release);
             if (minor >= 1000)
                 throw std::runtime_error("invalid minor value");
             val += minor*1000;
@@ -63,7 +63,7 @@ namespace thinsqlitepp
          */
         constexpr std::tuple<unsigned, unsigned, unsigned> parts() const noexcept
         { 
-            unsigned val = _value;
+            auto val = unsigned(_value);
             unsigned major = val / 1000000;
             val -= (major * 1000000);
             unsigned minor = val / 1000;

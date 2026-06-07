@@ -280,13 +280,13 @@ namespace thinsqlitepp
             
             constexpr const_iterator & operator++() noexcept { ++_idx; return *this; }
             constexpr const_iterator operator++(int) noexcept { return _idx++; }
-            constexpr const_iterator & operator+=(difference_type diff) noexcept { _idx += diff; return *this; }
+            constexpr const_iterator & operator+=(difference_type diff) noexcept { _idx += size_t(diff); return *this; }
             
             constexpr const_iterator & operator--() noexcept { --_idx; return *this; }
             constexpr const_iterator operator--(int) noexcept { return _idx--; }
-            constexpr const_iterator & operator-=(difference_type diff) noexcept { _idx -= diff; return *this; }
+            constexpr const_iterator & operator-=(difference_type diff) noexcept { _idx -= size_t(diff); return *this; }
             
-            friend constexpr difference_type operator-(const_iterator lhs, const_iterator rhs) noexcept { return lhs._idx - rhs._idx; }
+            friend constexpr difference_type operator-(const_iterator lhs, const_iterator rhs) noexcept { return difference_type(lhs._idx - rhs._idx); }
             
             friend constexpr bool operator==(const_iterator lhs, const_iterator rhs) noexcept { return lhs._idx == rhs._idx; };
             friend constexpr bool operator!=(const_iterator lhs, const_iterator rhs) noexcept { return lhs._idx != rhs._idx; };

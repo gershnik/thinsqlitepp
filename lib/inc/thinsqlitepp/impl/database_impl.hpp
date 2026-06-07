@@ -249,7 +249,7 @@ namespace thinsqlitepp
             if (collator)
                 this->create_collation(name, encoding, collator,
                                        [] (T data, int lhs_len, const void * lhs_bytes, int rhs_len, const void * rhs_bytes) noexcept -> int {
-                        return (*data)(span<const std::byte>((std::byte *)lhs_bytes, lhs_len), span<const std::byte>((std::byte *)rhs_bytes, rhs_len));
+                        return (*data)(span<const std::byte>((std::byte *)lhs_bytes, size_t(lhs_len)), span<const std::byte>((std::byte *)rhs_bytes, size_t(rhs_len)));
                 },
                                        deleter);
             else
