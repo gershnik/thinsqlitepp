@@ -108,8 +108,10 @@ namespace {
     void bind_u8text_unref(const char8_t * p) noexcept  { ++g_bind_cb_count; g_bind_cb_arg = p; }
 #endif
 
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
     int g_ptr_destroy_count = 0;
     void ptr_int_destroy(int * p) noexcept { ++g_ptr_destroy_count; g_bind_cb_arg = p; }
+#endif
 
     //A type whose live instance count we can observe, for the unique_ptr ownership overload.
     struct counted { static int alive; counted() { ++alive; } ~counted() { --alive; } };
@@ -278,6 +280,9 @@ TEST_CASE( "statement bind_reference" ) {
     }
 }
 
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
+
 TEST_CASE( "statement bind pointer" ) {
 
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
@@ -315,6 +320,8 @@ TEST_CASE( "statement bind pointer" ) {
         CHECK(counted::alive == 0);
     }
 }
+
+#endif
 
 #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 52, 0) && defined(SQLITE_ENABLE_CARRAY)
 

@@ -230,7 +230,7 @@ namespace thinsqlitepp
 
         //MARK: -
 
-    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 1)
         /**
          * Set error code and message
          * 
@@ -1202,6 +1202,11 @@ namespace thinsqlitepp
 
     #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 8, 7)
 
+        #if defined(__clang__) || defined(__GNUC__)
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+        #endif
+
         /**
          * Automatically load statically linked extension
          * 
@@ -1212,7 +1217,6 @@ namespace thinsqlitepp
         void auto_extension(void(*entry_point)(database *, const char **, const struct sqlite3_api_routines *))
             { check_error(sqlite3_auto_extension((void(*)(void))entry_point)); }
 
-    
         /**
          * Cancel automatic extension Loading
          * 
@@ -1233,6 +1237,10 @@ namespace thinsqlitepp
          */
         void reset_auto_extension() noexcept
             { sqlite3_reset_auto_extension(); }
+
+        #if defined(__clang__) || defined(__GNUC__)
+            #pragma GCC diagnostic pop
+        #endif
 
     #endif
 
@@ -1353,7 +1361,7 @@ namespace thinsqlitepp
          */
         struct status status(int op, bool reset = false) const;
 
-    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 1)
 
         /// Return type for @ref status64()
         struct status64

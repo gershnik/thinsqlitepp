@@ -390,7 +390,7 @@ namespace thinsqlitepp
         return ret;
     }
 
-#if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+#if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 1)
     inline struct database::status64 database::status64(int op, bool reset) const
     {
         struct status64 ret;

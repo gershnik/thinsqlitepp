@@ -245,6 +245,8 @@ TEST_CASE( "result" ) {
         return true;
     });
 
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
+
     // POINTER - result(T *, const char * type, void(*)(T *) noexcept)
     {
         static int payload       = 12345;
@@ -312,6 +314,7 @@ TEST_CASE( "result" ) {
         });
         CHECK(deletes == 1);            //the managed object was deleted exactly once
     }
+#endif
 }
 
 TEST_SUITE_END();
