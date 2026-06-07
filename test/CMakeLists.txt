@@ -80,6 +80,7 @@ function(configure_test_target target)
         test_backup.cpp
         test_blob.cpp
         test_database.cpp
+        test_keywords.cpp
         test_main.cpp
         test_memory.cpp
         test_snapshot.cpp
