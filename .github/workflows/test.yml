@@ -71,6 +71,7 @@ jobs:
           #windows
           for cxx_standard in cxx_standards:
             hosts.append({'os': 'windows-latest', 'cxx_standard': cxx_standard, 'jobname': f'Windows - C++{cxx_standard}'})
+            hosts.append({'os': 'windows-latest', 'cxx_standard': cxx_standard, 'compiler':'clang-cl', 'jobname': f'Windows - clang - C++{cxx_standard}'})
           
           #gcc hosts
           for gcc, runon in gcc_map.items():
@@ -140,12 +141,21 @@ jobs:
             echo "CC=gcc-${{ matrix.version }}" >> $GITHUB_ENV
             echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
           fi
+
+          if [[ '${{ matrix.os }}' == windows-latest ]]; then
+            if [[ '${{ matrix.compiler }}' != '' ]]; then
+                VCPREFIX="C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\Llvm\\x64\\bin"
+                echo "CC=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
+                echo "CXX=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
+                echo "CMAKE_GENERATOR=-GNinja" >> $GITHUB_ENV
+            fi
+          fi
         fi
 
     - name: Configure
       shell: bash
       run: |
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
+        cmake $CMAKE_GENERATOR -S . -B build -DCMAKE_BUILD_TYPE=Release 
 
     - name: Build and Test
       shell: bash
