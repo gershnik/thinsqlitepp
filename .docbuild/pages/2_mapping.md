@@ -12,6 +12,9 @@ status page of what is or isn't available in this library.
 * **out of scope**: Functionality that is not implemented and never will be. Common 
   examples are UTF-16 APIs or VFS-related APIs.
 
+* <span style="color:green"> **good as is** </span>: While the functionality is in scope for this library,
+  the API is safe to use as-is or or no safer wrapper is possible.
+
 * <span style="color:orange"> **not implemented** </span>: Functionality that is currently not 
   implemented but should be and might be added in a future version.
 
@@ -184,7 +187,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_get_auxdata             | @refmylib{context::get_auxdata}
 | ::sqlite3_get_clientdata          | @refmylib{database::get_clientdata}
 | ::sqlite3_get_table               | **out of scope**
-| ::sqlite3_hard_heap_limit64       | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_hard_heap_limit64       | <span style="color:green"> **good as is** </span>
 | ::sqlite3_initialize              | @refmylib{initialize}
 | ::sqlite3_interrupt               | @refmylib{database::interrupt}
 | ::sqlite3_is_interrupted          | @refmylib{database::is_interrupted}
@@ -196,7 +199,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_libversion_number       | @refmylib{sqlite_version::runtime}
 | ::sqlite3_limit                   | @refmylib{database::limit}
 | ::sqlite3_load_extension          | @refmylib{database::load_extension}
-| ::sqlite3_log                     | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_log                     | <span style="color:green"> **good as is** </span>
 
 
 ### M-O
@@ -205,8 +208,8 @@ status page of what is or isn't available in this library.
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3_malloc                  | @refmylib{sqlite_allocated}, @refmylib{sqlite_allocator}
 | ::sqlite3_malloc64                | @refmylib{sqlite_allocated}, @refmylib{sqlite_allocator}
-| ::sqlite3_memory_highwater        | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_memory_used             | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_memory_highwater        | <span style="color:green"> **good as is** </span>
+| ::sqlite3_memory_used             | <span style="color:green"> **good as is** </span>
 | ::sqlite3_mprintf                 | **out of scope**
 | ::sqlite3_msize                   | **out of scope**
 | ::sqlite3_mutex_alloc             | @refmylib{mutex::alloc}
@@ -246,7 +249,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_randomness              | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_realloc                 | **out of scope**
 | ::sqlite3_realloc64               | **out of scope**
-| ::sqlite3_release_memory          | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_release_memory          | <span style="color:green"> **good as is** </span>
 | ::sqlite3_reset                   | @refmylib{statement::reset}
 | ::sqlite3_reset_auto_extension    | @refmylib{database::reset_auto_extension}
 | ::sqlite3_result_blob             | @refmylib{context::result}, @refmylib{context::result_reference}
@@ -292,7 +295,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_snapshot_open           | @refmylib{database::open_snapshot}
 | ::sqlite3_snapshot_recover        | @refmylib{database::recover_snapshot}
 | ::sqlite3_snprintf                | **out of scope**
-| ::sqlite3_soft_heap_limit64       | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_soft_heap_limit64       | <span style="color:green"> **good as is** </span>
 | ::sqlite3_sourceid                | @refmylib{sqlite_version::runtime_sourceid}
 | ::sqlite3_sql                     | @refmylib{statement::sql}
 | ::sqlite3_status                  | @refmylib{status}
@@ -312,14 +315,16 @@ status page of what is or isn't available in this library.
 | ::sqlite3_str_appendf             | **out of scope**
 | ::sqlite3_str_errcode             | **out of scope**
 | ::sqlite3_str_finish              | **out of scope**
+| ::sqlite3_str_free                | **out of scope**
 | ::sqlite3_str_length              | **out of scope**
 | ::sqlite3_str_new                 | **out of scope**
 | ::sqlite3_str_reset               | **out of scope**
+| ::sqlite3_str_truncate            | **out of scope**
 | ::sqlite3_str_value               | **out of scope**
 | ::sqlite3_str_vappendf            | **out of scope**
-| ::sqlite3_strglob                 | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_strglob                 | <span style="color:green"> **good as is** </span>
 | ::sqlite3_stricmp                 | **out of scope**
-| ::sqlite3_strlike                 | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_strlike                 | <span style="color:green"> **good as is** </span>
 | ::sqlite3_strnicmp                | **out of scope**
 | ::sqlite3_system_errno            | @refmylib{exception::system_error_code}, @refmylib{error::system}
 
@@ -330,7 +335,7 @@ status page of what is or isn't available in this library.
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3_table_column_metadata   | @refmylib{database::table_column_metadata}
 | ::sqlite3_test_control            | **out of scope**
-| ::sqlite3_threadsafe              | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_threadsafe              | <span style="color:green"> **good as is** </span>
 | ::sqlite3_total_changes           | @refmylib{database::total_changes}
 | ::sqlite3_total_changes64         | @refmylib{database::total_changes}
 | ::sqlite3_trace_v2                | <span style="color:orange"> **not implemented** </span>

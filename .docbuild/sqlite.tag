@@ -291,9 +291,11 @@
     <member kind="function"><name>sqlite3_str_appendf</name><anchorfile>c3ref/str_append.html</anchorfile></member>
     <member kind="function"><name>sqlite3_str_errcode</name><anchorfile>c3ref/str_errcode.html</anchorfile></member>
     <member kind="function"><name>sqlite3_str_finish</name><anchorfile>c3ref/str_finish.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_str_free</name><anchorfile>c3ref/str_finish.html</anchorfile></member>
     <member kind="function"><name>sqlite3_str_length</name><anchorfile>c3ref/str_errcode.html</anchorfile></member>
     <member kind="function"><name>sqlite3_str_new</name><anchorfile>c3ref/str_new.html</anchorfile></member>
     <member kind="function"><name>sqlite3_str_reset</name><anchorfile>c3ref/str_append.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_str_truncate</name><anchorfile>c3ref/str_append.html</anchorfile></member>
     <member kind="function"><name>sqlite3_str_value</name><anchorfile>c3ref/str_errcode.html</anchorfile></member>
     <member kind="function"><name>sqlite3_str_vappendf</name><anchorfile>c3ref/str_append.html</anchorfile></member>
     <member kind="function"><name>sqlite3_strglob</name><anchorfile>c3ref/strglob.html</anchorfile></member>
