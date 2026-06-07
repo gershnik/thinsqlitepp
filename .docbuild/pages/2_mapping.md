@@ -188,9 +188,9 @@ status page of what is or isn't available in this library.
 | ::sqlite3_initialize              | @refmylib{initialize}
 | ::sqlite3_interrupt               | @refmylib{database::interrupt}
 | ::sqlite3_is_interrupted          | @refmylib{database::is_interrupted}
-| ::sqlite3_keyword_check           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_keyword_count           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_keyword_name            | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_keyword_check           | @refmylib{keywords::check}
+| ::sqlite3_keyword_count           | @refmylib{keywords}
+| ::sqlite3_keyword_name            | @refmylib{keywords}
 | ::sqlite3_last_insert_rowid       | @refmylib{database::last_insert_rowid}
 | ::sqlite3_libversion              | @refmylib{sqlite_version::runtime_str}
 | ::sqlite3_libversion_number       | @refmylib{sqlite_version::runtime}
