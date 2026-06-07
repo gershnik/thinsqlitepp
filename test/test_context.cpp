@@ -5,6 +5,7 @@
 
 #include <type_traits>
 #include <ostream>
+#include <array>
 
 using namespace thinsqlitepp;
 using namespace std;
@@ -243,6 +244,77 @@ TEST_CASE( "result" ) {
         CHECK(equalRanges(r[0].value<blob_view>(), blob_view{}));
         return true;
     });
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 20, 0)
+
+    // POINTER - result(T *, const char * type, void(*)(T *) noexcept)
+    {
+        static int payload       = 12345;
+        static int destroy_count = 0;
+        destroy_count = 0;
+ 
+        impl = [](context * ctxt) noexcept {
+            //(+ decays the captureless lambda to a function pointer so the
+            // templated destroy parameter can be deduced)
+            ctxt->result(&payload, "ctx_ptr", +[](int * p) noexcept {
+                CHECK(p == &payload);
+                ++destroy_count;
+            });
+        };
+ 
+        //A pointer result can only be retrieved by passing it to another function, so
+        //read it back through a consumer that uses value::get with the matching type.
+        auto consume = [](context * ctxt, int, value ** vals) noexcept {
+            int * p = vals[0]->get<int *>("ctx_ptr");
+            ctxt->result(p ? *p : -1);
+        };
+        db->create_function("consume_ptr", 1, SQLITE_UTF8, &consume, nullptr);
+ 
+        db->exec("SELECT consume_ptr(haha());", [](int, row r) noexcept {
+            CHECK(r[0].type() == SQLITE_INTEGER);
+            CHECK(r[0].value<int>() == 12345);
+            return true;
+        });
+        CHECK(destroy_count == 1);      //SQLite invoked the destructor exactly once
+ 
+        //A mismatched type name yields a null pointer.
+        auto consume_wrong = [](context * ctxt, int, value ** vals) noexcept {
+            int * p = vals[0]->get<int *>("wrong_type");
+            ctxt->result(p ? *p : -1);
+        };
+        db->create_function("consume_wrong", 1, SQLITE_UTF8, &consume_wrong, nullptr);
+ 
+        db->exec("SELECT consume_wrong(haha());", [](int, row r) noexcept {
+            CHECK(r[0].value<int>() == -1);
+            return true;
+        });
+    }
+ 
+    // POINTER - result(std::unique_ptr<T>) ownership transfer
+    {
+        static int deletes = 0;
+        deletes = 0;
+        struct counted { int tag = 77; ~counted() { ++deletes; } };
+ 
+        impl = [](context * ctxt) noexcept {
+            ctxt->result(std::make_unique<counted>());
+        };
+ 
+        //The unique_ptr overload registers the pointer under typeid(T).name().
+        auto consume = [](context * ctxt, int, value ** vals) noexcept {
+            counted * p = vals[0]->get<counted *>(typeid(counted).name());
+            ctxt->result(p ? p->tag : -1);
+        };
+        db->create_function("consume_uptr", 1, SQLITE_UTF8, &consume, nullptr);
+ 
+        db->exec("SELECT consume_uptr(haha());", [](int, row r) noexcept {
+            CHECK(r[0].type() == SQLITE_INTEGER);
+            CHECK(r[0].value<int>() == 77);
+            return true;
+        });
+        CHECK(deletes == 1);            //the managed object was deleted exactly once
+    }
+#endif
 }
 
 TEST_SUITE_END();

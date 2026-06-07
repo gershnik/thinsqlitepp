@@ -249,7 +249,7 @@ namespace thinsqlitepp
             if (collator)
                 this->create_collation(name, encoding, collator,
                                        [] (T data, int lhs_len, const void * lhs_bytes, int rhs_len, const void * rhs_bytes) noexcept -> int {
-                        return (*data)(span<const std::byte>((std::byte *)lhs_bytes, lhs_len), span<const std::byte>((std::byte *)rhs_bytes, rhs_len));
+                        return (*data)(span<const std::byte>((std::byte *)lhs_bytes, size_t(lhs_len)), span<const std::byte>((std::byte *)rhs_bytes, size_t(rhs_len)));
                 },
                                        deleter);
             else
@@ -389,6 +389,15 @@ namespace thinsqlitepp
         check_error(sqlite3_db_status(c_ptr(), op, &ret.current, &ret.high, reset));
         return ret;
     }
+
+#if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 1)
+    inline struct database::status64 database::status64(int op, bool reset) const
+    {
+        struct status64 ret;
+        check_error(sqlite3_db_status64(c_ptr(), op, &ret.current, &ret.high, reset));
+        return ret;
+    }
+#endif
         
     inline void database::load_extension(const string_param & file, const string_param & proc)
     {

@@ -120,7 +120,7 @@ namespace thinsqlitepp
         template<class T>
         SQLITEPP_ENABLE_IF(std::is_pointer_v<T>,
         T) get(const char * type = nullptr) const noexcept 
-            { return sqlite3_value_pointer(c_ptr(), type ? type : typeid(T).name()); }
+            { return static_cast<T>(sqlite3_value_pointer(c_ptr(), type ? type : typeid(T).name())); }
 
 
     #endif

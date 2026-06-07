@@ -96,6 +96,8 @@
     <member kind="function"><name>sqlite3_busy_handler</name><anchorfile>c3ref/busy_handler.html</anchorfile></member>
     <member kind="function"><name>sqlite3_busy_timeout</name><anchorfile>c3ref/busy_timeout.html</anchorfile></member>
     <member kind="function"><name>sqlite3_cancel_auto_extension</name><anchorfile>c3ref/cancel_auto_extension.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_carray_bind</name><anchorfile>c3ref/carray_bind.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_carray_bind_v2</name><anchorfile>c3ref/carray_bind.html</anchorfile></member>
     <member kind="function"><name>sqlite3_changes</name><anchorfile>c3ref/changes.html</anchorfile></member>
     <member kind="function"><name>sqlite3_changes64</name><anchorfile>c3ref/changes.html</anchorfile></member>
     <member kind="function"><name>sqlite3_clear_bindings</name><anchorfile>c3ref/clear_bindings.html</anchorfile></member>
@@ -152,6 +154,7 @@
     <member kind="function"><name>sqlite3_db_readonly</name><anchorfile>c3ref/db_readonly.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_release_memory</name><anchorfile>c3ref/db_release_memory.html</anchorfile></member>
     <member kind="function"><name>sqlite3_db_status</name><anchorfile>c3ref/db_status.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_db_status64</name><anchorfile>c3ref/db_status.html</anchorfile></member>
     <member kind="function"><name>sqlite3_declare_vtab</name><anchorfile>c3ref/declare_vtab.html</anchorfile></member>
     <member kind="function"><name>sqlite3_deserialize</name><anchorfile>c3ref/deserialize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_drop_modules</name><anchorfile>c3ref/drop_modules.html</anchorfile></member>
@@ -254,9 +257,11 @@
     <member kind="function"><name>sqlite3_result_zeroblob64</name><anchorfile>c3ref/result_blob.html</anchorfile></member>
     <member kind="function"><name>sqlite3_rollback_hook</name><anchorfile>c3ref/commit_hook.html</anchorfile></member>
     <member kind="function"><name>sqlite3_serialize</name><anchorfile>c3ref/serialize.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_setlk_timeout</name><anchorfile>c3ref/setlk_timeout.html</anchorfile></member>
     <member kind="function"><name>sqlite3_set_authorizer</name><anchorfile>c3ref/set_authorizer.html</anchorfile></member>
     <member kind="function"><name>sqlite3_set_auxdata</name><anchorfile>c3ref/get_auxdata.html</anchorfile></member>
     <member kind="function"><name>sqlite3_set_clientdata</name><anchorfile>c3ref/get_clientdata.html</anchorfile></member>
+    <member kind="function"><name>sqlite3_set_errmsg</name><anchorfile>c3ref/set_errmsg.html</anchorfile></member>
     <member kind="function"><name>sqlite3_set_last_insert_rowid</name><anchorfile>c3ref/set_last_insert_rowid.html</anchorfile></member>
     <member kind="function"><name>sqlite3_shutdown</name><anchorfile>c3ref/initialize.html</anchorfile></member>
     <member kind="function"><name>sqlite3_sleep</name><anchorfile>c3ref/sleep.html</anchorfile></member>

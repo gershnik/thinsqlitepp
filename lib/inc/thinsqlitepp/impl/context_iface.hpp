@@ -322,10 +322,14 @@ namespace thinsqlitepp
          * 
          * Equivalent to ::sqlite3_result_pointer()
          * 
+         * @tparam D Anything convertible to `void(*)(T *) noexcept`.
+         *   Can be a function pointer or a matching lambda.
+         * 
          */
-        template<class T>
-        void result(T * ptr, const char * type, void(*destroy)(T*) noexcept) noexcept
-            { sqlite3_result_pointer(this->c_ptr(), ptr, type, (void(*)(void*))destroy); }
+        template<class T, class D>
+        SQLITEPP_ENABLE_IF((std::is_convertible_v<D, void(*)(T *) noexcept>),
+        void) result(T * ptr, const char * type, D destroy) noexcept
+            { sqlite3_result_pointer(this->c_ptr(), ptr, type, (void(*)(void*))(void(*)(T *))destroy); }
         
         /**
          * Return a custom pointer from the implemented SQL function.

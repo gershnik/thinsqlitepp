@@ -530,7 +530,7 @@ namespace thinsqlitepp {
                             std::unique_ptr<std::remove_pointer_t<typename D::constructor_data_type>> data)
         {
             static_assert(std::is_same_v<D, Derived>, "please invoke this function only with default template parameter");
-            db.create_module(name, vtab::get_module(), data.release(), [](typename D::constructor_data_type ptr) {
+            db.create_module(name, vtab::get_module(), data.release(), [](typename D::constructor_data_type ptr) noexcept {
                 delete ptr;
             });
         }

@@ -130,6 +130,15 @@ namespace thinsqlitepp
         /// Returns error message or nullptr, if not available
         const char * message() const noexcept
             { return _message.get(); }
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 38, 0)
+        /**
+         * Returns the offset within SQL statement that produced the error.
+         * 
+         * Equivalent to ::sqlite3_error_offset
+         */
+        int offset() const noexcept
+            { return _offset;}
+    #endif
         
         /**
          * Move the message out of this object
@@ -152,6 +161,9 @@ namespace thinsqlitepp
     private:
         int _error_code = 0;
         int _system_error_code = 0;
+    #if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 38, 0)
+        int _offset = -1;
+    #endif
         message_ptr _message = nullptr;
     };
 

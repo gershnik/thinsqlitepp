@@ -69,6 +69,7 @@ set(IMPL_HEADERS
     inc/thinsqlitepp/impl/exception_impl.hpp
     inc/thinsqlitepp/impl/global_iface.hpp
     inc/thinsqlitepp/impl/handle.hpp
+    inc/thinsqlitepp/impl/keywords.hpp
     inc/thinsqlitepp/impl/memory_iface.hpp
     inc/thinsqlitepp/impl/meta.hpp
     inc/thinsqlitepp/impl/mutex_iface.hpp

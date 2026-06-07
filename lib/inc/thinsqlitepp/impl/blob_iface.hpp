@@ -61,7 +61,7 @@ namespace thinsqlitepp
         size_t bytes() const noexcept
         { 
             int ret = sqlite3_blob_bytes(c_ptr());
-            return ret >= 0 ? ret : 0;
+            return ret >= 0 ? size_t(ret) : 0;
         } 
 
         /**

@@ -10,6 +10,7 @@
 #define HEADER_SQLITEPP_GLOBAL_INCLUDED
 
 #include <thinsqlitepp/impl/global_iface.hpp>
+#include <thinsqlitepp/impl/keywords.hpp>
 
 #include <thinsqlitepp/impl/exception_impl.hpp>
 

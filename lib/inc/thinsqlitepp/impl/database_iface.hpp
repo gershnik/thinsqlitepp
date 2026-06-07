@@ -27,7 +27,7 @@
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-function-type"
     
-    #if defined(__APPLE__) && defined(__clang__) && defined(SQLITE_AVAILABLE)
+    #if defined(__APPLE__) && defined(__clang__)
         #pragma GCC diagnostic ignored "-Wunguarded-availability-new"
         #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     #endif
@@ -153,6 +153,64 @@ namespace thinsqlitepp
          */
         void busy_timeout(int ms)
             { check_error(sqlite3_busy_timeout(c_ptr(), ms)); }
+
+
+        //MARK: -
+
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 50, 0)
+
+        /**
+         * Set a setlk timeout
+         * 
+         * Equivalent to ::sqlite3_setlk_timeout
+         */
+        void setlk_timeout(int ms, int flags = 0)
+            { check_error(sqlite3_setlk_timeout(c_ptr(), ms, flags)); }
+
+    #endif
+
+        //MARK: Client data
+
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 44, 0)
+        
+        /**
+         * Set arbitrary client data to this database connection
+         * 
+         * Equivalent to ::sqlite3_set_clientdata
+         */
+        void set_clientdata(const string_param & name, void * ptr, void(*destroy)(void*) = nullptr)
+            { check_error(sqlite3_set_clientdata(c_ptr(), name.c_str(), ptr, destroy)); }
+
+        /**
+         * Set arbitrary client data to this database connection
+         * 
+         * Equivalent to ::sqlite3_set_clientdata
+         * 
+         * This is a safer overload of @ref set_clientdata(const string_param &, void *, void(*)(void*))
+         * that takes a pointer via std::unique_ptr ownership transfer.
+         */
+        template<class T>
+        void set_clientdata(const string_param & name, std::unique_ptr<T> && data)
+        { 
+            set_clientdata(name, data.release(), [](void * d) {
+                delete static_cast<T *>(d);
+            });
+        }
+
+        /**
+         * Get arbitrary client data of this database connection
+         * 
+         * Equivalent to ::sqlite3_get_clientdata
+         * 
+         * Note that no type checks are performed to ensure that the data
+         * is, indeed, of the type T. It is  **your** responsibility to match T
+         * to the type passed to @ref set_clientdata
+         */
+        template<class T>
+        T * get_clientdata(const string_param & name) noexcept
+            { return static_cast<T *>(sqlite3_get_clientdata(c_ptr(), name.c_str())); }
+
+    #endif
         
         //MARK: -
 
@@ -169,6 +227,18 @@ namespace thinsqlitepp
             return sqlite3_changes(c_ptr()); 
         #endif
         }
+
+        //MARK: -
+
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 1)
+        /**
+         * Set error code and message
+         * 
+         * Equivalent to ::sqlite3_set_errmsg
+         */
+        void set_errmsg(int errcode, const string_param & message)
+            { check_error(sqlite3_set_errmsg(c_ptr(), errcode, message.c_str())); }
+    #endif
 
         //MARK: - exec
 
@@ -899,12 +969,14 @@ namespace thinsqlitepp
          * @param name name of the module
          * @param mod pointer to ::sqlite3_module "vtable"
          * @param data data to be passed to virtual table xCreate function.
-         * @param destructor function to call when data is no longer needed. Can be omitted
+         * @param destructor `void(*)(T *) noexcept` function (or anything convertible to such a pointer)
+         *   to call when data is no longer needed. Can be omitted
          */
-        template<typename T>
-        void create_module(const string_param & name, const sqlite3_module * mod, 
-                           T * data, void(*destructor)(T *) noexcept = nullptr)
-            { check_error(sqlite3_create_module_v2(c_ptr(), name.c_str(), mod, (void*)data, (void (*)(void *))destructor)); }
+        template<typename T, typename D = void(*)(T *) noexcept>
+        SQLITEPP_ENABLE_IF((std::is_convertible_v<D, void(*)(T *) noexcept>),
+        void) create_module(const string_param & name, const sqlite3_module * mod, 
+                           T * data, D destructor = nullptr)
+            { check_error(sqlite3_create_module_v2(c_ptr(), name.c_str(), mod, (void*)data, (void (*)(void *))(void(*)(T *) noexcept)destructor)); }
 
         
         //MARK: -
@@ -1140,7 +1212,6 @@ namespace thinsqlitepp
         void auto_extension(void(*entry_point)(database *, const char **, const struct sqlite3_api_routines *))
             { check_error(sqlite3_auto_extension((void(*)(void))entry_point)); }
 
-    
         /**
          * Cancel automatic extension Loading
          * 
@@ -1161,7 +1232,7 @@ namespace thinsqlitepp
          */
         void reset_auto_extension() noexcept
             { sqlite3_reset_auto_extension(); }
-
+    
     #endif
 
         /** @} */
@@ -1271,12 +1342,33 @@ namespace thinsqlitepp
             int high;
         };
 
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 0)
+        [[deprecated("use status64")]]
+    #endif
         /**
          * Retrieve database connection status
          * 
          * Equivalent to ::sqlite3_db_status
          */
         struct status status(int op, bool reset = false) const;
+
+    #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 1)
+
+        /// Return type for @ref status64()
+        struct status64
+        {
+            sqlite3_int64 current;
+            sqlite3_int64 high;
+        };
+
+        /**
+         * Retrieve database connection status
+         * 
+         * Equivalent to ::sqlite3_db_status64
+         */
+        struct status64 status64(int op, bool reset = false) const;
+
+    #endif
         
         //MARK: - table_column_metadata
         

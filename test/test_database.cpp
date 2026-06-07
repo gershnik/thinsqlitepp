@@ -780,4 +780,73 @@ TEST_CASE( "serialization" ) {
 
 #endif
 
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 44, 0)
+
+TEST_CASE( "clientdata" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    //raw pointer round-trip (no destructor)
+    int payload = 7;
+    db->set_clientdata("k1", &payload);
+    CHECK(db->get_clientdata<int>("k1") == &payload);
+    REQUIRE(db->get_clientdata<int>("k1") != nullptr);
+    CHECK(*db->get_clientdata<int>("k1") == 7);
+
+    //unknown name yields nullptr
+    CHECK(db->get_clientdata<int>("does_not_exist") == nullptr);
+
+    //custom destructor: not called while live, called when the entry is replaced
+    {
+        static int destroyed = 0;
+        destroyed = 0;
+        int x = 0;
+        db->set_clientdata("k2", &x, [](void *) { ++destroyed; });
+        CHECK(destroyed == 0);
+        CHECK(db->get_clientdata<int>("k2") == &x);
+
+        //replacing the entry under the same name invokes the prior destructor
+        db->set_clientdata("k2", nullptr);
+        CHECK(destroyed == 1);
+        CHECK(db->get_clientdata<int>("k2") == nullptr);
+    }
+
+    //unique_ptr ownership transfer: object destroyed when the connection closes
+    {
+        static int alive = 0;
+        alive = 0;
+        struct counted { counted() { ++alive; } ~counted() { --alive; } };
+        {
+            auto db2 = database::open("foo2.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+            db2->set_clientdata("owned", std::make_unique<counted>());
+            CHECK(alive == 1);
+            CHECK(db2->get_clientdata<counted>("owned") != nullptr);
+        }   //db2 closes here -> client data destructor deletes the object
+        CHECK(alive == 0);
+    }
+}
+
+#endif
+
+#if SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 51, 1)
+
+TEST_CASE( "set_errmsg" ) {
+
+    auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);
+
+    //a primary result code with a message
+    db->set_errmsg(SQLITE_CONSTRAINT, "custom failure");
+    CHECK(sqlite3_errcode(db->c_ptr()) == SQLITE_CONSTRAINT);
+    CHECK(sqlite3_extended_errcode(db->c_ptr()) == SQLITE_CONSTRAINT);
+    CHECK(std::string_view(sqlite3_errmsg(db->c_ptr())) == "custom failure"sv);
+
+    //an extended result code: the primary code is derived from it
+    db->set_errmsg(SQLITE_IOERR_READ, "io read failed");
+    CHECK(sqlite3_extended_errcode(db->c_ptr()) == SQLITE_IOERR_READ);
+    CHECK(sqlite3_errcode(db->c_ptr()) == SQLITE_IOERR);
+    CHECK(std::string_view(sqlite3_errmsg(db->c_ptr())) == "io read failed"sv);
+}
+
+#endif
+
 TEST_SUITE_END();

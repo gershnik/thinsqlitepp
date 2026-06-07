@@ -48,7 +48,7 @@ namespace thinsqlitepp
 #endif
         if (res != SQLITE_OK)
             throw exception(res, db);
-        sql.remove_prefix(tail - start);
+        sql.remove_prefix(size_t(tail - start));
         return std::unique_ptr<statement>(from(ret));
     }
 

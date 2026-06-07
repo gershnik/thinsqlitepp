@@ -88,6 +88,8 @@ status page of what is or isn't available in this library.
 | Function                          |  Mapped To                                                     |
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3_cancel_auto_extension   | @refmylib{database::cancel_auto_extension}
+| ::sqlite3_carray_bind             | @refmylib{statement::carray_bind}
+| ::sqlite3_carray_bind_v2          | @refmylib{statement::carray_bind}
 | ::sqlite3_changes                 | @refmylib{database::changes}
 | ::sqlite3_changes64               | @refmylib{database::changes}
 | ::sqlite3_clear_bindings          | @refmylib{statement::clear_bindings}
@@ -149,6 +151,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_db_readonly             | @refmylib{database::readonly}
 | ::sqlite3_db_release_memory       | @refmylib{database::release_memory}
 | ::sqlite3_db_status               | @refmylib{database::status}
+| ::sqlite3_db_status64             | @refmylib{database::status}
 | ::sqlite3_declare_vtab            | @refmylib{database::declare_vtab}
 | ::sqlite3_deserialize             | @refmylib{database::deserialize}
 | ::sqlite3_drop_modules            | @refmylib{database::drop_modules}
@@ -157,7 +160,7 @@ status page of what is or isn't available in this library.
 | ::sqlite3_errcode                 | @refmylib{exception::primary_error_code}, @refmylib{error::primary}
 | ::sqlite3_errmsg                  | @refmylib{exception::what}, @refmylib{error::message}
 | ::sqlite3_errmsg16                | **out of scope**
-| ::sqlite3_error_offset            | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_error_offset            | @refmylib{error::offset}
 | ::sqlite3_errstr                  | @refmylib{exception::what}, @refmylib{error::message}
 | ::sqlite3_exec                    | @refmylib{database::exec}
 | ::sqlite3_expanded_sql            | @refmylib{statement::expanded_sql}
@@ -179,15 +182,15 @@ status page of what is or isn't available in this library.
 | ::sqlite3_free_table              | **out of scope**
 | ::sqlite3_get_autocommit          | @refmylib{database::get_autocommit}
 | ::sqlite3_get_auxdata             | @refmylib{context::get_auxdata}
-| ::sqlite3_get_clientdata          | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_get_clientdata          | @refmylib{database::get_clientdata}
 | ::sqlite3_get_table               | **out of scope**
 | ::sqlite3_hard_heap_limit64       | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_initialize              | @refmylib{initialize}
 | ::sqlite3_interrupt               | @refmylib{database::interrupt}
 | ::sqlite3_is_interrupted          | @refmylib{database::is_interrupted}
-| ::sqlite3_keyword_check           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_keyword_count           | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_keyword_name            | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_keyword_check           | @refmylib{keywords::check}
+| ::sqlite3_keyword_count           | @refmylib{keywords}
+| ::sqlite3_keyword_name            | @refmylib{keywords}
 | ::sqlite3_last_insert_rowid       | @refmylib{database::last_insert_rowid}
 | ::sqlite3_libversion              | @refmylib{sqlite_version::runtime_str}
 | ::sqlite3_libversion_number       | @refmylib{sqlite_version::runtime}
@@ -275,9 +278,11 @@ status page of what is or isn't available in this library.
 | Function                          |  Mapped To                                                     |
 |-----------------------------------|----------------------------------------------------------------|
 | ::sqlite3_serialize               | @refmylib{database::serialize}, @refmylib{database::serialize_reference}
+| ::sqlite3_setlk_timeout           | @refmylib{database::setlk_timeout}
 | ::sqlite3_set_authorizer          | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_set_auxdata             | @refmylib{context::set_auxdata}
-| ::sqlite3_set_clientdata          | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_set_clientdata          | @refmylib{database::set_clientdata}
+| ::sqlite3_set_errmsg              | @refmylib{database::set_errmsg}
 | ::sqlite3_set_last_insert_rowid   | @refmylib{database::set_last_insert_rowid}
 | ::sqlite3_shutdown                | @refmylib{shutdown}
 | ::sqlite3_sleep                   | **out of scope**
@@ -290,8 +295,8 @@ status page of what is or isn't available in this library.
 | ::sqlite3_soft_heap_limit64       | <span style="color:orange"> **not implemented** </span>
 | ::sqlite3_sourceid                | @refmylib{sqlite_version::runtime_sourceid}
 | ::sqlite3_sql                     | @refmylib{statement::sql}
-| ::sqlite3_status                  | <span style="color:orange"> **not implemented** </span>
-| ::sqlite3_status64                | <span style="color:orange"> **not implemented** </span>
+| ::sqlite3_status                  | @refmylib{status}
+| ::sqlite3_status64                | @refmylib{status}
 | ::sqlite3_step                    | @refmylib{statement::step}
 | ::sqlite3_stmt_busy               | @refmylib{statement::busy}
 | ::sqlite3_stmt_explain            | <span style="color:orange"> **not implemented** </span>

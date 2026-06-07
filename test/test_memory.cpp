@@ -393,7 +393,7 @@ TEST_CASE("sqlite_allocator works with std::vector") {
 
         REQUIRE(v.size() == 64);
         for (int i = 0; i < 64; ++i)
-            CHECK(v[i] == i * 3);
+            CHECK(v[size_t(i)] == i * 3);
     }
 
     // At least one alloc happened (reserve) and matching frees ran.
