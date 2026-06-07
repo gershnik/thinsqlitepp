@@ -506,12 +506,12 @@ namespace thinsqlitepp
          * - char8_t * (if `char8_t` is supported by your compiler/library)
          * - iovec
          */
-        template<class T, class D>
-        SQLITEPP_ENABLE_IF((supported_carray_type<T> && std::is_convertible_v<D, void(*)(void *) noexcept>),
-        void) carray_bind(int idx, span<T> array, D destroy, void * destroy_arg = nullptr)
+        template<class T>
+        SQLITEPP_ENABLE_IF(supported_carray_type<T>,
+        void) carray_bind(int idx, span<T> array, void (*destroy)(void *) noexcept, void * destroy_arg = nullptr)
         {
             check_error(sqlite3_carray_bind_v2(this->c_ptr(), idx, (void*)array.data(), int(array.size()), 
-                                               carray_type<T>(), (void(*)(void *))(void(*)(void *)noexcept)destroy, destroy_arg));
+                                               carray_type<T>(), (void(*)(void *))destroy, destroy_arg));
         }
 
     #endif
