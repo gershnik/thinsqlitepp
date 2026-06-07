@@ -67,7 +67,7 @@ namespace thinsqlitepp
      * 
      * Equivalent to `::sqlite3_status64` or `::sqlite3_status`, if the former is not available
      */
-    status_value status(int op, bool reset = false)
+    inline status_value status(int op, bool reset = false)
     {
         status_value ret;
     #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0)
