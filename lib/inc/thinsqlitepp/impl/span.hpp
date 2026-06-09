@@ -39,7 +39,6 @@
 
 #else
 
-    #include <iterator>
     #include <array>
 
     namespace thinsqlitepp

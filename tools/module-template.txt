@@ -1,0 +1,16 @@
+/*
+ Copyright 2019 Eugene Gershnik
+
+ Use of this source code is governed by a BSD-style
+ license that can be found in the LICENSE file or at
+ https://github.com/gershnik/thinsqlitepp/blob/master/LICENSE
+*/
+module;
+
+##SYS_INCLUDES##
+
+export module thinsqlitepp;
+
+#define SQLITEPP_EXPORTED export 
+
+##CONTENT##
