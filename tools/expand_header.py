@@ -15,6 +15,14 @@ import sys
 from pathlib import Path
 
 
+# Sentinel marking a token as *known to be undefined*. This is distinct from a
+# token being absent from the table: absent means "indeterminate" (leave the
+# conditional verbatim), whereas UNDEFINED means "this macro is definitely not
+# defined" -- so defined(X) is 0, a bare X evaluates to 0 (as in a real #if),
+# and #ifndef X becomes a taken branch that gets unwrapped.
+UNDEFINED = object()
+
+
 # --------------------------------------------------------------------------- #
 # Small parsing helpers
 # --------------------------------------------------------------------------- #
@@ -165,6 +173,8 @@ def _eval_pp_expr(expr, tokens):
         if name not in tokens:
             return None
         val = tokens[name]
+        if val is UNDEFINED:
+            return 0
         return 0 if val is None else int(val)
 
     def primary():
@@ -196,7 +206,9 @@ def _eval_pp_expr(expr, tokens):
                     nm = advance()
                     if nm[0] != "id":
                         raise _Bail()
-                return 1 if nm[1] in tokens else None
+                if nm[1] not in tokens:
+                    return None
+                return 0 if tokens[nm[1]] is UNDEFINED else 1
             advance()
             if tx == "true":
                 return 1
@@ -514,10 +526,15 @@ def expand_header(filepath, local_include_prefix, prefix_base_dir,
                               comparing #if contexts of a repeated system header.
         tokens:               dict mapping known tokens to optional numeric
                               values, e.g. {'__cplusplus': 202002,
-                              '__has_include(<format>)': 1, '_WIN32': None}.
-                              A value of None means "defined, value 0". A token
-                              absent from the dict is indeterminate. __has_*
-                              keys must be whitespace-free, e.g.
+                              '__has_include(<format>)': 1, '_WIN32': None,
+                              'SQLITEPP_OMIT_MUTEX': UNDEFINED}.
+                              A numeric value means "defined, with that value".
+                              None means "defined, value 0". The UNDEFINED
+                              sentinel means "known to be undefined" (defined(X)
+                              is 0, bare X is 0, #ifndef X is taken). A token
+                              absent from the dict is indeterminate -- its
+                              conditional is left verbatim. __has_* keys must be
+                              whitespace-free, e.g.
                               '__has_cpp_attribute(nodiscard)'.
 
     Returns:
@@ -550,7 +567,7 @@ def expand_header(filepath, local_include_prefix, prefix_base_dir,
         if not path.is_file():
             raise FileNotFoundError(f"Header not found: {path}")
         seen.add(real)
-        raw = path.read_text(encoding='utf-8').splitlines()
+        raw = path.read_text().splitlines()
         st = _FileState(path, _strip_guard(raw, path))
         st.cond_depth_at_entry = len(cond_frames)
         file_stack.append(st)

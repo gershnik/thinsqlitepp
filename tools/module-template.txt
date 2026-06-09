@@ -11,6 +11,6 @@ module;
 
 export module thinsqlitepp;
 
-#define SQLITEPP_EXPORTED export 
+#define SQLITEPP_BUILDING_MODULE 1 
 
 ##CONTENT##

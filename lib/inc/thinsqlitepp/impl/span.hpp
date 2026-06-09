@@ -31,6 +31,7 @@
          * If std::span is available, %thinsqlitepp::span is a typedef to it.
          * Otherwise it is an equivalent class defined in this library
          */
+        SQLITEPP_EXPORTED
         template<class T>
         using span = std::span<T>;
     

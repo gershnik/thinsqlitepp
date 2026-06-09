@@ -32,6 +32,7 @@ namespace thinsqlitepp
      * 
      * @tparam T character type
      */
+    SQLITEPP_EXPORTED
     template<class T>
     class basic_string_param
     {
@@ -54,12 +55,12 @@ namespace thinsqlitepp
     };
 
     /// Convenience typedef
-    using string_param = basic_string_param<char>;
+    SQLITEPP_EXPORTED using string_param = basic_string_param<char>;
 
 #if __cpp_char8_t >= 201811
 
     /// Convenience typedef. Only available if you compiler/library supports char8_t
-    using u8string_param = basic_string_param<char8_t>;
+    SQLITEPP_EXPORTED using u8string_param = basic_string_param<char8_t>;
     
 #endif
 

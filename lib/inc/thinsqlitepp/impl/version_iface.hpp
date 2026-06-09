@@ -32,6 +32,7 @@ namespace thinsqlitepp
      * It provides wrappers for SQLite functions that obtain runtime SQLite version
      * information and constexpr wrapper for compile-time version info.
      */
+    SQLITEPP_EXPORTED
     class sqlite_version
     {
     public:

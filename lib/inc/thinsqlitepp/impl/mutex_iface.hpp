@@ -41,6 +41,7 @@ namespace thinsqlitepp
      * 
      * @see lock_adapter
      */
+    SQLITEPP_EXPORTED
     class mutex final : public handle<sqlite3_mutex, mutex>
     {
     public:
@@ -67,8 +68,14 @@ namespace thinsqlitepp
          * @returns Newly allocated mutex of `nullptr` if the SQLite implementation
          * is unable to allocate a mutex (e.g. if it does not support mutexes).
          */
-        static std::unique_ptr<mutex> alloc(type t) noexcept
-            { return std::unique_ptr<mutex>(from(sqlite3_mutex_alloc(int(t)))); }
+        static std::unique_ptr<mutex> alloc([[maybe_unused]] type t) noexcept
+        {
+        #if !SQLITEPP_NO_MUTEX
+            return std::unique_ptr<mutex>(from(sqlite3_mutex_alloc(int(t))));
+        #else
+            return {};
+        #endif
+        }
 
         /**
          * Lock the mutex
@@ -76,14 +83,24 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_enter
          */
         void lock() noexcept
-            { sqlite3_mutex_enter(c_ptr()); }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            sqlite3_mutex_enter(c_ptr());
+        #endif
+        }
         /** 
          * Try to lock the mutex
          * 
          * Equivalent to ::sqlite3_mutex_try
          */
         bool try_lock() noexcept
-            { return sqlite3_mutex_try(c_ptr()) == SQLITE_OK; }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            return sqlite3_mutex_try(c_ptr()) == SQLITE_OK;
+        #else
+            return true;
+        #endif
+        }
 
         /**
          * Unlock the mutex
@@ -91,7 +108,11 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_leave
          */
         void unlock() noexcept
-            { sqlite3_mutex_leave(c_ptr()); }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            sqlite3_mutex_leave(c_ptr());
+        #endif
+        }
     };
 
     /** @} */
@@ -128,7 +149,11 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_enter
          */
         void lock() noexcept
-            { sqlite3_mutex_enter(c_ptr(_mutex)); }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            sqlite3_mutex_enter(c_ptr(_mutex));
+        #endif
+        }
 
         /** 
          * Try to lock the mutex
@@ -136,7 +161,13 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_try
          */
         bool try_lock() noexcept
-            { return sqlite3_mutex_try(c_ptr(_mutex)) == SQLITE_OK; }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            return sqlite3_mutex_try(c_ptr(_mutex)) == SQLITE_OK;
+        #else
+            return true;
+        #endif
+        }
 
         /**
          * Unlock the mutex
@@ -144,7 +175,11 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_leave
          */
         void unlock() noexcept
-            { sqlite3_mutex_leave(c_ptr(_mutex)); }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            sqlite3_mutex_leave(c_ptr(_mutex));
+        #endif
+        }
     private:
         mutex * _mutex;
     };

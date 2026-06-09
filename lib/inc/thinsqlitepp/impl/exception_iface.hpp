@@ -17,8 +17,8 @@
 
 namespace thinsqlitepp
 {
-    class database;
-    class exception;
+    SQLITEPP_EXPORTED class database;
+    SQLITEPP_EXPORTED class exception;
 
     /**
      * @addtogroup SQL SQLite API Wrappers
@@ -34,6 +34,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/exception.hpp>`
      */
+    SQLITEPP_EXPORTED
     class error
     {
     friend class exception;
@@ -174,6 +175,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/exception.hpp>`
      */
+    SQLITEPP_EXPORTED
     class exception : public std::exception
     {
     public:

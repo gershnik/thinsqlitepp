@@ -13,13 +13,15 @@
 import sys
 from pathlib import Path
 
-from .expand_header import expand_header
+from expand_header import expand_header, UNDEFINED
 
 TOKENS = {
     '__cplusplus': '202302',
     '_MSVC_LANG': '202302',
     '__cpp_impl_three_way_comparison': '201907',
     '__cpp_lib_bit_cast': '201806',
+    '__cpp_concepts': 201907,
+    'DOXYGEN': UNDEFINED
 }
 
 SPECIAL_HEADERS = {

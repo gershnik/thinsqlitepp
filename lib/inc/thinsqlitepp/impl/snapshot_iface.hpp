@@ -38,6 +38,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/snapshot.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class snapshot final : public handle<sqlite3_snapshot, snapshot> 
     {
     public:

@@ -38,6 +38,13 @@ set (CXX_STANDARDS
     23
 )
 
+if (THSQPP_ENABLE_MODULE)
+    if (CMAKE_VERSION VERSION_LESS "3.28")
+        message(WARNING "CMake version ${CMAKE_VERSION} doesn't support modules, ignoring THSQPP_ENABLE_MODULE")
+        set(THSQPP_ENABLE_MODULE False)
+    endif()
+endif()
+
 function(configure_test_target target)
 
     set_target_properties(${target} PROPERTIES
@@ -50,7 +57,7 @@ function(configure_test_target target)
 
     target_compile_options(${target}
     PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8;/wd5285>
+        $<$<CXX_COMPILER_ID:MSVC>:/W4;/WX;/utf-8;/Zc:preprocessor;/wd5285>
         $<${CLANG_NORMAL}:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move;-Wconversion;-Wsign-conversion>
         $<$<CXX_COMPILER_ID:AppleClang>:-Wall;-Wextra;-pedantic;-Wno-self-assign-overloaded;-Wno-self-move;-Wconversion;-Wsign-conversion>
         $<${CLANG_CL}:/W4 /WX -Wpedantic;-Wconversion;-Wsign-conversion;-Wno-cast-function-type-mismatch> 
@@ -60,6 +67,7 @@ function(configure_test_target target)
     target_compile_definitions(${target}
     PRIVATE
         CATCH_AMALGAMATED_CUSTOM_MAIN
+        SQLITEPP_NO_MUTEX=1
     )
 
     target_link_libraries(${target}
@@ -136,26 +144,43 @@ foreach(CXX_STANDARD ${CXX_STANDARDS})
 
     foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
 
-        add_executable(test-${CXX_STANDARD}-${SQLITE_VERSION} EXCLUDE_FROM_ALL)
+        set(target test-${CXX_STANDARD}-${SQLITE_VERSION})
 
-        configure_test_target(test-${CXX_STANDARD}-${SQLITE_VERSION})
+        add_executable(${target} EXCLUDE_FROM_ALL)
 
-        set_target_properties(test-${CXX_STANDARD}-${SQLITE_VERSION} PROPERTIES
+        configure_test_target(${target})
+
+        set_target_properties(${target} PROPERTIES
             CXX_STANDARD ${CXX_STANDARD}
             CXX_STANDARD_REQUIRED ON
         )
 
-        target_link_libraries(test-${CXX_STANDARD}-${SQLITE_VERSION} 
+        if (THSQPP_ENABLE_MODULE AND CXX_STANDARD GREATER_EQUAL 20)
+            set_target_properties(${target} PROPERTIES
+                CXX_SCAN_FOR_MODULES ON
+            )
+            target_compile_definitions(${target} PRIVATE
+                SQLITEPP_USE_MODULES=1
+            )
+            thinsqlitepp_add_module(${target} PRIVATE)
+        else()
+            target_link_libraries(${target}
+            PRIVATE
+                thinsqlitepp::thinsqlitepp
+            )
+        endif()
+
+        target_link_libraries(${target}
         PRIVATE
             sqlite3-${SQLITE_VERSION}
         )
 
-        target_compile_options(test-${CXX_STANDARD}-${SQLITE_VERSION}
+        target_compile_options(${target}
         PRIVATE 
             $<$<BOOL:${EMSCRIPTEN}>:-fexceptions>
         )
 
-        target_link_options(test-${CXX_STANDARD}-${SQLITE_VERSION}
+        target_link_options(${target}
         PRIVATE 
             $<$<BOOL:${EMSCRIPTEN}>:-sNO_DISABLE_EXCEPTION_CATCHING -fexceptions>
         )
@@ -163,9 +188,9 @@ foreach(CXX_STANDARD ${CXX_STANDARDS})
         list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite-${SQLITE_VERSION})
         list(APPEND TEST_COMMAND COMMAND)
         if (DEFINED EMSCRIPTEN)
-            list(APPEND TEST_COMMAND node --trace-uncaught $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}> -ni)
+            list(APPEND TEST_COMMAND node --trace-uncaught $<TARGET_FILE:${target}> -ni)
         else()
-            list(APPEND TEST_COMMAND $<TARGET_FILE:test-${CXX_STANDARD}-${SQLITE_VERSION}> -ni -fc)
+            list(APPEND TEST_COMMAND $<TARGET_FILE:${target}> -ni -fc)
         endif()
 
     endforeach()

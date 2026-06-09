@@ -41,7 +41,7 @@ module;
 
 export module thinsqlitepp;
 
-#define SQLITEPP_EXPORTED export 
+#define SQLITEPP_BUILDING_MODULE 1 
 
 #ifndef SQLITE_VERSION
     #if THINSQLITEPP_BUILDING_EXTENSION
@@ -66,13 +66,12 @@ export module thinsqlitepp;
     #define SQLITEPP_SUPPRESS_SILLY_VARARG_WARNING_END
 #endif
 
-#ifndef DOXYGEN
-    #define SQLITEPP_ENABLE_IF(cond, t) std::enable_if_t<(cond), t>
-#else
-    #define SQLITEPP_ENABLE_IF(cond, t) t
-#endif
+        #define SQLITEPP_ENABLE_IF(cond, t) requires(cond) t
+        #define SQLITEPP_ENABLE_IFP(prefix, cond, t) requires(cond) prefix t
 
-#ifndef SQLITEPP_EXPORTED
+#if SQLITEPP_BUILDING_MODULE 
+    #define SQLITEPP_EXPORTED export
+#else
     #define SQLITEPP_EXPORTED
 #endif
 
@@ -127,8 +126,8 @@ namespace thinsqlitepp
 
 namespace thinsqlitepp
 {
-    class database;
-    class exception;
+    SQLITEPP_EXPORTED class database;
+    SQLITEPP_EXPORTED class exception;
 
     /**
      * @addtogroup SQL SQLite API Wrappers
@@ -144,6 +143,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/exception.hpp>`
      */
+    SQLITEPP_EXPORTED
     class error
     {
     friend class exception;
@@ -284,6 +284,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/exception.hpp>`
      */
+    SQLITEPP_EXPORTED
     class exception : public std::exception
     {
     public:
@@ -406,6 +407,7 @@ namespace thinsqlitepp
      * 
      * @see lock_adapter
      */
+    SQLITEPP_EXPORTED
     class mutex final : public handle<sqlite3_mutex, mutex>
     {
     public:
@@ -432,8 +434,14 @@ namespace thinsqlitepp
          * @returns Newly allocated mutex of `nullptr` if the SQLite implementation
          * is unable to allocate a mutex (e.g. if it does not support mutexes).
          */
-        static std::unique_ptr<mutex> alloc(type t) noexcept
-            { return std::unique_ptr<mutex>(from(sqlite3_mutex_alloc(int(t)))); }
+        static std::unique_ptr<mutex> alloc([[maybe_unused]] type t) noexcept
+        {
+        #if !SQLITEPP_NO_MUTEX
+            return std::unique_ptr<mutex>(from(sqlite3_mutex_alloc(int(t))));
+        #else
+            return {};
+        #endif
+        }
 
         /**
          * Lock the mutex
@@ -441,14 +449,24 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_enter
          */
         void lock() noexcept
-            { sqlite3_mutex_enter(c_ptr()); }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            sqlite3_mutex_enter(c_ptr());
+        #endif
+        }
         /** 
          * Try to lock the mutex
          * 
          * Equivalent to ::sqlite3_mutex_try
          */
         bool try_lock() noexcept
-            { return sqlite3_mutex_try(c_ptr()) == SQLITE_OK; }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            return sqlite3_mutex_try(c_ptr()) == SQLITE_OK;
+        #else
+            return true;
+        #endif
+        }
 
         /**
          * Unlock the mutex
@@ -456,7 +474,11 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_leave
          */
         void unlock() noexcept
-            { sqlite3_mutex_leave(c_ptr()); }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            sqlite3_mutex_leave(c_ptr());
+        #endif
+        }
     };
 
     /** @} */
@@ -492,7 +514,11 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_enter
          */
         void lock() noexcept
-            { sqlite3_mutex_enter(c_ptr(_mutex)); }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            sqlite3_mutex_enter(c_ptr(_mutex));
+        #endif
+        }
 
         /** 
          * Try to lock the mutex
@@ -500,7 +526,13 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_try
          */
         bool try_lock() noexcept
-            { return sqlite3_mutex_try(c_ptr(_mutex)) == SQLITE_OK; }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            return sqlite3_mutex_try(c_ptr(_mutex)) == SQLITE_OK;
+        #else
+            return true;
+        #endif
+        }
 
         /**
          * Unlock the mutex
@@ -508,7 +540,11 @@ namespace thinsqlitepp
          * Equivalent to ::sqlite3_mutex_leave
          */
         void unlock() noexcept
-            { sqlite3_mutex_leave(c_ptr(_mutex)); }
+        { 
+        #if !SQLITEPP_NO_MUTEX
+            sqlite3_mutex_leave(c_ptr(_mutex));
+        #endif
+        }
     private:
         mutex * _mutex;
     };
@@ -534,6 +570,7 @@ namespace thinsqlitepp
      * 
      * @tparam T character type
      */
+    SQLITEPP_EXPORTED
     template<class T>
     class basic_string_param
     {
@@ -556,12 +593,12 @@ namespace thinsqlitepp
     };
 
     /// Convenience typedef
-    using string_param = basic_string_param<char>;
+    SQLITEPP_EXPORTED using string_param = basic_string_param<char>;
 
 #if __cpp_char8_t >= 201811
 
     /// Convenience typedef. Only available if you compiler/library supports char8_t
-    using u8string_param = basic_string_param<char8_t>;
+    SQLITEPP_EXPORTED using u8string_param = basic_string_param<char8_t>;
 
 #endif
 
@@ -581,6 +618,7 @@ namespace thinsqlitepp
          * If std::span is available, %thinsqlitepp::span is a typedef to it.
          * Otherwise it is an equivalent class defined in this library
          */
+        SQLITEPP_EXPORTED
         template<class T>
         using span = std::span<T>;
 
@@ -750,6 +788,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/blob.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class blob final : public handle<sqlite3_blob, blob>
     {
     public:
@@ -982,6 +1021,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/snapshot.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class snapshot final : public handle<sqlite3_snapshot, snapshot> 
     {
     public:
@@ -1007,19 +1047,6 @@ namespace thinsqlitepp
         friend std::strong_ordering operator<=>(const snapshot & lhs, const snapshot & rhs) noexcept
             { return strong_ordering_from_int(compare(lhs, rhs)); }
         /// @}
-    #if defined(DOXYGEN) || __cpp_impl_three_way_comparison < 201907
-        /// @{ 
-        /// @name C++17 comparison operators. Not present in C++20
-        friend bool operator<(const snapshot & lhs, const snapshot & rhs) noexcept
-            { return compare(lhs, rhs) < 0; }
-        friend bool operator<=(const snapshot & lhs, const snapshot & rhs) noexcept
-            { return compare(lhs, rhs) <= 0; }
-        friend bool operator>(const snapshot & lhs, const snapshot & rhs) noexcept
-            { return compare(lhs, rhs) > 0; }
-        friend bool operator>=(const snapshot & lhs, const snapshot & rhs) noexcept
-            { return compare(lhs, rhs) >= 0; }
-        /// @} 
-    #endif
     };
 
 #endif
@@ -1039,6 +1066,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/memory.hpp>`
      */
+    SQLITEPP_EXPORTED
     template<class T>
     class sqlite_deleter
     {
@@ -1057,6 +1085,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/memory.hpp>`
      */
+    SQLITEPP_EXPORTED
     using allocated_string = std::unique_ptr<char, sqlite_deleter<char>>;
 
     /**
@@ -1064,6 +1093,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/memory.hpp>`
      */
+    SQLITEPP_EXPORTED
     using allocated_bytes = std::unique_ptr<std::byte, sqlite_deleter<std::byte>>;
 
     /// @cond PRIVATE
@@ -1086,6 +1116,7 @@ namespace thinsqlitepp
     #endif
     }
 
+    SQLITEPP_EXPORTED
     inline void * sqlite_allocate(std::size_t size)
     {
         if (auto ret = sqlite_allocate_nothrow(size))
@@ -1106,6 +1137,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/memory.hpp>`
      */
+    SQLITEPP_EXPORTED
     struct sqlite_allocated
     {
         void * operator new(std::size_t size, const std::nothrow_t &) noexcept
@@ -1130,6 +1162,7 @@ namespace thinsqlitepp
      * A C++ [Allocator](https://en.cppreference.com/w/cpp/named_req/Allocator)
      * that uses SQLite memory allocation functions
      */
+    SQLITEPP_EXPORTED
     template<class T>
     struct sqlite_allocator 
     {
@@ -1172,9 +1205,9 @@ namespace thinsqlitepp
 
 namespace thinsqlitepp
 {
-    class context;
-    class row;
-    class value;
+    SQLITEPP_EXPORTED class context;
+    SQLITEPP_EXPORTED class row;
+    SQLITEPP_EXPORTED class value;
 
     /** @cond PRIVATE */
 
@@ -1239,6 +1272,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/database.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class database final : public handle<sqlite3, database>
     {
     private:
@@ -2052,14 +2086,10 @@ namespace thinsqlitepp
          */
         template<int Code, class ...Args>
         auto config(Args && ...args) -> 
-        #ifndef DOXYGEN
             //void but prevents instantiation with wrong types
             decltype(
               config_mapping<Code>::type::apply(*this, std::forward<decltype(args)>(args)...)
             )
-        #else
-            void
-        #endif
             { config_mapping<Code>::type::apply(*this, std::forward<Args>(args)...); }
 
         //MARK: - create_module
@@ -2123,14 +2153,10 @@ namespace thinsqlitepp
          */
         template<int Code, class ...Args>
         auto vtab_config(Args && ...args) -> 
-        #ifndef DOXYGEN
             //void but prevents instantiation with wrong types
             decltype(
               vtab_config_mapping<Code>::type::apply(*this, std::forward<decltype(args)>(args)...)
             )
-        #else
-            void
-        #endif
             { vtab_config_mapping<Code>::type::apply(*this, std::forward<Args>(args)...); }
 
         /**
@@ -2839,6 +2865,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/backup.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class backup final : public handle<sqlite3_backup, backup>
     {
     public:
@@ -2923,6 +2950,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/value.hpp>`
      */
+    SQLITEPP_EXPORTED
     class value final : public handle<sqlite3_value, value>
     {
     public:
@@ -3150,7 +3178,7 @@ namespace thinsqlitepp
 
 namespace thinsqlitepp
 {
-    class database;
+    SQLITEPP_EXPORTED class database;
 
     /**
      * @addtogroup SQL SQLite API Wrappers
@@ -3166,6 +3194,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/context.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class context final : public handle<sqlite3_context, context>
     {
     public:
@@ -3554,8 +3583,8 @@ struct iovec;
 
 namespace thinsqlitepp
 {
-    class database;
-    class value;
+    SQLITEPP_EXPORTED class database;
+    SQLITEPP_EXPORTED class value;
 
     /**
      * @addtogroup SQL SQLite API Wrappers
@@ -3566,7 +3595,8 @@ namespace thinsqlitepp
      * A fallback version of struct iovec for platforms that lack it.
      * 
      * @see thinsqlitepp::iovec
-     */ 
+     */
+    SQLITEPP_EXPORTED
     struct iovec_fallback {
         /// @brief Base address of a memory region for input or output. 
         void *iov_base;
@@ -3588,11 +3618,8 @@ namespace thinsqlitepp
      * 
      * Thus, for portability, you can use thinsqlitepp::iovec on any platform
      */
-#if !DOXYGEN
+    SQLITEPP_EXPORTED
     using iovec = std::remove_reference_t<decltype(*detect_iovec((::iovec *)nullptr))>;
-#else
-    using iovec = <conditionally declared>;
-#endif
 
     /**
      * Prepared Statement Object
@@ -3603,6 +3630,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/statement.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class statement final : public handle<sqlite3_stmt, statement>
     {
     public:
@@ -4264,6 +4292,7 @@ namespace thinsqlitepp
      * This helper class allows you to iterate over text containing multiple SQL
      * statements and generate @ref statement instances from them 
      */
+    SQLITEPP_EXPORTED
     class statement_parser
     {
     public:
@@ -4289,6 +4318,7 @@ namespace thinsqlitepp
      * 
      * This enum supports all the normal bitwise operations: `&`, `|`, `^` and `~`
      */
+    SQLITEPP_EXPORTED
     enum class auto_reset_flags: unsigned
     {
         none = 0,               ///< Reset nothing
@@ -4296,13 +4326,13 @@ namespace thinsqlitepp
         clear_bindings = 2,     ///< Reset the bindings 
         all = 3                 ///< Reset everything
     };
-    constexpr auto_reset_flags operator|(auto_reset_flags lhs, auto_reset_flags rhs)
+    SQLITEPP_EXPORTED constexpr auto_reset_flags operator|(auto_reset_flags lhs, auto_reset_flags rhs)
         { return auto_reset_flags(unsigned(lhs) | unsigned(rhs)); }
-    constexpr auto_reset_flags operator&(auto_reset_flags lhs, auto_reset_flags rhs)
+    SQLITEPP_EXPORTED constexpr auto_reset_flags operator&(auto_reset_flags lhs, auto_reset_flags rhs)
         { return auto_reset_flags(unsigned(lhs) & unsigned(rhs)); }
-    constexpr auto_reset_flags operator^(auto_reset_flags lhs, auto_reset_flags rhs)
+    SQLITEPP_EXPORTED constexpr auto_reset_flags operator^(auto_reset_flags lhs, auto_reset_flags rhs)
         { return auto_reset_flags(unsigned(lhs) ^ unsigned(rhs)); }
-    constexpr auto_reset_flags operator~(auto_reset_flags arg)
+    SQLITEPP_EXPORTED constexpr auto_reset_flags operator~(auto_reset_flags arg)
         { return auto_reset_flags(~unsigned(arg)); }
 
     /**
@@ -4314,6 +4344,7 @@ namespace thinsqlitepp
      * 
      * @tparam Flags @ref auto_reset_flags specifying what kind of reset to perform on destruction
      */
+    SQLITEPP_EXPORTED
     template<auto_reset_flags Flags>
     class auto_reset
     {
@@ -4602,6 +4633,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/statement.hpp>`
      */
+    SQLITEPP_EXPORTED
     class cell
     {
     public:
@@ -4711,6 +4743,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/statement.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class row
     {
     public:
@@ -4838,6 +4871,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/statement.hpp>`
      */
+    SQLITEPP_EXPORTED
     class row_iterator : private row
     {
     public:
@@ -4907,6 +4941,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/statement.hpp>`
      */
+    SQLITEPP_EXPORTED
     class row_range {
     public:
         using value_type = row;
@@ -5528,6 +5563,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/global.hpp>`
      */
+    SQLITEPP_EXPORTED
     inline void initialize()
     {
         int res = sqlite3_initialize();
@@ -5542,12 +5578,14 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/global.hpp>`
      */
+    SQLITEPP_EXPORTED
     inline void shutdown() noexcept
     {
         sqlite3_shutdown();
     }
 
     /// Return type for @ref status()
+    SQLITEPP_EXPORTED
     struct status_value
     {
     #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0)
@@ -5565,6 +5603,7 @@ namespace thinsqlitepp
      * 
      * Equivalent to `::sqlite3_status64` or `::sqlite3_status`, if the former is not available
      */
+    SQLITEPP_EXPORTED
     inline status_value status(int op, bool reset = false)
     {
         status_value ret;
@@ -5614,17 +5653,14 @@ namespace thinsqlitepp
      * 
      * @include{doc} global-options.md
      */
+    SQLITEPP_EXPORTED
     template<int Code, class ...Args>
     inline
     auto config(Args && ...args) -> 
-    #ifndef DOXYGEN
         //void but prevents instantiation with wrong types 
         decltype(
           internal::config_mapping<Code>::type::apply(std::forward<decltype(args)>(args)...)
         )
-    #else
-        void
-    #endif
         { internal::config_mapping<Code>::type::apply(std::forward<Args>(args)...); }
 
     /** @} */
@@ -5735,6 +5771,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/global.hpp>`
      */
+    SQLITEPP_EXPORTED
     class keywords 
     {
     public:
@@ -5874,6 +5911,7 @@ namespace thinsqlitepp
      * It provides wrappers for SQLite functions that obtain runtime SQLite version
      * information and constexpr wrapper for compile-time version info.
      */
+    SQLITEPP_EXPORTED
     class sqlite_version
     {
     public:
@@ -6013,6 +6051,7 @@ namespace thinsqlitepp {
      * 
      * `#include <thinsqlitepp/vtab.hpp>`
      */
+    SQLITEPP_EXPORTED
     template<class T = void>
     class index_info : public handle<sqlite3_index_info, index_info<T>>
     {
@@ -6238,6 +6277,7 @@ namespace thinsqlitepp {
      * 
      * `#include <thinsqlitepp/vtab.hpp>`
      */
+    SQLITEPP_EXPORTED
     template<class Derived>
     class vtab : private sqlite3_vtab
     {
@@ -6462,8 +6502,9 @@ namespace thinsqlitepp {
          * @param destructor an optional destructor function for the data pointer. Can be nullptr.
          */
         template<class D=Derived>
-        static 
-        SQLITEPP_ENABLE_IF((std::is_pointer_v<typename D::constructor_data_type>),
+        SQLITEPP_ENABLE_IFP(
+        static,
+            (std::is_pointer_v<typename D::constructor_data_type>),
         void) create_module(database & db,
                             const string_param & name, 
                             typename D::constructor_data_type data, 
@@ -6490,8 +6531,9 @@ namespace thinsqlitepp {
          * your derived class.
          */
         template<class D=Derived> 
-        static 
-        SQLITEPP_ENABLE_IF((std::is_pointer_v<typename D::constructor_data_type>),
+        SQLITEPP_ENABLE_IFP(
+        static,
+            (std::is_pointer_v<typename D::constructor_data_type>),
         void) create_module(database & db,
                             const string_param & name, 
                             std::unique_ptr<std::remove_pointer_t<typename D::constructor_data_type>> data)

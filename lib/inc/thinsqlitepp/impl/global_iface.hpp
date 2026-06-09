@@ -30,6 +30,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/global.hpp>`
      */
+    SQLITEPP_EXPORTED
     inline void initialize()
     {
         int res = sqlite3_initialize();
@@ -44,12 +45,14 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/global.hpp>`
      */
+    SQLITEPP_EXPORTED
     inline void shutdown() noexcept
     {
         sqlite3_shutdown();
     }
 
     /// Return type for @ref status()
+    SQLITEPP_EXPORTED
     struct status_value
     {
     #if  SQLITE_VERSION_NUMBER >= SQLITEPP_SQLITE_VERSION(3, 10, 0)
@@ -67,6 +70,7 @@ namespace thinsqlitepp
      * 
      * Equivalent to `::sqlite3_status64` or `::sqlite3_status`, if the former is not available
      */
+    SQLITEPP_EXPORTED
     inline status_value status(int op, bool reset = false)
     {
         status_value ret;
@@ -116,6 +120,7 @@ namespace thinsqlitepp
      * 
      * @include{doc} global-options.md
      */
+    SQLITEPP_EXPORTED
     template<int Code, class ...Args>
     inline
     auto config(Args && ...args) -> 

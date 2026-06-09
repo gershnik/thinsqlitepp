@@ -29,6 +29,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/backup.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class backup final : public handle<sqlite3_backup, backup>
     {
     public:

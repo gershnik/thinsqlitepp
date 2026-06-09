@@ -33,6 +33,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/blob.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class blob final : public handle<sqlite3_blob, blob>
     {
     public:

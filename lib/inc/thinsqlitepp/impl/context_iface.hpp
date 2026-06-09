@@ -17,7 +17,7 @@
 
 namespace thinsqlitepp
 {
-    class database;
+    SQLITEPP_EXPORTED class database;
 
     /**
      * @addtogroup SQL SQLite API Wrappers
@@ -33,6 +33,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/context.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class context final : public handle<sqlite3_context, context>
     {
     public:

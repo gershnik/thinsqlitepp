@@ -26,6 +26,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/memory.hpp>`
      */
+    SQLITEPP_EXPORTED
     template<class T>
     class sqlite_deleter
     {
@@ -44,6 +45,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/memory.hpp>`
      */
+    SQLITEPP_EXPORTED
     using allocated_string = std::unique_ptr<char, sqlite_deleter<char>>;
 
     /**
@@ -51,6 +53,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/memory.hpp>`
      */
+    SQLITEPP_EXPORTED
     using allocated_bytes = std::unique_ptr<std::byte, sqlite_deleter<std::byte>>;
 
 
@@ -74,6 +77,7 @@ namespace thinsqlitepp
     #endif
     }
 
+    SQLITEPP_EXPORTED
     inline void * sqlite_allocate(std::size_t size)
     {
         if (auto ret = sqlite_allocate_nothrow(size))
@@ -96,6 +100,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/memory.hpp>`
      */
+    SQLITEPP_EXPORTED
     struct sqlite_allocated
     {
         void * operator new(std::size_t size, const std::nothrow_t &) noexcept
@@ -122,6 +127,7 @@ namespace thinsqlitepp
      * A C++ [Allocator](https://en.cppreference.com/w/cpp/named_req/Allocator)
      * that uses SQLite memory allocation functions
      */
+    SQLITEPP_EXPORTED
     template<class T>
     struct sqlite_allocator 
     {

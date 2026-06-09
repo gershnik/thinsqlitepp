@@ -96,6 +96,18 @@ PRIVATE
     ${IMPL_HEADERS}
 )
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.28")
+
+    function(thinsqlitepp_add_module target_name visibility)
+        set(_base ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/modules)
+        set(_files ${_base}/thinsqlitepp.cppm)
+        target_sources(${target_name} ${visibility}
+            FILE_SET thinsqlitepp_module TYPE CXX_MODULES BASE_DIRS ${_base} FILES ${_files}
+        )
+    endfunction()
+
+endif()
+
 if (PROJECT_IS_TOP_LEVEL)
     include(cmake/install.cmake)
 endif()

@@ -45,6 +45,7 @@ namespace thinsqlitepp {
      * 
      * `#include <thinsqlitepp/vtab.hpp>`
      */
+    SQLITEPP_EXPORTED
     template<class T = void>
     class index_info : public handle<sqlite3_index_info, index_info<T>>
     {
@@ -271,6 +272,7 @@ namespace thinsqlitepp {
      * 
      * `#include <thinsqlitepp/vtab.hpp>`
      */
+    SQLITEPP_EXPORTED
     template<class Derived>
     class vtab : private sqlite3_vtab
     {

@@ -52,7 +52,9 @@
     #define SQLITEPP_ENABLE_IF(cond, t) t
 #endif
 
-#ifndef SQLITEPP_EXPORTED
+#if SQLITEPP_BUILDING_MODULE 
+    #define SQLITEPP_EXPORTED export
+#else
     #define SQLITEPP_EXPORTED
 #endif
 
