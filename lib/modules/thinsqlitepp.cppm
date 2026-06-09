@@ -8,13 +8,16 @@
 module;
 
 #ifndef SQLITE_VERSION
-    #if THINSQLITEPP_BUILDING_EXTENSION
+    #if defined(THINSQLITEPP_CUSTOM_SQLITE_H)
+        #include THINSQLITEPP_CUSTOM_SQLITE_H
+    #elif THINSQLITEPP_BUILDING_EXTENSION
         #include <sqlite3ext.h>
         SQLITE_EXTENSION_INIT3
     #else
         #include <sqlite3.h>
     #endif
 #endif
+
 #include <exception>
 #include <memory>
 #include <limits>
@@ -44,7 +47,9 @@ export module thinsqlitepp;
 #define SQLITEPP_BUILDING_MODULE 1 
 
 #ifndef SQLITE_VERSION
-    #if THINSQLITEPP_BUILDING_EXTENSION
+    #if defined(THINSQLITEPP_CUSTOM_SQLITE_H)
+        #include THINSQLITEPP_CUSTOM_SQLITE_H
+    #elif THINSQLITEPP_BUILDING_EXTENSION
         SQLITE_EXTENSION_INIT3
     #else
     #endif

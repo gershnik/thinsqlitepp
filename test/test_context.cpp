@@ -1,16 +1,15 @@
 #include <doctest.h>
-#include "mock_sqlite.hpp"
-
-#if !SQLITEPP_USE_MODULES
-#include <thinsqlitepp/context.hpp>
-#endif
 
 #include <type_traits>
 #include <ostream>
 #include <array>
 
-#if SQLITEPP_USE_MODULES
-import thinsqlitepp;
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/context.hpp>
+#else
+    #include <sqlite3.h>
+    #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+    import thinsqlitepp;
 #endif
 
 using namespace thinsqlitepp;
@@ -58,7 +57,9 @@ TEST_CASE( "destructor matching" ) {
     
 }
 
-#include <thinsqlitepp/database.hpp>
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/database.hpp>
+#endif
 
 TEST_CASE( "result" ) {
     auto db = database::open("foo.db", SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX);

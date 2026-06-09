@@ -1,17 +1,16 @@
+#include <doctest.h>
+
 #include <string_view>
 #include <ostream>
-#include <doctest.h>
-#include "mock_sqlite.hpp"
-
-#if !SQLITEPP_USE_MODULES
-#include <thinsqlitepp/database.hpp>
-#include <thinsqlitepp/statement.hpp>
-#endif
-
 #include <type_traits>
 
-#if SQLITEPP_USE_MODULES
-import thinsqlitepp;
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/database.hpp>
+    #include <thinsqlitepp/statement.hpp>
+#else
+    #include "mock_sqlite.hpp"
+    #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+    import thinsqlitepp;
 #endif
 
 using namespace thinsqlitepp;
@@ -35,8 +34,10 @@ TEST_CASE( "database type properties") {
     CHECK(!is_swappable_v<database>);
 }
 
-#include <thinsqlitepp/context.hpp>
-#include <thinsqlitepp/value.hpp>
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/context.hpp>
+    #include <thinsqlitepp/value.hpp>
+#endif
 
 
 class sqlitepp_test_fixture

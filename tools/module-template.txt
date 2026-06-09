@@ -7,6 +7,17 @@
 */
 module;
 
+#ifndef SQLITE_VERSION
+    #if defined(THINSQLITEPP_CUSTOM_SQLITE_H)
+        #include THINSQLITEPP_CUSTOM_SQLITE_H
+    #elif THINSQLITEPP_BUILDING_EXTENSION
+        #include <sqlite3ext.h>
+        SQLITE_EXTENSION_INIT3
+    #else
+        #include <sqlite3.h>
+    #endif
+#endif
+
 ##SYS_INCLUDES##
 
 export module thinsqlitepp;

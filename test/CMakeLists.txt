@@ -67,6 +67,7 @@ function(configure_test_target target)
     target_compile_definitions(${target}
     PRIVATE
         CATCH_AMALGAMATED_CUSTOM_MAIN
+        THINSQLITEPP_CUSTOM_SQLITE_H=\"${CMAKE_CURRENT_LIST_DIR}/mock_sqlite.hpp\"
         THINSQLITEPP_ENABLE_EXPERIMENTAL=1
         SQLITEPP_NO_MUTEX=1
     )

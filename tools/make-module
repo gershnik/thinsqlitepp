@@ -26,17 +26,7 @@ TOKENS = {
 
 SPECIAL_HEADERS = {
     'sqlite3ext.h': '',
-
-    'sqlite3.h': '''
-#ifndef SQLITE_VERSION
-    #if THINSQLITEPP_BUILDING_EXTENSION
-        #include <sqlite3ext.h>
-        SQLITE_EXTENSION_INIT3
-    #else
-        #include <sqlite3.h>
-    #endif
-#endif
-'''.lstrip()
+    'sqlite3.h': ''
 }
 
 
