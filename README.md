@@ -134,7 +134,7 @@ With modern CMake, you can easily integrate ThinSQLite++ as follows:
 ```cmake
 include(FetchContent)
 FetchContent_Declare(thinsqlitepp
-    GIT_REPOSITORY git@github.com:gershnik/thinsqlitepp.git
+    GIT_REPOSITORY https://github.com/gershnik/thinsqlitepp.git
     GIT_TAG <desired tag like v1.0>
 )
 ...
