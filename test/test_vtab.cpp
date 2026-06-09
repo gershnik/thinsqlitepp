@@ -2,6 +2,7 @@
 
 #include <string>
 #include <memory>
+#include <algorithm>
 
 #if !SQLITEPP_USE_MODULES
     #include <thinsqlitepp/vtab.hpp>

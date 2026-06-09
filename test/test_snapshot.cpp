@@ -1,5 +1,7 @@
 #include <doctest.h>
 
+#include <string>
+
 #if ! THINSQLITEPP_OMIT_SNAPSHOT
 
 #if !SQLITEPP_USE_MODULES
