@@ -146,6 +146,8 @@ jobs:
             echo "CC=gcc-${{ matrix.version }}" >> $GITHUB_ENV
             echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
           fi
+
+          echo "CMAKE_GENERATOR=-GNinja" >> $GITHUB_ENV
         fi
 
         if [[ '${{ matrix.os }}' == windows-latest ]]; then
@@ -201,7 +203,7 @@ jobs:
         if [[ '${{ matrix.module }}' == 'true' ]]; then
           CMAKE_ARGS+=(-DTHSQPP_ENABLE_MODULE=ON)
         fi
-        cmake -S . -B build ${CMAKE_ARGS[@]} -DCMAKE_BUILD_TYPE=Release 
+        cmake -GNinja  -S . -B build ${CMAKE_ARGS[@]} -DCMAKE_BUILD_TYPE=Release 
   
     - name: Build and Test
       shell: bash
