@@ -201,7 +201,7 @@ jobs:
         if [[ '${{ matrix.module }}' == 'true' ]]; then
           CMAKE_ARGS+=(-DTHSQPP_ENABLE_MODULE=ON)
         fi
-        cmake -S . -B build ${CMAKE_ARGS[@] -DCMAKE_BUILD_TYPE=Release 
+        cmake -S . -B build ${CMAKE_ARGS[@]} -DCMAKE_BUILD_TYPE=Release 
   
     - name: Build and Test
       shell: bash
