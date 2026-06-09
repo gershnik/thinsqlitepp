@@ -12,7 +12,6 @@ include(CMakePackageConfigHelpers)
 install(TARGETS thinsqlitepp EXPORT thinsqlitepp FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT thinsqlitepp NAMESPACE thinsqlitepp:: FILE thinsqlitepp-exports.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/thinsqlitepp)
 
-message("BZOP ${CMAKE_CURRENT_LIST_DIR}/../modules/thinsqlitepp.cppm")
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/../modules/thinsqlitepp.cppm DESTINATION ${CMAKE_INSTALL_LIBDIR}/thinsqlitepp)
 
 configure_package_config_file(

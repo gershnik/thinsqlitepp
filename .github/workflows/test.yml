@@ -89,8 +89,8 @@ jobs:
                 continue
               containers.append({'container': container, 'cxx_standard': cxx_standard,
                                  'jobname': f'Linux - GCC{gcc} - C++{cxx_standard}'})
-          containers.append({'container': 'gcc:16.1', 'cxx_standard': 26, 'module': True,
-                                 'jobname': f'Linux - GCC16 - module - C++26'})
+          containers.append({'container': 'gcc:16.1', 'cxx_standard': 23, 'module': True,
+                                 'jobname': f'Linux - GCC16 - module'})
 
 
           #clang
@@ -100,6 +100,8 @@ jobs:
                   continue
               hosts.append({'os': runon, 'compiler': 'clang', 'version': clang, 'cxx_standard': cxx_standard,
                             'jobname': f'Linux - Clang{clang} - C++{cxx_standard}'})
+          hosts.append({'os': runon, 'compiler': 'clang', 'version': 22, 'cxx_standard': 23, 'module': True,
+                            'jobname': f'Linux - Clang22 - module'})
 
           #emscripten
           for emscripten in emscripten_versions:
