@@ -1,7 +1,9 @@
 #include <doctest.h>
 #include "mock_sqlite.hpp"
 
+#if !SQLITEPP_USE_MODULES
 #include <thinsqlitepp/memory.hpp>
+#endif
 
 #include <type_traits>
 #include <memory>
@@ -10,6 +12,10 @@
 #include <vector>
 #include <list>
 #include <string>
+
+#if SQLITEPP_USE_MODULES
+import thinsqlitepp;
+#endif
 
 using namespace thinsqlitepp;
 

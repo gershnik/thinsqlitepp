@@ -1,11 +1,17 @@
 #include <doctest.h>
 #include "mock_sqlite.hpp"
 
+#if !SQLITEPP_USE_MODULES
 #include <thinsqlitepp/context.hpp>
+#endif
 
 #include <type_traits>
 #include <ostream>
 #include <array>
+
+#if SQLITEPP_USE_MODULES
+import thinsqlitepp;
+#endif
 
 using namespace thinsqlitepp;
 using namespace std;

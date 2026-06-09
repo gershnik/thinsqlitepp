@@ -6,10 +6,17 @@
 #include <doctest.h>
 #include "mock_sqlite.hpp"
 
+#if !SQLITEPP_USE_MODULES
 #include <thinsqlitepp/global.hpp>
+#endif
 
 #if __cpp_lib_ranges >= 201911L
     #include <ranges>
+#endif
+
+#if SQLITEPP_USE_MODULES
+#define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+import thinsqlitepp;
 #endif
 
 using namespace thinsqlitepp;

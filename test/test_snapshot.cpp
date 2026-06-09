@@ -3,10 +3,13 @@
 
 #if ! THINSQLITEPP_OMIT_SNAPSHOT
 
-#define THINSQLITEPP_ENABLE_EXPERIMENTAL 1
-
-#include <thinsqlitepp/snapshot.hpp>
-#include <thinsqlitepp/database.hpp>
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/snapshot.hpp>
+    #include <thinsqlitepp/database.hpp>
+#else
+    import thinsqlitepp;
+    #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+#endif
 
 using namespace thinsqlitepp;
 

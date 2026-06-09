@@ -1,7 +1,11 @@
 #include <doctest.h>
 #include "mock_sqlite.hpp"
 
-#include <thinsqlitepp/global.hpp>
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/global.hpp>
+#else
+    import thinsqlitepp;
+#endif
 
 using namespace thinsqlitepp;
 
