@@ -41,7 +41,13 @@
 #endif
 
 #ifndef DOXYGEN
-    #define SQLITEPP_ENABLE_IF(cond, t) std::enable_if_t<(cond), t>
+    #if __cpp_concepts >= 201907L
+        #define SQLITEPP_ENABLE_IF(cond, t) requires(cond) t
+        #define SQLITEPP_ENABLE_IFP(prefix, cond, t) requires(cond) prefix t
+    #else
+        #define SQLITEPP_ENABLE_IF(cond, t) std::enable_if_t<(cond), t>
+        #define SQLITEPP_ENABLE_IFP(prefix, cond, t) prefix std::enable_if_t<(cond), t>
+    #endif
 #else
     #define SQLITEPP_ENABLE_IF(cond, t) t
 #endif
