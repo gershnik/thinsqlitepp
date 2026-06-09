@@ -20,16 +20,20 @@ module;
 
 ##SYS_INCLUDES##
 
-//GCC and MSVC people are hostile morons for imposing such a non-standard rule
-//there are very legitimate reasons to declare things here
+//The standard allows declarations here but
+//GCC and MSVC being hostile and moronic decide to warn about it.
+//There are very legitimate reasons to declare things here
 #if defined(__GNUC__) && !defined(__clang__)
+    //With GCC 16 this currently generates the very warning it is supposed 
+    //to suppress. That's hostile on a whole another level.
     #pragma GCC diagnostic ignored "-Wglobal-module"
 #elif defined(_MSC_VER)
     //"a global module fragment can only contain preprocessor directives"
+    //at least they let you disable it
     #pragma warning(disable: 5202)
 #endif
 
-// forward declare it so at least the delaration is there 
+// forward declare it so at least the declaration is there 
 // whether <sys/uio.h> is present and whether it declares it
 struct iovec; 
 
