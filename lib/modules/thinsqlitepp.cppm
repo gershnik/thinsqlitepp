@@ -46,7 +46,7 @@ module;
 //there are very legitimate reasons to declare things here
 #if defined(__GNUC__) && !defined(__clang__)
     #pragma GCC diagnostic ignored "-Wglobal-module"
-#ifdef _MSC_VER
+#elif defined(_MSC_VER)
     //"a global module fragment can only contain preprocessor directives"
     #pragma warning(disable: 5202)
 #endif
