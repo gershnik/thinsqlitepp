@@ -2593,7 +2593,8 @@ PREDEFINED             = DOXYGEN=1 \
                          SQLITE_ENABLE_PREUPDATE_HOOK=1 \
                          __cplusplus=0xFFFFFFFF \
                          __cpp_char8_t=0xFFFFFFFF \
-                         __cpp_lib_ranges=0xFFFFFFFF
+                         __cpp_lib_ranges=0xFFFFFFFF \
+                         SQLITEPP_EXPORTED=
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
