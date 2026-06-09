@@ -36,6 +36,7 @@ namespace thinsqlitepp
     };
 
     /// @cond DEPRECATED
+    SQLITEPP_EXPORTED
     template<class T>
     using deleter [[deprecated]] = sqlite_deleter<T>;
     /// @endcond

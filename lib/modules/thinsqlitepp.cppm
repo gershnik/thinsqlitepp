@@ -633,7 +633,7 @@ namespace thinsqlitepp
      */
 
     /// A blob_view is a span of bytes
-    using blob_view = span<const std::byte>;
+    SQLITEPP_EXPORTED using blob_view = span<const std::byte>;
 
     /**
      * An efficient blob of zeroes of a given size
@@ -648,6 +648,7 @@ namespace thinsqlitepp
      * to achieve the same effect in this library.
      * 
      */
+    SQLITEPP_EXPORTED
     class zero_blob
     {
     public:
@@ -1076,6 +1077,7 @@ namespace thinsqlitepp
     };
 
     /// @cond DEPRECATED
+    SQLITEPP_EXPORTED
     template<class T>
     using deleter [[deprecated]] = sqlite_deleter<T>;
     /// @endcond

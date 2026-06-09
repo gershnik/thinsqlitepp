@@ -236,7 +236,7 @@ namespace thinsqlitepp
      */
 
     /// A blob_view is a span of bytes
-    using blob_view = span<const std::byte>;
+    SQLITEPP_EXPORTED using blob_view = span<const std::byte>;
     
 
     /**
@@ -252,6 +252,7 @@ namespace thinsqlitepp
      * to achieve the same effect in this library.
      * 
      */
+    SQLITEPP_EXPORTED
     class zero_blob
     {
     public:
