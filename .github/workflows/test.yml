@@ -89,7 +89,7 @@ jobs:
                 continue
               containers.append({'container': container, 'cxx_standard': cxx_standard,
                                  'jobname': f'Linux - GCC{gcc} - C++{cxx_standard}'})
-          containers.append({'container': 'gcc:16.1', 'cxx_standard': 26, module: True,
+          containers.append({'container': 'gcc:16.1', 'cxx_standard': 26, 'module': True,
                                  'jobname': f'Linux - GCC16 - module - C++26'})
 
 
