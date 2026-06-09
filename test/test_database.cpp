@@ -3,6 +3,8 @@
 #include <string_view>
 #include <ostream>
 #include <type_traits>
+#include <memory>
+#include <algorithm>
 
 #if !SQLITEPP_USE_MODULES
     #include <thinsqlitepp/database.hpp>
