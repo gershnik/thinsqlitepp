@@ -12,4 +12,12 @@
 # Avoid repeatedly including the targets
 if(NOT TARGET thinsqlitepp::thinsqlitepp)
     include(${CMAKE_CURRENT_LIST_DIR}/thinsqlitepp-exports.cmake)
+
+    function(thinsqlitepp_add_module target_name visibility)
+        set(_base ${CMAKE_CURRENT_FUNCTION_LIST_DIR})
+        set(_files ${_base}/thinsqlitepp.cppm)
+        target_sources(${target_name} ${visibility}
+            FILE_SET thinsqlitepp_module TYPE CXX_MODULES BASE_DIRS ${_base} FILES ${_files}
+        )
+    endfunction()
 endif()

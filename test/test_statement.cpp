@@ -1,16 +1,23 @@
+#include <doctest.h>
+
 #include <string_view>
 #include <ostream>
 #include <vector>
 #include <memory>
-#include <doctest.h>
-#include "mock_sqlite.hpp"
-
-#include <thinsqlitepp/statement.hpp>
-#include <thinsqlitepp/database.hpp>
-#include <thinsqlitepp/context.hpp>
 
 #if __cpp_lib_ranges >= 201911L
-    #include <ranges>
+#include <ranges>
+#endif
+
+
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/statement.hpp>
+    #include <thinsqlitepp/database.hpp>
+    #include <thinsqlitepp/context.hpp>
+#else
+    #include "mock_sqlite.hpp"
+    #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+    import thinsqlitepp;
 #endif
 
 using namespace thinsqlitepp;

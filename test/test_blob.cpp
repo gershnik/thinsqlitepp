@@ -1,12 +1,17 @@
 #include <doctest.h>
-#include "mock_sqlite.hpp"
-
-#include <thinsqlitepp/blob.hpp>
-#include <thinsqlitepp/database.hpp>
-#include <thinsqlitepp/statement.hpp>
 
 #include <vector>
 #include <cstdint>
+
+
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/blob.hpp>
+    #include <thinsqlitepp/database.hpp>
+    #include <thinsqlitepp/statement.hpp>
+#else
+    #include <sqlite3.h>
+    import thinsqlitepp;
+#endif
 
 using namespace thinsqlitepp;
 

@@ -31,6 +31,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/value.hpp>`
      */
+    SQLITEPP_EXPORTED
     class value final : public handle<sqlite3_value, value>
     {
     public:

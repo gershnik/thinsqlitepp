@@ -1,12 +1,19 @@
+#include <doctest.h>
+
 #include <string_view>
 #include <ostream>
-#include <doctest.h>
-#include "mock_sqlite.hpp"
-
-#include <thinsqlitepp/database.hpp>
-#include <thinsqlitepp/statement.hpp>
-
 #include <type_traits>
+#include <memory>
+#include <algorithm>
+
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/database.hpp>
+    #include <thinsqlitepp/statement.hpp>
+#else
+    #include "mock_sqlite.hpp"
+    #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+    import thinsqlitepp;
+#endif
 
 using namespace thinsqlitepp;
 using namespace std;
@@ -29,8 +36,10 @@ TEST_CASE( "database type properties") {
     CHECK(!is_swappable_v<database>);
 }
 
-#include <thinsqlitepp/context.hpp>
-#include <thinsqlitepp/value.hpp>
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/context.hpp>
+    #include <thinsqlitepp/value.hpp>
+#endif
 
 
 class sqlitepp_test_fixture
@@ -206,6 +215,8 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "changes") {
     set_mock_sqlite3_changes([&] (sqlite3 *dbx) {
         
         REQUIRE(dbx == db->c_ptr());
+        REQUIRE(dbx == c_ptr(db.get()));
+        REQUIRE(dbx == c_ptr(*db));
         return real_sqlite3_changes(dbx);
     });
     db->exec("INSERT INTO foo(name) VALUES ('abc')");

@@ -23,12 +23,16 @@
     #include <sys/uio.h>
 #endif
 
-struct iovec;
+#ifndef SQLITEPP_BUILDING_MODULE
+    // forward declare it so at least the delaration is there 
+    // whether <sys/uio.h> is present and whether it declares it
+    struct iovec; 
+#endif
 
 namespace thinsqlitepp
 {
-    class database;
-    class value;
+    SQLITEPP_EXPORTED class database;
+    SQLITEPP_EXPORTED class value;
 
     /**
      * @addtogroup SQL SQLite API Wrappers
@@ -39,7 +43,8 @@ namespace thinsqlitepp
      * A fallback version of struct iovec for platforms that lack it.
      * 
      * @see thinsqlitepp::iovec
-     */ 
+     */
+    SQLITEPP_EXPORTED
     struct iovec_fallback {
         /// @brief Base address of a memory region for input or output. 
         void *iov_base;
@@ -62,6 +67,7 @@ namespace thinsqlitepp
      * Thus, for portability, you can use thinsqlitepp::iovec on any platform
      */
 #if !DOXYGEN
+    SQLITEPP_EXPORTED
     using iovec = std::remove_reference_t<decltype(*detect_iovec((::iovec *)nullptr))>;
 #else
     using iovec = <conditionally declared>;
@@ -76,6 +82,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/statement.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class statement final : public handle<sqlite3_stmt, statement>
     {
     public:
@@ -742,6 +749,7 @@ namespace thinsqlitepp
      * This helper class allows you to iterate over text containing multiple SQL
      * statements and generate @ref statement instances from them 
      */
+    SQLITEPP_EXPORTED
     class statement_parser
     {
     public:
@@ -767,6 +775,7 @@ namespace thinsqlitepp
      * 
      * This enum supports all the normal bitwise operations: `&`, `|`, `^` and `~`
      */
+    SQLITEPP_EXPORTED
     enum class auto_reset_flags: unsigned
     {
         none = 0,               ///< Reset nothing
@@ -774,13 +783,13 @@ namespace thinsqlitepp
         clear_bindings = 2,     ///< Reset the bindings 
         all = 3                 ///< Reset everything
     };
-    constexpr auto_reset_flags operator|(auto_reset_flags lhs, auto_reset_flags rhs)
+    SQLITEPP_EXPORTED constexpr auto_reset_flags operator|(auto_reset_flags lhs, auto_reset_flags rhs)
         { return auto_reset_flags(unsigned(lhs) | unsigned(rhs)); }
-    constexpr auto_reset_flags operator&(auto_reset_flags lhs, auto_reset_flags rhs)
+    SQLITEPP_EXPORTED constexpr auto_reset_flags operator&(auto_reset_flags lhs, auto_reset_flags rhs)
         { return auto_reset_flags(unsigned(lhs) & unsigned(rhs)); }
-    constexpr auto_reset_flags operator^(auto_reset_flags lhs, auto_reset_flags rhs)
+    SQLITEPP_EXPORTED constexpr auto_reset_flags operator^(auto_reset_flags lhs, auto_reset_flags rhs)
         { return auto_reset_flags(unsigned(lhs) ^ unsigned(rhs)); }
-    constexpr auto_reset_flags operator~(auto_reset_flags arg)
+    SQLITEPP_EXPORTED constexpr auto_reset_flags operator~(auto_reset_flags arg)
         { return auto_reset_flags(~unsigned(arg)); }
 
     /**
@@ -792,6 +801,7 @@ namespace thinsqlitepp
      * 
      * @tparam Flags @ref auto_reset_flags specifying what kind of reset to perform on destruction
      */
+    SQLITEPP_EXPORTED
     template<auto_reset_flags Flags>
     class auto_reset
     {

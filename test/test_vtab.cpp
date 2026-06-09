@@ -1,9 +1,18 @@
 #include <doctest.h>
-#include "mock_sqlite.hpp"
 
-#include <thinsqlitepp/vtab.hpp>
-#include <thinsqlitepp/memory.hpp>
-#include <thinsqlitepp/database.hpp>
+#include <string>
+#include <memory>
+#include <algorithm>
+
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/vtab.hpp>
+    #include <thinsqlitepp/memory.hpp>
+    #include <thinsqlitepp/database.hpp>
+#else
+    #include "mock_sqlite.hpp"
+    #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+    import thinsqlitepp;
+#endif
 
 using namespace thinsqlitepp;
 

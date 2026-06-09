@@ -37,9 +37,9 @@
 
 namespace thinsqlitepp
 {
-    class context;
-    class row;
-    class value;
+    SQLITEPP_EXPORTED class context;
+    SQLITEPP_EXPORTED class row;
+    SQLITEPP_EXPORTED class value;
 
     /** @cond PRIVATE */
 
@@ -104,6 +104,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/database.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class database final : public handle<sqlite3, database>
     {
     private:

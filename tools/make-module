@@ -1,0 +1,77 @@
+#! /usr/bin/env python3
+
+#  Copyright 2019 Eugene Gershnik
+#
+#  Use of this source code is governed by a BSD-style
+#  license that can be found in the LICENSE file or at
+#  https://github.com/gershnik/thinsqlitepp/blob/master/LICENSE
+#
+
+# pylint: disable=missing-module-docstring, missing-function-docstring, line-too-long
+
+
+import sys
+from pathlib import Path
+
+from expand_header import expand_header, UNDEFINED
+
+TOKENS = {
+    '__cplusplus': '202302',
+    '_MSVC_LANG': '202302',
+    '__cpp_impl_three_way_comparison': '201907',
+    '__cpp_lib_bit_cast': '201806',
+    '__cpp_concepts': 201907,
+    'DOXYGEN': UNDEFINED
+}
+
+SPECIAL_HEADERS = {
+    'sqlite3ext.h': '',
+    'sqlite3.h': ''
+}
+
+
+
+
+def combine_headers(root: Path, incdir: Path, template: Path, output: Path):
+
+    result = template.read_text(encoding='utf-8')
+
+    lines, sys_headers = expand_header(root, 
+                                       local_include_prefix=str(root.parent.relative_to(incdir))+'/', 
+                                       prefix_base_dir=incdir,
+                                       tokens = TOKENS)
+    result = result.replace("##CONTENT##", '\n'.join(lines))
+
+    sys_includes_text = ""
+    for sys_include, cond in sys_headers.items():
+        inc_text = ''
+
+        if (repl := SPECIAL_HEADERS.get(sys_include)) is not None:
+            inc_text = repl.replace('##INCLUDE##', f"#include <{sys_include}>")
+        else:
+            indent = ''
+            for item in cond:
+                inc_text += f'{indent}#if {item}\n'
+                indent += '    '
+            inc_text += f"{indent}#include <{sys_include}>\n"
+            for item in cond:
+                indent = indent[:-4]
+                inc_text += f'{indent}#endif\n'
+
+        sys_includes_text += inc_text
+
+    result = result.replace("##SYS_INCLUDES##", sys_includes_text)
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(result, encoding='utf-8')
+
+def main():
+    mydir = Path(__file__).parent
+    incdir = mydir.parent / 'lib/inc'
+    moddir = mydir.parent / 'lib/modules'
+    root = incdir / 'thinsqlitepp/thinsqlitepp.hpp'
+
+    combine_headers(root, incdir, mydir / 'module-template.txt', moddir / 'thinsqlitepp.cppm')
+
+if __name__ == "__main__":
+    sys.exit(main())

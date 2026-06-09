@@ -1,15 +1,21 @@
-#include <ostream>
+#include <doctest.h>
+
 #include <string_view>
 #include <vector>
 #include <algorithm>
 #include <iterator>
-#include <doctest.h>
-#include "mock_sqlite.hpp"
-
-#include <thinsqlitepp/global.hpp>
+#include <ostream>
 
 #if __cpp_lib_ranges >= 201911L
     #include <ranges>
+#endif
+
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/global.hpp>
+#else
+    #include <sqlite3.h>
+    #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+    import thinsqlitepp;
 #endif
 
 using namespace thinsqlitepp;

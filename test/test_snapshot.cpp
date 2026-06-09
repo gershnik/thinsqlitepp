@@ -1,12 +1,17 @@
 #include <doctest.h>
-#include "mock_sqlite.hpp"
+
+#include <string>
 
 #if ! THINSQLITEPP_OMIT_SNAPSHOT
 
-#define THINSQLITEPP_ENABLE_EXPERIMENTAL 1
-
-#include <thinsqlitepp/snapshot.hpp>
-#include <thinsqlitepp/database.hpp>
+#if !SQLITEPP_USE_MODULES
+    #include <thinsqlitepp/snapshot.hpp>
+    #include <thinsqlitepp/database.hpp>
+#else
+    #include "mock_sqlite.hpp"
+    #define SQLITEPP_SQLITE_VERSION(x, y, z) ((x) * 1000000 + (y) * 1000 + (z))
+    import thinsqlitepp;
+#endif
 
 using namespace thinsqlitepp;
 

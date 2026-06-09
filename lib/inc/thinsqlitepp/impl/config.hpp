@@ -10,7 +10,9 @@
 #define HEADER_SQLITEPP_CONFIG_INCLUDED
 
 #ifndef SQLITE_VERSION
-    #if THINSQLITEPP_BUILDING_EXTENSION
+    #if defined(THINSQLITEPP_CUSTOM_SQLITE_H)
+        #include THINSQLITEPP_CUSTOM_SQLITE_H
+    #elif THINSQLITEPP_BUILDING_EXTENSION
         #include <sqlite3ext.h>
         SQLITE_EXTENSION_INIT3
     #else
@@ -41,9 +43,21 @@
 #endif
 
 #ifndef DOXYGEN
-    #define SQLITEPP_ENABLE_IF(cond, t) std::enable_if_t<(cond), t>
+    #if __cpp_concepts >= 201907L
+        #define SQLITEPP_ENABLE_IF(cond, t) requires(cond) t
+        #define SQLITEPP_ENABLE_IFP(prefix, cond, t) requires(cond) prefix t
+    #else
+        #define SQLITEPP_ENABLE_IF(cond, t) std::enable_if_t<(cond), t>
+        #define SQLITEPP_ENABLE_IFP(prefix, cond, t) prefix std::enable_if_t<(cond), t>
+    #endif
 #else
     #define SQLITEPP_ENABLE_IF(cond, t) t
+#endif
+
+#if SQLITEPP_BUILDING_MODULE 
+    #define SQLITEPP_EXPORTED export
+#else
+    #define SQLITEPP_EXPORTED
 #endif
 
 #endif

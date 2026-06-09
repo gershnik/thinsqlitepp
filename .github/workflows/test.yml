@@ -72,6 +72,7 @@ jobs:
           for cxx_standard in cxx_standards:
             hosts.append({'os': 'windows-latest', 'cxx_standard': cxx_standard, 'jobname': f'Windows - C++{cxx_standard}'})
             hosts.append({'os': 'windows-latest', 'cxx_standard': cxx_standard, 'compiler':'clang-cl', 'jobname': f'Windows - clang - C++{cxx_standard}'})
+          hosts.append({'os': 'windows-latest', 'cxx_standard': 23, 'module':True, 'jobname': f'Windows - module'})
           
           #gcc hosts
           for gcc, runon in gcc_map.items():
@@ -88,6 +89,8 @@ jobs:
                 continue
               containers.append({'container': container, 'cxx_standard': cxx_standard,
                                  'jobname': f'Linux - GCC{gcc} - C++{cxx_standard}'})
+          containers.append({'container': 'gcc:16.1', 'cxx_standard': 23, 'module': True,
+                                 'jobname': f'Linux - GCC16 - module'})
 
 
           #clang
@@ -97,6 +100,8 @@ jobs:
                   continue
               hosts.append({'os': runon, 'compiler': 'clang', 'version': clang, 'cxx_standard': cxx_standard,
                             'jobname': f'Linux - Clang{clang} - C++{cxx_standard}'})
+          hosts.append({'os': runon, 'compiler': 'clang', 'version': 22, 'cxx_standard': 23, 'module': True,
+                            'jobname': f'Linux - Clang22 - module'})
 
           #emscripten
           for emscripten in emscripten_versions:
@@ -142,20 +147,31 @@ jobs:
             echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
           fi
 
-          if [[ '${{ matrix.os }}' == windows-latest ]]; then
-            if [[ '${{ matrix.compiler }}' != '' ]]; then
-                VCPREFIX="C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\Llvm\\x64\\bin"
-                echo "CC=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
-                echo "CXX=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
-                echo "CMAKE_GENERATOR=-GNinja" >> $GITHUB_ENV
-            fi
+          echo "CMAKE_GENERATOR=-GNinja" >> $GITHUB_ENV
+        fi
+
+        if [[ '${{ matrix.os }}' == windows-latest ]]; then
+          if [[ '${{ matrix.compiler }}' != '' ]]; then
+              VCPREFIX="C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\Llvm\\x64\\bin"
+              echo "CC=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
+              echo "CXX=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
+              echo "CMAKE_GENERATOR=-GNinja" >> $GITHUB_ENV
           fi
+        fi
+
+        CMAKE_ARGS=( )
+        if [[ '${{ matrix.module }}' == 'true' ]]; then
+          CMAKE_ARGS+=(-DTHSQPP_ENABLE_MODULE=ON)
+        fi
+
+        if [[ ${#CMAKE_ARGS[@]} != 0 ]]; then
+          echo "CMAKE_ARGS=${CMAKE_ARGS[@]}" >> $GITHUB_ENV
         fi
 
     - name: Configure
       shell: bash
       run: |
-        cmake $CMAKE_GENERATOR -S . -B build -DCMAKE_BUILD_TYPE=Release 
+        cmake $CMAKE_GENERATOR -S . -B build $CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release 
 
     - name: Build and Test
       shell: bash
@@ -183,7 +199,11 @@ jobs:
     - name: Configure
       shell: bash
       run: |
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
+        CMAKE_ARGS=( )
+        if [[ '${{ matrix.module }}' == 'true' ]]; then
+          CMAKE_ARGS+=(-DTHSQPP_ENABLE_MODULE=ON)
+        fi
+        cmake -GNinja  -S . -B build ${CMAKE_ARGS[@]} -DCMAKE_BUILD_TYPE=Release 
   
     - name: Build and Test
       shell: bash

@@ -30,6 +30,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/statement.hpp>`
      */
+    SQLITEPP_EXPORTED
     class cell
     {
     public:
@@ -139,6 +140,7 @@ namespace thinsqlitepp
      * `#include <thinsqlitepp/statement.hpp>`
      * 
      */
+    SQLITEPP_EXPORTED
     class row
     {
     public:
@@ -266,6 +268,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/statement.hpp>`
      */
+    SQLITEPP_EXPORTED
     class row_iterator : private row
     {
     public:
@@ -335,6 +338,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/statement.hpp>`
      */
+    SQLITEPP_EXPORTED
     class row_range {
     public:
         using value_type = row;

@@ -45,6 +45,7 @@ namespace thinsqlitepp {
      * 
      * `#include <thinsqlitepp/vtab.hpp>`
      */
+    SQLITEPP_EXPORTED
     template<class T = void>
     class index_info : public handle<sqlite3_index_info, index_info<T>>
     {
@@ -271,6 +272,7 @@ namespace thinsqlitepp {
      * 
      * `#include <thinsqlitepp/vtab.hpp>`
      */
+    SQLITEPP_EXPORTED
     template<class Derived>
     class vtab : private sqlite3_vtab
     {
@@ -495,8 +497,9 @@ namespace thinsqlitepp {
          * @param destructor an optional destructor function for the data pointer. Can be nullptr.
          */
         template<class D=Derived>
-        static 
-        SQLITEPP_ENABLE_IF((std::is_pointer_v<typename D::constructor_data_type>),
+        SQLITEPP_ENABLE_IFP(
+        static,
+            (std::is_pointer_v<typename D::constructor_data_type>),
         void) create_module(database & db,
                             const string_param & name, 
                             typename D::constructor_data_type data, 
@@ -523,8 +526,9 @@ namespace thinsqlitepp {
          * your derived class.
          */
         template<class D=Derived> 
-        static 
-        SQLITEPP_ENABLE_IF((std::is_pointer_v<typename D::constructor_data_type>),
+        SQLITEPP_ENABLE_IFP(
+        static,
+            (std::is_pointer_v<typename D::constructor_data_type>),
         void) create_module(database & db,
                             const string_param & name, 
                             std::unique_ptr<std::remove_pointer_t<typename D::constructor_data_type>> data)

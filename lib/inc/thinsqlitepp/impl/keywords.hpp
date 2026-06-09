@@ -30,6 +30,7 @@ namespace thinsqlitepp
      * 
      * `#include <thinsqlitepp/global.hpp>`
      */
+    SQLITEPP_EXPORTED
     class keywords 
     {
     public:

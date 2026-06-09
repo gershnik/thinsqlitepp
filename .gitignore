@@ -4,5 +4,7 @@
 build/
 out/
 .devcontainer/
+__pycache__
+*.pdb
 
 CMakeSettings.json
