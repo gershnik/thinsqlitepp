@@ -146,24 +146,24 @@ jobs:
             echo "CC=gcc-${{ matrix.version }}" >> $GITHUB_ENV
             echo "CXX=g++-${{ matrix.version }}" >> $GITHUB_ENV
           fi
+        fi
 
-          if [[ '${{ matrix.os }}' == windows-latest ]]; then
-            if [[ '${{ matrix.compiler }}' != '' ]]; then
-                VCPREFIX="C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\Llvm\\x64\\bin"
-                echo "CC=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
-                echo "CXX=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
-                echo "CMAKE_GENERATOR=-GNinja" >> $GITHUB_ENV
-            fi
+        if [[ '${{ matrix.os }}' == windows-latest ]]; then
+          if [[ '${{ matrix.compiler }}' != '' ]]; then
+              VCPREFIX="C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\Llvm\\x64\\bin"
+              echo "CC=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
+              echo "CXX=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
+              echo "CMAKE_GENERATOR=-GNinja" >> $GITHUB_ENV
           fi
+        fi
 
-          CMAKE_ARGS=( )
-          if [[ '${{ matrix.module }}' == 'true' ]]; then
-            CMAKE_ARGS+=(-DTHSQPP_ENABLE_MODULE=ON)
-          fi
+        CMAKE_ARGS=( )
+        if [[ '${{ matrix.module }}' == 'true' ]]; then
+          CMAKE_ARGS+=(-DTHSQPP_ENABLE_MODULE=ON)
+        fi
 
-          if [[ ${#CMAKE_ARGS[@]} != 0 ]]; then
-            echo "CMAKE_ARGS=${CMAKE_ARGS[@]}" >> $GITHUB_ENV
-          fi
+        if [[ ${#CMAKE_ARGS[@]} != 0 ]]; then
+          echo "CMAKE_ARGS=${CMAKE_ARGS[@]}" >> $GITHUB_ENV
         fi
 
     - name: Configure
@@ -197,7 +197,11 @@ jobs:
     - name: Configure
       shell: bash
       run: |
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
+        CMAKE_ARGS=( )
+        if [[ '${{ matrix.module }}' == 'true' ]]; then
+          CMAKE_ARGS+=(-DTHSQPP_ENABLE_MODULE=ON)
+        fi
+        cmake -S . -B build ${CMAKE_ARGS[@] -DCMAKE_BUILD_TYPE=Release 
   
     - name: Build and Test
       shell: bash
