@@ -23,7 +23,11 @@
     #include <sys/uio.h>
 #endif
 
-struct iovec;
+#ifndef SQLITEPP_BUILDING_MODULE
+    // forward declare it so at least the delaration is there 
+    // whether <sys/uio.h> is present and whether it declares it
+    struct iovec; 
+#endif
 
 namespace thinsqlitepp
 {

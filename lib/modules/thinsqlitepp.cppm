@@ -42,6 +42,17 @@ module;
 #include <string.h>
 
 
+#ifdef _MSC_VER
+    //"a global module fragment can only contain preprocessor directives"
+    //MSVC people are morons for imposing such a non-standard rule
+    //there are legitimate reasons to declare things here
+    #pragma warning(disable: 5202)
+#endif
+
+// forward declare it so at least the delaration is there 
+// whether <sys/uio.h> is present and whether it declares it
+struct iovec; 
+
 export module thinsqlitepp;
 
 #define SQLITEPP_BUILDING_MODULE 1 
@@ -3586,7 +3597,11 @@ namespace thinsqlitepp
 #if __has_include(<sys/uio.h>)
 #endif
 
-struct iovec;
+#ifndef SQLITEPP_BUILDING_MODULE
+    // forward declare it so at least the delaration is there 
+    // whether <sys/uio.h> is present and whether it declares it
+    struct iovec; 
+#endif
 
 namespace thinsqlitepp
 {
