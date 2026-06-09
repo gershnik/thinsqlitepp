@@ -215,6 +215,8 @@ TEST_CASE_FIXTURE(sqlitepp_test_fixture,  "changes") {
     set_mock_sqlite3_changes([&] (sqlite3 *dbx) {
         
         REQUIRE(dbx == db->c_ptr());
+        REQUIRE(dbx == c_ptr(db.get()));
+        REQUIRE(dbx == c_ptr(*db));
         return real_sqlite3_changes(dbx);
     });
     db->exec("INSERT INTO foo(name) VALUES ('abc')");
