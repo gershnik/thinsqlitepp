@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.8] - 2026-06-09
+
 ### Added
 - **Experimental** support for using this library as a module. See README for more details.
 - `statement::carray_bind` overloads wrapping `sqlite3_carray_bind_v2`
@@ -142,3 +144,4 @@ to compile this library is no longer needed.
 [1.5]: https://github.com/gershnik/thinsqlitepp/releases/v1.5
 [1.6]: https://github.com/gershnik/thinsqlitepp/releases/v1.6
 [1.7]: https://github.com/gershnik/thinsqlitepp/releases/v1.7
+[1.8]: https://github.com/gershnik/thinsqlitepp/releases/v1.8
