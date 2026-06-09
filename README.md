@@ -26,6 +26,7 @@ Using the SQLite C API from C++ can be quite tedious and error-prone. While the 
         - [CMake package](#cmake-package)
         - [Via pkg-config](#via-pkg-config)
     - [Use directly](#use-directly)
+    - [Module](#module)
 - [Configuration](#configuration)
 - [Implementation choices](#implementation-choices)
     - [Errors as exceptions](#errors-as-exceptions)
@@ -209,6 +210,41 @@ before running `pkg-config`.
 You can also simply download the headers of this repository from the [Releases][releases] page 
 (named `thinsqlitepp-X.Y.tar.gz`), unpack it somewhere and add its `inc` to your include path.
 
+### Module
+
+Since version 1.8 this library includes **experimental** support for being used as a C++
+module. It is experimental because as of June 2026 no compiler or build system fully supports
+modules yet. Please report bugs if you experience any issues.
+
+The module is provided as a _single file_ [lib/modules/thinsqlitepp.cppm](lib/modules/thinsqlitepp.cppm).
+You can simply add this file to your build directly. 
+
+Additionally, if using CMake (via any of the methods described above) you can also do:
+
+```cmake
+thinsqlitepp_add_module(your-target PRIVATE)
+```
+
+The `thinsqlitepp_add_module` is provided by this library's CMake files.
+What it does is something like:
+
+```cmake
+target_sources(your-target PRIVATE
+    FILE_SET thinsqlitepp_module TYPE CXX_MODULES FILES path/to/thinsqlitepp.cppm
+)
+```
+
+which you can do manually, of course.
+
+Whichever method you use simply do:
+```cpp
+import thinsqlitepp;
+```
+instead of any includes.
+
+Note that when using the module you need to set the [configuration flags](#configuration)
+_for the module file build_. It is pointless to `#define` them in sources.
+
 
 ## Configuration
 
@@ -230,6 +266,15 @@ At present the only such interface is the SQLite [snapshot API][sqlite-snapshot]
 together with `database::get_snapshot`, `database::open_snapshot` and `database::recover_snapshot` — which
 additionally requires SQLite 3.10.0 or greater. Other experimental wrappers may be added behind the same
 macro in the future.
+
+When SQLite _itself_ is built with `SQLITE_THREADSAFE=0` the mutex API functions become unavailable even
+though their declarations are still present in the SQLite header. If you use mutex wrappers and want them
+to become no-ops in such situation rather than fail to link define `THINSQLITEPP_NO_MUTEX=1`. 
+(This is especially important for a module build on MSVC, where even unused functions are emitted) 
+
+You can override what file the library includes to get sqlite3 definition by
+* Including the desired header _before_ any headers from this library or
+* Defining the `THINSQLITEPP_CUSTOM_SQLITE_H` macro to `<some-path>` or `"some-path"`. 
 
 
 ## Implementation choices
