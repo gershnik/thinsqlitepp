@@ -16,11 +16,19 @@ string(STRIP ${THSQPP_VERSION} THSQPP_VERSION)
 
 project(ThinSQLite++ VERSION ${THSQPP_VERSION} LANGUAGES C CXX)
 
+option(BUILD_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
 
 add_subdirectory(lib)
 
 if (PROJECT_IS_TOP_LEVEL)
     include(lib/cmake/install.cmake)
-    add_subdirectory(test)
 endif()
+
+if (BUILD_TESTING)
+
+    enable_testing()
+    add_subdirectory(test)
+
+endif()
+
 

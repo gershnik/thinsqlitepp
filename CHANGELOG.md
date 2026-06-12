@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Changed
+- Building tests is now gated behind `-DBUILD_TESTING=ON`.
+
 ### Fixed
 - CMake install now puts the *.cmake files and .cppm module under `share/thinsqlitepp` rather than `/lib/{.../}thinsqlitepp` as it
   should always have done, since they aren't architecture dependent. This should be completely transparent to clients 
