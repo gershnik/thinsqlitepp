@@ -67,7 +67,7 @@ function(configure_test_target target)
     target_compile_definitions(${target}
     PRIVATE
         CATCH_AMALGAMATED_CUSTOM_MAIN
-        THINSQLITEPP_CUSTOM_SQLITE_H=\"${CMAKE_CURRENT_LIST_DIR}/mock_sqlite.hpp\"
+        "THINSQLITEPP_CUSTOM_SQLITE_H=\"${CMAKE_CURRENT_LIST_DIR}/mock_sqlite.hpp\""
         THINSQLITEPP_ENABLE_EXPERIMENTAL=1
         THINSQLITEPP_NO_MUTEX=1
     )
@@ -104,7 +104,6 @@ function(configure_test_target target)
 
 endfunction()
 
-set(TEST_TARGETS "")
 
 foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
     add_library(sqlite3-${SQLITE_VERSION} STATIC EXCLUDE_FROM_ALL)
@@ -140,10 +139,13 @@ foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
     )
 endforeach()
 
+add_custom_target(tests ALL)
 
 foreach(CXX_STANDARD ${CXX_STANDARDS})
-    set(TEST_COMMAND "")
 
+    add_custom_target(tests-${CXX_STANDARD})
+    add_dependencies(tests tests-${CXX_STANDARD})
+    
     foreach(SQLITE_VERSION ${SQLITE_VERSIONS})
 
         set(target test-${CXX_STANDARD}-${SQLITE_VERSION})
@@ -187,13 +189,18 @@ foreach(CXX_STANDARD ${CXX_STANDARDS})
             $<$<BOOL:${EMSCRIPTEN}>:-sNO_DISABLE_EXCEPTION_CATCHING -fexceptions>
         )
 
-        list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite-${SQLITE_VERSION})
-        list(APPEND TEST_COMMAND COMMAND)
         if (DEFINED EMSCRIPTEN)
-            list(APPEND TEST_COMMAND node --trace-uncaught $<TARGET_FILE:${target}> -ni)
+            set(TEST_COMMAND node --trace-uncaught $<TARGET_FILE:${target}> -ni)
         else()
-            list(APPEND TEST_COMMAND $<TARGET_FILE:${target}> -ni -fc)
+            set(TEST_COMMAND $<TARGET_FILE:${target}> -ni -fc)
         endif()
+
+        add_dependencies(tests-${CXX_STANDARD} ${target})
+
+        add_test(
+            NAME "C++${CXX_STANDARD} SQLite-${SQLITE_VERSION}"
+            COMMAND ${TEST_COMMAND}
+        )
 
     endforeach()
 
@@ -219,19 +226,16 @@ foreach(CXX_STANDARD ${CXX_STANDARDS})
             SQLITEPP_TEST_IMPRECISE_VERSION=1
         )
 
-        list(APPEND TEST_COMMAND COMMAND echo C++${CXX_STANDARD} SQLite: native)
-        list(APPEND TEST_COMMAND COMMAND)
-        list(APPEND TEST_COMMAND $<TARGET_FILE:test-${CXX_STANDARD}-native> -ni -fc)
+        add_dependencies(tests-${CXX_STANDARD} test-${CXX_STANDARD}-native)
+
+        add_test(
+            NAME "C++${CXX_STANDARD} SQLite: native"
+            COMMAND test-${CXX_STANDARD}-native -ni -fc
+        )
+
     endif()
 
-    
-    add_custom_target(run-test-${CXX_STANDARD}
-        ${TEST_COMMAND}
-    )
-    list(APPEND TEST_TARGETS run-test-${CXX_STANDARD} )
 endforeach()
 
 
-add_custom_target(run-test 
-    DEPENDS ${TEST_TARGETS}
-)
+

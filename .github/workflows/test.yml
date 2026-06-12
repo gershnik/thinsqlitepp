@@ -174,9 +174,13 @@ jobs:
       run: |
         cmake $CMAKE_GENERATOR -S . -B build $CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release 
 
-    - name: Build and Test
+    - name: Build
       shell: bash
-      run: cmake --build build --config Release --target run-test-${{matrix.cxx_standard}}
+      run: cmake --build build --config Release --target tests-${{matrix.cxx_standard}}
+        
+    - name: Test
+      shell: bash
+      run: ctest --test-dir build -C Release --output-on-failure -VV -R 'C\+\+${{matrix.cxx_standard}}.*'
 
   container:
     needs: define-matrix
@@ -206,9 +210,13 @@ jobs:
         fi
         cmake -GNinja  -S . -B build ${CMAKE_ARGS[@]} -DCMAKE_BUILD_TYPE=Release 
   
-    - name: Build and Test
+    - name: Build
       shell: bash
-      run: cmake --build build --config Release --target run-test-${{matrix.cxx_standard}}
+      run: cmake --build build --config Release --target tests-${{matrix.cxx_standard}}
+        
+    - name: Test
+      shell: bash
+      run: ctest --test-dir build -C Release --output-on-failure -VV -R 'C\+\+${{matrix.cxx_standard}}.*'
 
   emscripten:
     needs: define-matrix
@@ -242,7 +250,10 @@ jobs:
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 
-      - name: Build and Test
-        run: cmake --build build --config Release --target run-test-${{matrix.cxx_standard}}
+      - name: Build
+        run: cmake --build build --config Release --target tests-${{matrix.cxx_standard}}
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure -VV -R 'C\+\+${{matrix.cxx_standard}}.*'
 
 
