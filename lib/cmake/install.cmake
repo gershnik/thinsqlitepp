@@ -10,15 +10,20 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 install(TARGETS thinsqlitepp EXPORT thinsqlitepp FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(EXPORT thinsqlitepp NAMESPACE thinsqlitepp:: FILE thinsqlitepp-exports.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/thinsqlitepp)
+install(EXPORT thinsqlitepp NAMESPACE thinsqlitepp:: FILE thinsqlitepp-exports.cmake DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/thinsqlitepp)
 
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/../modules/thinsqlitepp.cppm DESTINATION ${CMAKE_INSTALL_LIBDIR}/thinsqlitepp)
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/../modules/thinsqlitepp.cppm DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/thinsqlitepp)
+
+# Clean the old CMAKE_INSTALL_LIBDIR location where things were previously put
+# on older versions
+install(CODE "file(REMOVE_RECURSE \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/thinsqlitepp\")")
+
 
 configure_package_config_file(
         ${CMAKE_CURRENT_LIST_DIR}/thinsqlitepp-config.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/thinsqlitepp-config.cmake
     INSTALL_DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/thinsqlitepp
+        ${CMAKE_INSTALL_DATAROOTDIR}/thinsqlitepp
 )
 
 write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/thinsqlitepp-config-version.cmake
@@ -31,7 +36,7 @@ install(
         ${CMAKE_CURRENT_BINARY_DIR}/thinsqlitepp-config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/thinsqlitepp-config-version.cmake
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/thinsqlitepp
+        ${CMAKE_INSTALL_DATAROOTDIR}/thinsqlitepp
 )
 
 file(RELATIVE_PATH FROM_PCFILEDIR_TO_PREFIX ${CMAKE_INSTALL_FULL_DATAROOTDIR}/thinsqlitepp ${CMAKE_INSTALL_PREFIX})
