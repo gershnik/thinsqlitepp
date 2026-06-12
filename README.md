@@ -141,10 +141,13 @@ FetchContent_Declare(thinsqlitepp
 ...
 FetchContent_MakeAvailable(thinsqlitepp)
 ...
+#To use header files:
 target_link_libraries(mytarget
 PRIVATE
   thinsqlitepp::thinsqlitepp
 )
+#To use the C++ module (the second param is the visibility)
+thinsqlitepp_add_module(mytarget PRIVATE)
 ``` 
 
 #### CMake from downloaded sources
@@ -154,10 +157,13 @@ Alternatively, you can download the library from the [Releases][releases] page, 
 ```cmake
 add_subdirectory(PATH_WHERE_YOU_UNPACKED_IT_TO, thinsqlitepp)
 ...
+#To use header files:
 target_link_libraries(mytarget
 PRIVATE
   thinsqlitepp::thinsqlitepp
 )
+#To use the C++ module (the second param is the visibility)
+thinsqlitepp_add_module(mytarget PRIVATE)
 ```
 
 ### Installing on your system
@@ -181,22 +187,30 @@ Once the library has been installed, it can be used in the following ways:
 
 #### Basic use 
 
-Set the include directory to `<prefix>/include` where `<prefix>` is the install prefix from above.
+To use the header files, set the include directory to `<prefix>/include` where `<prefix>` is the install prefix from above.
+
+To use the C++ module, include `<prefix>/share/thinsqlitepp/thinsqlitepp.cppm` in your build.
 
 #### CMake package
 
 ```cmake
 find_package(thinsqlitepp)
 
+#To use header files:
 target_link_libraries(mytarget
 PRIVATE
   thinsqlitepp::thinsqlitepp
 )
+
+#To use the C++ module (the second param is the visibility)
+thinsqlitepp_add_module(mytarget PRIVATE)
 ```
 
 #### Via `pkg-config`
 
-Add the output of `pkg-config --cflags thinsqlitepp` to your compiler flags.
+To use header files, add the output of `pkg-config --cflags thinsqlitepp` to your compiler flags.
+
+To use the module, add the output of `pkg-config --variable=module thinsqlitepp` (it will be the path to a .cppm file) to your build.
 
 Note that the default installation prefix `/usr/local` might not be in the list of places your
 `pkg-config` looks into. If so, you might need to do:
