@@ -152,7 +152,8 @@ jobs:
 
         if [[ '${{ matrix.os }}' == windows-latest ]]; then
           if [[ '${{ matrix.compiler }}' != '' ]]; then
-              VCPREFIX="C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise\\VC\\Tools\\Llvm\\x64\\bin"
+              VSROOT=`"/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" -latest -property installationPath`
+              VCPREFIX="$VSROOT\\VC\\Tools\\Llvm\\x64\\bin"
               echo "CC=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
               echo "CXX=$VCPREFIX\\${{ matrix.compiler }}" >> $GITHUB_ENV
               echo "CMAKE_GENERATOR=-GNinja" >> $GITHUB_ENV
