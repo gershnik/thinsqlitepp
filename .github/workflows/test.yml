@@ -12,7 +12,7 @@ on:
       - 'LICENSE'
       - '.github/workflows/publish.yml'
       - '.github/workflows/make-docs.yml'
-      - 'tools/**'
+      - '.tools/**'
       - '.docbuild/**'
 
 
