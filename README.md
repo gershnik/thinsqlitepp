@@ -176,10 +176,6 @@ You can also build and install this library on your system using CMake.
 cd SOME_PATH
 cmake -S . -B build 
 
-#If you wish to run tests 
-#cmake --build build 
-#ctest --test-dir build --output-on-failure
-
 #install to /usr/local
 sudo cmake --install build
 #or for a different prefix
