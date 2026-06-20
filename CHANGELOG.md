@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## [1.9] - 2026-06-19
+
 ### Changed
 - Building tests is now gated behind `-DBUILD_TESTING=ON`.
 - Build now supports `ctest`
@@ -154,3 +156,4 @@ to compile this library is no longer needed.
 [1.6]: https://github.com/gershnik/thinsqlitepp/releases/v1.6
 [1.7]: https://github.com/gershnik/thinsqlitepp/releases/v1.7
 [1.8]: https://github.com/gershnik/thinsqlitepp/releases/v1.8
+[1.9]: https://github.com/gershnik/thinsqlitepp/releases/v1.9
